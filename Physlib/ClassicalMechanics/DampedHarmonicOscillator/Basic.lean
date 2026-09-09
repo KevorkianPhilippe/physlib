@@ -80,13 +80,15 @@ In the `Solution` module:
 ## iv. References
 
 References for the damped harmonic oscillator include:
-- Landau & Lifshitz, Mechanics, page 76, section 25.
-- Goldstein, Classical Mechanics, Chapter 2.
+
+* Landau & Lifshitz, Mechanics, page 76, section 25. [ref: landau_mechanics]
+* Goldstein, Classical Mechanics, Chapter 6, Section 6.5 (Forced Vibrations and the Effect of
+  Dissipative Forces). [ref: goldstein_classicalmechanics]
 
 References for the Caldirola–Kanai lagrangian include:
-- Caldirola, Nuovo Cimento 18 (1941) 393.
-- Kanai, Progress of Theoretical Physics 3 (1948) 440.
 
+* Caldirola, Nuovo Cimento 18 (1941) 393. [ref: caldirola_1941]
+* Kanai, Progress of Theoretical Physics 3 (1948) 440. [ref: kanai_1948]
 -/
 
 @[expose] public section
