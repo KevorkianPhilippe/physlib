@@ -63,3 +63,4 @@ public import PhyslibAlpha.Particles.BeyondTheStandardModel.TwoHDM.Invariants
 public import PhyslibAlpha.Particles.BeyondTheStandardModel.TwoHDM.Module
 public import PhyslibAlpha.Particles.BeyondTheStandardModel.TwoHDM.OrbitRepresentative
 public import PhyslibAlpha.Particles.BeyondTheStandardModel.TwoHDM.SwapDoublet
+public import PhyslibAlpha.Relativity.General.Schwarzschild.IncompressibleSphere
