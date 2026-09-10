@@ -469,6 +469,7 @@ public import Physlib.Relativity.Tensors.RealTensor.Units.Pre
 public import Physlib.Relativity.Tensors.RealTensor.Vector.Basic
 public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.Basic
 public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.LightLike
+public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.ReverseTriangle
 public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.TimeLike
 public import Physlib.Relativity.Tensors.RealTensor.Vector.MinkowskiProduct
 public import Physlib.Relativity.Tensors.RealTensor.Vector.Pre.Basic

@@ -6,6 +6,7 @@ Authors: Joseph Tooby-Smith
 module
 
 public import Physlib.Relativity.Special.ProperTime
+public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.ReverseTriangle
 /-!
 # Twin Paradox
 
@@ -67,11 +68,18 @@ def ageGap : ℝ := T.properTimeTwinA - T.properTimeTwinB
 
 TODO "Find the conditions for which the age gap for the twin paradox is zero."
 
-/-- In the twin paradox with instantaneous acceleration, Twin A is always older
-  then Twin B. -/
-informal_lemma ageGap_nonneg where
-  deps := [``ageGap]
-  tag := "7ROVE"
+/-- In the twin paradox with instantaneous acceleration, Twin A is always at least as old as
+  Twin B: the age gap is nonnegative. This is the reverse triangle inequality of Minkowski space
+  (`sqrt_add_sqrt_le_sqrt_add`) applied to the two legs of Twin B. -/
+lemma ageGap_nonneg : 0 ≤ T.ageGap := by
+  have hu := isFutureCausal_of_causallyFollows T.twinBMid_causallyFollows_startPoint
+  have hv := isFutureCausal_of_causallyFollows T.endPoint_causallyFollows_twinBMid
+  have h := sqrt_add_sqrt_le_sqrt_add hu hv
+  have hsum : T.endPoint - T.startPoint
+      = (T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid) := by abel
+  unfold ageGap properTimeTwinA properTimeTwinB properTime
+  rw [hsum]
+  linarith
 
 /-!
 
