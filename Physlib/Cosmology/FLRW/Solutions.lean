@@ -16,9 +16,11 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 
 This file collects the standard closed-form solutions of the Friedmann equations
 (`FirstOrderFriedmann` and `SecondOrderFriedmann` of `Physlib.Cosmology.FLRW.Basic`) and
-proves that they solve them: the de Sitter solution and the spatially flat power-law
-solutions (radiation-dominated and Einstein-de Sitter) here, the Milne model and the
-Einstein static universe being still TODO items.
+proves that they solve them: the de Sitter solution, the spatially flat power-law
+solutions (radiation-dominated and Einstein-de Sitter), the Milne model, and the equilibrium
+relations of the Einstein static universe. The vanishing of the curvature of the Milne model
+and the instability of the Einstein static universe are still TODO items: neither the curvature
+of the FLRW metric nor a perturbation theory of the Friedmann equations is available yet.
 
 Each solution is a scale factor `a : Time → ℝ` given by an explicit function of the time
 coordinate `t.val`. Its time derivative `∂ₜ a` is computed through the bridge
@@ -43,6 +45,12 @@ coordinate `t.val`. Its time derivative `∂ₜ a` is computed through the bridg
   `einsteinDeSitterScaleFactor_secondOrderFriedmann`: `a = (t / t₀) ^ (2/3)` solves the flat
   Friedmann equations with the dust density `ρ = 1 / (6 π G t²)` and `p = 0`; `q = 1 / 2` and
   `H(t₀) = 2 / (3 t₀)`.
+- `milneScaleFactor_firstOrderFriedmann`, `milneScaleFactor_secondOrderFriedmann`: the Milne
+  scale factor `a = c t` solves the empty (`ρ = 0`, `p = 0`, `Λ = 0`) Friedmann equations with
+  `k = -1`; `q = 0`.
+- `einsteinStatic_density`, `einsteinStatic_curvature`: if `∂ₜ a = ∂ₜ ∂ₜ a = 0` at `t` and the
+  Friedmann equations hold there with `p = 0`, then `ρ = Λ c² / (4 π G) = 2 ρ_Λ` and
+  `k c² / a² = 4 π G ρ`, so that `k > 0` when `ρ > 0` (`einsteinStatic_curvature_pos`).
 
 ## iii. Table of contents
 
@@ -56,7 +64,9 @@ coordinate `t.val`. Its time derivative `∂ₜ a` is computed through the bridg
   - C.2. The Hubble and deceleration parameters
   - C.3. The radiation-dominated solution
   - C.4. The Einstein-de Sitter solution
-- D. Remaining TODO items
+- D. The Milne solution
+- E. The Einstein static universe
+- F. Remaining TODO items
 
 -/
 
@@ -427,14 +437,117 @@ lemma hubbleConstant_einsteinDeSitterScaleFactor_t₀ {t₀ : ℝ} (ht₀ : 0 < 
 
 /-!
 
-## D. Remaining TODO items
+## D. The Milne solution
+
+The Milne universe is the empty (`ρ = 0`, `p = 0`, `Λ = 0`) solution with `k = -1` and
+`a(t) = c t` for `t > 0`. That it is Minkowski space in expanding coordinates (vanishing
+curvature) is not stated here: the FLRW metric is not yet an object of Physlib.
 
 -/
 
-TODO "Prove that the Milne solution `a = c t` (empty universe, `K < 0`) has
+/-- The Milne scale factor `a(t) = c t`. -/
+noncomputable def milneScaleFactor (c : ℝ) : Time → ℝ :=
+  fun t => c * t.val
+
+lemma deriv_milneScaleFactor (c : ℝ) : ∂ₜ (milneScaleFactor c) = fun _ => c := by
+  funext t
+  exact deriv_comp_val (((hasDerivAt_id t.val).const_mul c).congr_deriv (mul_one c))
+
+lemma deriv_deriv_milneScaleFactor (c : ℝ) : ∂ₜ (∂ₜ (milneScaleFactor c)) = fun _ => 0 := by
+  rw [deriv_milneScaleFactor]
+  funext t
+  exact deriv_comp_val (γ := fun _ => c) (hasDerivAt_const t.val c)
+
+/-- The Milne solution solves the first-order Friedmann equation with `ρ = 0`, `k = -1` and
+  `Λ = 0`, for `t > 0`. -/
+lemma milneScaleFactor_firstOrderFriedmann {G c : ℝ} (hc : 0 < c) {t : Time} (ht : 0 < t.val) :
+    FirstOrderFriedmann (milneScaleFactor c) (fun _ => 0) (-1) 0 G c t := by
+  unfold FirstOrderFriedmann
+  rw [deriv_milneScaleFactor]
+  simp only [milneScaleFactor]
+  field_simp
+  ring
+
+/-- The Milne solution solves the second-order Friedmann equation with `ρ = 0`, `p = 0` and
+  `Λ = 0`. -/
+lemma milneScaleFactor_secondOrderFriedmann {G c : ℝ} (t : Time) :
+    SecondOrderFriedmann (milneScaleFactor c) (fun _ => 0) (fun _ => 0) 0 G c t := by
+  unfold SecondOrderFriedmann
+  rw [deriv_deriv_milneScaleFactor]
+  simp
+
+/-- The deceleration parameter of the Milne solution is `q = 0`. -/
+lemma decelerationParameter_milneScaleFactor (c : ℝ) (t : Time) :
+    decelerationParameter (milneScaleFactor c) t = 0 := by
+  unfold decelerationParameter
+  rw [deriv_deriv_milneScaleFactor, deriv_milneScaleFactor]
+  simp
+
+/-!
+
+## E. The Einstein static universe
+
+At an instant where `∂ₜ a = ∂ₜ ∂ₜ a = 0`, the two Friedmann equations with dust (`p = 0`)
+force the density `ρ = Λ c² / (4 π G)`, twice the density `ρ_Λ = Λ c² / (8 π G)` associated
+with the cosmological constant, and `k c² / a² = 4 π G ρ`, hence a positive curvature
+parameter when `ρ > 0`. That this equilibrium is unstable is not stated here.
+
+-/
+
+/-- The density `ρ_Λ = Λ c² / (8 π G)` associated with the cosmological constant. -/
+noncomputable def cosmologicalConstantDensity (Λ G c : ℝ) : ℝ :=
+  Λ * c ^ 2 / (8 * π * G)
+
+/-- In the Einstein static universe the dust density is `ρ = Λ c² / (4 π G) = 2 ρ_Λ`. -/
+lemma einsteinStatic_density {a ρ : Time → ℝ} {Λ G c : ℝ} {t : Time} (hG : 0 < G)
+    (h2 : ∂ₜ (∂ₜ a) t = 0) (hF2 : SecondOrderFriedmann a ρ (fun _ => 0) Λ G c t) :
+    ρ t = 2 * cosmologicalConstantDensity Λ G c := by
+  unfold SecondOrderFriedmann at hF2
+  rw [h2, zero_div] at hF2
+  simp only [mul_zero, zero_div, add_zero] at hF2
+  unfold cosmologicalConstantDensity
+  have hπ := Real.pi_pos
+  field_simp
+  linarith
+
+/-- In the Einstein static universe `k c² / a² = 4 π G ρ`. -/
+lemma einsteinStatic_curvature {a ρ : Time → ℝ} {k Λ G c : ℝ} {t : Time}
+    (h1 : ∂ₜ a t = 0) (h2 : ∂ₜ (∂ₜ a) t = 0) (hF1 : FirstOrderFriedmann a ρ k Λ G c t)
+    (hF2 : SecondOrderFriedmann a ρ (fun _ => 0) Λ G c t) :
+    k * c ^ 2 / (a t) ^ 2 = 4 * π * G * ρ t := by
+  unfold FirstOrderFriedmann at hF1
+  unfold SecondOrderFriedmann at hF2
+  rw [h1, zero_div] at hF1
+  rw [h2, zero_div] at hF2
+  simp only [mul_zero, zero_div, add_zero] at hF1 hF2
+  linarith
+
+/-- In the Einstein static universe with positive density, the curvature parameter is
+  positive. -/
+lemma einsteinStatic_curvature_pos {a ρ : Time → ℝ} {k Λ G c : ℝ} {t : Time} (hG : 0 < G)
+    (hc : 0 < c) (ha : a t ≠ 0) (hρ : 0 < ρ t) (h1 : ∂ₜ a t = 0) (h2 : ∂ₜ (∂ₜ a) t = 0)
+    (hF1 : FirstOrderFriedmann a ρ k Λ G c t)
+    (hF2 : SecondOrderFriedmann a ρ (fun _ => 0) Λ G c t) :
+    0 < k := by
+  have h := einsteinStatic_curvature h1 h2 hF1 hF2
+  have hpos : 0 < k * c ^ 2 / (a t) ^ 2 := by
+    rw [h]
+    positivity
+  have ha2 : 0 < (a t) ^ 2 := by positivity
+  have hc2 : 0 < c ^ 2 := by positivity
+  rw [div_pos_iff_of_pos_right ha2] at hpos
+  exact (mul_pos_iff_of_pos_right hc2).mp hpos
+
+/-!
+
+## F. Remaining TODO items
+
+-/
+
+TODO "Prove that the Milne solution `milneScaleFactor` (empty universe, `K < 0`) has
   vanishing scalar curvature, i.e. it is Minkowski space in expanding coordinates."
 
-TODO "Define the Einstein static universe (`∂ₜ a = ∂ₜ ∂ₜ a = 0`, forcing `K > 0`
-  and `ρ_m = 2 ρ_Λ`) and prove that it is an unstable equilibrium."
+TODO "Prove that the Einstein static universe (`∂ₜ a = ∂ₜ ∂ₜ a = 0`, `einsteinStatic_density`,
+  `einsteinStatic_curvature`) is an unstable equilibrium."
 
 end Cosmology.FLRW.FriedmannEquation
