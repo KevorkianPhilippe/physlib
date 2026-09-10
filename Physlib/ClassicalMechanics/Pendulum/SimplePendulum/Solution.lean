@@ -75,15 +75,15 @@ the time since release.
 
 References for the motion of the pendulum, its phase plane, and the existence and uniqueness
 theorem for ordinary differential equations include:
-- Landau & Lifshitz, Mechanics, 3rd ed., §11, for motion in one dimension.
-- Arnold, Mathematical Methods of Classical Mechanics, 2nd ed., §4, for the phase plane of the
-  pendulum.
-- Arnold, Ordinary Differential Equations, Chapter 4 (Proofs of the main theorems), for the
-  existence and uniqueness theorem by Picard iteration.
+
+* Landau & Lifshitz, Mechanics, 3rd ed., §11, for motion in one dimension. [ref: landau_mechanics]
+* Arnold, Mathematical Methods of Classical Mechanics, 2nd ed., §4, for the phase plane of the
+  pendulum. [ref: arnold_mechanics]
+* Arnold, Ordinary Differential Equations, Chapter 4 (Proofs of the main theorems), for the
+  existence and uniqueness theorem by Picard iteration. [ref: arnold_ode]
 
 The reduction to a first-order system on the phase space follows
 `DampedHarmonicOscillator.equationOfMotion_unique`.
-
 -/
 
 @[expose] public section
@@ -268,7 +268,7 @@ rule `Time.deriv_comp_neg` and its second-order form `Time.deriv_deriv_comp_neg`
 lemma isSolution_comp_neg {S : SimplePendulum} {θ : Time → EuclideanSpace ℝ (Fin 1)}
     (h : S.IsSolution θ) : S.IsSolution (fun t => θ (-t)) := by
   refine ⟨h.contDiff.comp contDiff_neg, fun t => ?_⟩
-  rw [Time.deriv_deriv_comp_neg θ h.contDiff t]
+  rw [Time.deriv_deriv_comp_neg θ (h.contDiff.of_le (by norm_cast)) t]
   exact h.equationOfMotion (-t)
 
 /-!

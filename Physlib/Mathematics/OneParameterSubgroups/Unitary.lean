@@ -31,9 +31,8 @@ Physlib.
 
 ## References
 
-* M. H. Stone, *Linear Transformations in Hilbert Space III. Operational Methods and Group Theory*,
-  Proc. Natl. Acad. Sci. 18 (1932), 172-175.
-
+* M. H. Stone, Linear Transformations in Hilbert Space III. Operational Methods and Group Theory,
+  Proc. Natl. Acad. Sci. 16 (1930), 172-175. [ref: stone_1930]
 -/
 
 @[expose] public section

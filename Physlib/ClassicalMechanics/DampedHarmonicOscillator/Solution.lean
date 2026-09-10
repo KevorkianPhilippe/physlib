@@ -49,9 +49,10 @@ case, polynomial for the critically damped case, and hyperbolic for the overdamp
 ## iv. References
 
 References for the damped harmonic oscillator include:
-- Landau & Lifshitz, Mechanics, page 76, section 25.
-- Goldstein, Classical Mechanics, Chapter 2.
 
+* Landau & Lifshitz, Mechanics, page 76, section 25. [ref: landau_mechanics]
+* Goldstein, Classical Mechanics, Chapter 6, Section 6.5 (Forced Vibrations and the Effect of
+  Dissipative Forces). [ref: goldstein_classicalmechanics]
 -/
 
 @[expose] public section

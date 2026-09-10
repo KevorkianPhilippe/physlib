@@ -6,7 +6,7 @@ Authors: Aadarsh Agarwal
 module
 
 public import Physlib.ClassicalMechanics.Pendulum.SimplePendulum.Geometric.Basic
-public import Physlib.SpaceAndTime.Time.Basic
+public import Physlib.SpaceAndTime.Time.InnerProductSpace
 public import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 /-!
 
@@ -46,11 +46,10 @@ physical space, on the position of the bob in the plane.
 
 ## iv. References
 
-- `Physlib.ClassicalMechanics.Pendulum.SimplePendulum.Geometric.Basic` (the configuration
-  circle, the angular lift `ofAngle` and the map to physical space).
-- `Physlib.ClassicalMechanics.HarmonicOscillator.Geometric.Trajectory` (the corresponding
-  trajectory module of the harmonic oscillator, whose structure this module follows).
-
+* `Physlib.ClassicalMechanics.Pendulum.SimplePendulum.Geometric.Basic` (the configuration circle,
+  the angular lift `ofAngle` and the map to physical space).
+* `Physlib.ClassicalMechanics.HarmonicOscillator.Geometric.Trajectory` (the corresponding trajectory
+  module of the harmonic oscillator, whose structure this module follows).
 -/
 
 @[expose] public section
