@@ -5,7 +5,6 @@ Authors: Jinzheng Li, Philippe Kevorkian
 -/
 module
 
-public import Physlib.Meta.TODO.Basic
 public import Physlib.Cosmology.FLRW.Dynamics
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
@@ -24,12 +23,17 @@ recession velocity equals `c` exactly at the Hubble radius `R_H = c / H`. The tr
 distance `r(χ)` is the function `S` of `Cosmology.SpatialGeometry` for the geometry of curvature
 `K`, with curvature radius `1 / √|K|`. The particle and event horizons are the comoving distances
 to the initial time and to the infinite future; the particle horizon of the Einstein-de Sitter
-universe is computed.
+universe is computed. The luminosity distance `d_L = (1 + z) r(χ)` and the angular-diameter
+distance `d_A = r(χ) / (1 + z)` satisfy Etherington's relation `d_L = (1 + z)² d_A`. The
+low-redshift expansions of the lookback time and of the distances are given through their
+coefficients: the first and second derivatives of `z` and `χ` at the observation time, and the
+resulting `dχ/dz = c / (a₀ H₀)`, `d²χ/dz² = - c (1 + q₀) / (a₀ H₀)` at `z = 0`.
 
 What is not stated here: the cosmological redshift law `E ∝ 1 / a` of a photon (it needs the
 metric and the null geodesics, not yet objects of Physlib), and the comoving distance as an
 integral in `z` (it needs `H` as a function of `z`); the differential relation above is what is
-proved.
+proved. The Taylor expansions themselves (with remainder, through the inverse of `t ↦ z(t)`) are
+not stated: only their coefficients are.
 
 ## ii. Key results
 
@@ -40,6 +44,13 @@ proved.
   `deriv_properDistance_eq_iff`.
 - `spatialGeometryOfCurvature`, `transverseComovingDistance` and its three closed forms.
 - `particleHorizon`, `eventHorizon`, `particleHorizon_einsteinDeSitter`.
+- `lookbackTime`; `deriv_redshift_self`, `deriv_deriv_redshift_self`: `∂ₜ z = - H₀` and
+  `∂ₜ ∂ₜ z = H₀² (2 + q₀)` at `t₀`, the coefficients of `t₀ - t = H₀⁻¹ [z - ½ (2 + q₀) z² + …]`.
+- `luminosityDistance`, `angularDiameterDistance`, `luminosityDistance_eq`: Etherington.
+- `deriv_deriv_comovingDistance_self`, `comovingDistance_coeff_one`, `comovingDistance_coeff_two`:
+  `dχ/dz = c / (a₀ H₀)` and `d²χ/dz² = - c (1 + q₀) / (a₀ H₀)` at `z = 0`;
+  `luminosityDistance_coeff_two`, `angularDiameterDistance_coeff_two`: the second-order
+  coefficients `c (1 - q₀) / (a₀ H₀)` and `- c (3 + q₀) / (a₀ H₀)` of `d_L` and `d_A` (flat case).
 
 ## iii. Table of contents
 
@@ -48,6 +59,9 @@ proved.
 - C. The proper distance and the Hubble radius
 - D. The transverse comoving distance
 - E. The horizons
+- F. The lookback time and its expansion
+- G. The luminosity and angular-diameter distances
+- H. The low-redshift expansions of the distances
 
 -/
 
@@ -227,6 +241,142 @@ lemma particleHorizon_einsteinDeSitter {t₀ c : ℝ} (ht₀ : 0 < t₀) {t : Ti
   rw [intervalIntegral.integral_congr hcongr, intervalIntegral.integral_const_mul,
     integral_rpow (Or.inl (by norm_num)), Real.zero_rpow (by norm_num)]
   norm_num
+  ring
+
+/-!
+
+## F. The lookback time and its expansion
+
+-/
+
+/-- The lookback time `t₀ - t`. -/
+def lookbackTime (t₀ t : Time) : ℝ := t₀.val - t.val
+
+/-- At the observation time, `∂ₜ z = - H₀`: the first-order coefficient `dt/dz = - 1 / H₀`. -/
+lemma deriv_redshift_self {a : Time → ℝ} {t₀ : Time} (hd : DifferentiableAt ℝ a t₀)
+    (ha : a t₀ ≠ 0) : ∂ₜ (redshift a t₀) t₀ = -hubbleConstant a t₀ := by
+  rw [deriv_redshift hd ha, one_add_redshift, div_self ha]
+  ring
+
+/-- `∂ₜ z = - a(t₀) ∂ₜ a / a²` at all times, for `a` differentiable and nonzero. -/
+lemma deriv_redshift_eq {a : Time → ℝ} {t₀ : Time} (hd : Differentiable ℝ a) (hapos : ∀ s, a s ≠ 0)
+    (s : Time) : ∂ₜ (redshift a t₀) s = -(a t₀ * ∂ₜ a s) / a s ^ 2 := by
+  rw [deriv_redshift (hd s) (hapos s), one_add_redshift]
+  unfold hubbleConstant
+  have := hapos s
+  field_simp
+
+/-- At the observation time, `∂ₜ ∂ₜ z = H₀² (2 + q₀)`: the second-order coefficient
+  `d²t/dz² = (2 + q₀) / H₀` of the lookback time `t₀ - t = H₀⁻¹ [z - ½ (2 + q₀) z² + …]`. -/
+lemma deriv_deriv_redshift_self {a : Time → ℝ} {t₀ : Time} (hd : Differentiable ℝ a)
+    (hdd : DifferentiableAt ℝ (∂ₜ a) t₀) (hapos : ∀ s, a s ≠ 0) (hd0 : ∂ₜ a t₀ ≠ 0) :
+    ∂ₜ (∂ₜ (redshift a t₀)) t₀ = hubbleConstant a t₀ ^ 2 * (2 + decelerationParameter a t₀) := by
+  have hz := deriv_redshift_eq (t₀ := t₀) hd hapos
+  obtain ⟨τ₀⟩ := t₀
+  have hA := hasDerivAt_mk_of_differentiableAt (hd ⟨τ₀⟩)
+  have hA' := hasDerivAt_mk_of_differentiableAt hdd
+  have h := ((hA'.const_mul (a ⟨τ₀⟩)).div (hA.pow 2) (pow_ne_zero 2 (hapos ⟨τ₀⟩))).neg
+  refine (deriv_eq_of_hasDerivAt (f := ∂ₜ (redshift a ⟨τ₀⟩))
+    (h.congr_of_eventuallyEq (Filter.Eventually.of_forall fun σ => ?_))).trans ?_
+  · simp only [Pi.neg_apply, Pi.div_apply, Pi.pow_apply]
+    rw [hz ⟨σ⟩]
+    ring
+  · simp only [Pi.pow_apply, Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
+    unfold hubbleConstant decelerationParameter
+    have := hapos ⟨τ₀⟩
+    field_simp
+    ring
+
+/-!
+
+## G. The luminosity and angular-diameter distances
+
+-/
+
+/-- The luminosity distance `d_L = (1 + z) r(χ)`. -/
+noncomputable def luminosityDistance (K : ℝ) (a : Time → ℝ) (c : ℝ) (t₀ t : Time) : ℝ :=
+  (1 + redshift a t₀ t) * transverseComovingDistance K (comovingDistance a c t t₀)
+
+/-- The angular-diameter distance `d_A = r(χ) / (1 + z)`. -/
+noncomputable def angularDiameterDistance (K : ℝ) (a : Time → ℝ) (c : ℝ) (t₀ t : Time) : ℝ :=
+  transverseComovingDistance K (comovingDistance a c t t₀) / (1 + redshift a t₀ t)
+
+/-- Etherington's distance-duality relation `d_L = (1 + z)² d_A`. -/
+lemma luminosityDistance_eq {K : ℝ} {a : Time → ℝ} {c : ℝ} {t₀ t : Time} (ha₀ : a t₀ ≠ 0)
+    (ha : a t ≠ 0) :
+    luminosityDistance K a c t₀ t
+      = (1 + redshift a t₀ t) ^ 2 * angularDiameterDistance K a c t₀ t := by
+  have hz : 1 + redshift a t₀ t ≠ 0 := by
+    rw [one_add_redshift]
+    exact div_ne_zero ha₀ ha
+  unfold luminosityDistance angularDiameterDistance
+  field_simp
+
+/-!
+
+## H. The low-redshift expansions of the distances
+
+The comoving distance as a function of the redshift has, at `z = 0`, the derivatives
+`dχ/dz = χ' / z'` and `d²χ/dz² = (χ'' z' - χ' z'') / z'³` (primes are time derivatives at `t₀`);
+they are computed here, giving `χ = (c / (a₀ H₀)) [z - ½ (1 + q₀) z² + …]`, and, in the flat
+case `r(χ) = χ`, `d_L = (c / (a₀ H₀)) [z + ½ (1 - q₀) z² + …]` and
+`d_A = (c / (a₀ H₀)) [z - ½ (3 + q₀) z² + …]`.
+
+-/
+
+/-- At the observation time, `∂ₜ ∂ₜ χ = c H₀ / a₀`. -/
+lemma deriv_deriv_comovingDistance_self {a : Time → ℝ} {c : ℝ} (hcont : Continuous a)
+    (hapos : ∀ s, 0 < a s) {t₀ : Time} (hd : DifferentiableAt ℝ a t₀) :
+    ∂ₜ (∂ₜ (fun s => comovingDistance a c s t₀)) t₀ = c * hubbleConstant a t₀ / a t₀ := by
+  have hχ := deriv_comovingDistance (c := c) hcont hapos t₀
+  obtain ⟨τ₀⟩ := t₀
+  have hA := hasDerivAt_mk_of_differentiableAt hd
+  have h := (hasDerivAt_const τ₀ (-c)).div hA (hapos ⟨τ₀⟩).ne'
+  refine (deriv_eq_of_hasDerivAt (f := ∂ₜ (fun s => comovingDistance a c s ⟨τ₀⟩))
+    (h.congr_of_eventuallyEq (Filter.Eventually.of_forall fun σ => hχ ⟨σ⟩))).trans ?_
+  unfold hubbleConstant
+  have := (hapos ⟨τ₀⟩).ne'
+  field_simp
+  ring
+
+/-- `dχ/dz = χ' / z' = c / (a₀ H₀)` at `z = 0`. -/
+lemma comovingDistance_coeff_one {a : Time → ℝ} {c : ℝ} (hcont : Continuous a)
+    (hapos : ∀ s, 0 < a s) {t₀ : Time} (hd : DifferentiableAt ℝ a t₀)
+    (hH : hubbleConstant a t₀ ≠ 0) :
+    ∂ₜ (fun s => comovingDistance a c s t₀) t₀ / ∂ₜ (redshift a t₀) t₀
+      = c / (a t₀ * hubbleConstant a t₀) := by
+  rw [deriv_comovingDistance hcont hapos, deriv_redshift_self hd (hapos t₀).ne']
+  have := (hapos t₀).ne'
+  field_simp
+
+/-- `d²χ/dz² = (χ'' z' - χ' z'') / z'³ = - c (1 + q₀) / (a₀ H₀)` at `z = 0`. -/
+lemma comovingDistance_coeff_two {a : Time → ℝ} {c : ℝ} (hcont : Continuous a)
+    (hapos : ∀ s, 0 < a s) {t₀ : Time} (hd : Differentiable ℝ a)
+    (hdd : DifferentiableAt ℝ (∂ₜ a) t₀) (hd0 : ∂ₜ a t₀ ≠ 0) :
+    (∂ₜ (∂ₜ (fun s => comovingDistance a c s t₀)) t₀ * ∂ₜ (redshift a t₀) t₀
+      - ∂ₜ (fun s => comovingDistance a c s t₀) t₀ * ∂ₜ (∂ₜ (redshift a t₀)) t₀)
+      / ∂ₜ (redshift a t₀) t₀ ^ 3
+      = -(c * (1 + decelerationParameter a t₀) / (a t₀ * hubbleConstant a t₀)) := by
+  have hne : ∀ s, a s ≠ 0 := fun s => (hapos s).ne'
+  rw [deriv_deriv_comovingDistance_self hcont hapos (hd t₀), deriv_comovingDistance hcont hapos,
+    deriv_redshift_self (hd t₀) (hne t₀), deriv_deriv_redshift_self hd hdd hne hd0]
+  unfold hubbleConstant decelerationParameter
+  have := hne t₀
+  field_simp
+  ring
+
+/-- Flat case: the second-order coefficient of `d_L = (1 + z) χ(z)` is `2 χ₁ + χ₂`, which with
+  `χ₁ = c / (a₀ H₀)` and `χ₂ = - c (1 + q₀) / (a₀ H₀)` is `c (1 - q₀) / (a₀ H₀)`. -/
+lemma luminosityDistance_coeff_two (c a₀ H₀ q₀ : ℝ) (hH : H₀ ≠ 0) (ha : a₀ ≠ 0) :
+    2 * (c / (a₀ * H₀)) + -(c * (1 + q₀) / (a₀ * H₀)) = c * (1 - q₀) / (a₀ * H₀) := by
+  field_simp
+  ring
+
+/-- Flat case: the second-order coefficient of `d_A = χ(z) / (1 + z)` is `χ₂ - 2 χ₁`, which is
+  `- c (3 + q₀) / (a₀ H₀)`. -/
+lemma angularDiameterDistance_coeff_two (c a₀ H₀ q₀ : ℝ) (hH : H₀ ≠ 0) (ha : a₀ ≠ 0) :
+    -(c * (1 + q₀) / (a₀ * H₀)) - 2 * (c / (a₀ * H₀)) = -(c * (3 + q₀) / (a₀ * H₀)) := by
+  field_simp
   ring
 
 end Cosmology.FLRW.FriedmannEquation
