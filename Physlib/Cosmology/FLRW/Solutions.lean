@@ -6,7 +6,7 @@ Authors: Jinzheng Li, Philippe Kevorkian
 module
 
 public import Physlib.Meta.TODO.Basic
-public import Physlib.Cosmology.FLRW.Basic
+public import Physlib.Cosmology.FLRW.MatterContent
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 /-!
 
@@ -488,15 +488,12 @@ lemma decelerationParameter_milneScaleFactor (c : ℝ) (t : Time) :
 ## E. The Einstein static universe
 
 At an instant where `∂ₜ a = ∂ₜ ∂ₜ a = 0`, the two Friedmann equations with dust (`p = 0`)
-force the density `ρ = Λ c² / (4 π G)`, twice the density `ρ_Λ = Λ c² / (8 π G)` associated
-with the cosmological constant, and `k c² / a² = 4 π G ρ`, hence a positive curvature
-parameter when `ρ > 0`. That this equilibrium is unstable is not stated here.
+force the density `ρ = Λ c² / (4 π G)`, twice the density `cosmologicalConstantDensity`
+(`ρ_Λ = Λ c² / (8 π G)`, defined in `Physlib.Cosmology.FLRW.MatterContent`), and
+`k c² / a² = 4 π G ρ`, hence a positive curvature parameter when `ρ > 0`. That this
+equilibrium is unstable is not stated here.
 
 -/
-
-/-- The density `ρ_Λ = Λ c² / (8 π G)` associated with the cosmological constant. -/
-noncomputable def cosmologicalConstantDensity (Λ G c : ℝ) : ℝ :=
-  Λ * c ^ 2 / (8 * π * G)
 
 /-- In the Einstein static universe the dust density is `ρ = Λ c² / (4 π G) = 2 ρ_Λ`. -/
 lemma einsteinStatic_density {a ρ : Time → ℝ} {Λ G c : ℝ} {t : Time} (hG : 0 < G)
