@@ -271,11 +271,6 @@ lemma deriv_deriv_nonpos_of_friedmann {a ρ p : Time → ℝ} {G c : ℝ} {t : T
 
 -/
 
-/-- The curve `σ ↦ a ⟨σ⟩` on `ℝ` is differentiable with derivative `σ ↦ ∂ₜ a ⟨σ⟩`. -/
-lemma deriv_mk_eq {a : Time → ℝ} (hd1 : Differentiable ℝ a) (σ : ℝ) :
-    deriv (fun σ : ℝ => a ⟨σ⟩) σ = ∂ₜ a ⟨σ⟩ :=
-  (hasDerivAt_mk_of_differentiableAt (hd1 ⟨σ⟩)).deriv
-
 /-- If `a` is twice differentiable with `∂ₜ ∂ₜ a ≤ 0` at all times and `∂ₜ a t₀ > 0`, then
   `a t ≤ 0` for every `t` with `t ≤ t₀ - a t₀ / ∂ₜ a t₀`: a decelerating universe expanding
   at `t₀` cannot have a positive scale factor earlier than `t₀ - 1 / H₀`. The proof is the
@@ -300,7 +295,7 @@ lemma scaleFactor_nonpos_of_decelerating {a : Time → ℝ} (hd1 : Differentiabl
     · have := Convex.mul_sub_le_image_sub_of_le_deriv (convex_Iic τ₀)
         hf.continuous.continuousOn hf.differentiableOn (C := ∂ₜ a ⟨τ₀⟩)
         (fun x hx => by
-          rw [deriv_mk_eq hd1]
+          rw [(hasDerivAt_mk_of_differentiableAt (hd1 ⟨x⟩)).deriv]
           rw [interior_Iic] at hx
           exact hanti (le_of_lt hx))
         σ (Set.mem_Iic.mpr h) τ₀ (Set.mem_Iic.mpr le_rfl) h
@@ -308,7 +303,7 @@ lemma scaleFactor_nonpos_of_decelerating {a : Time → ℝ} (hd1 : Differentiabl
     · have := Convex.image_sub_le_mul_sub_of_deriv_le (convex_Ici τ₀)
         hf.continuous.continuousOn hf.differentiableOn (C := ∂ₜ a ⟨τ₀⟩)
         (fun x hx => by
-          rw [deriv_mk_eq hd1]
+          rw [(hasDerivAt_mk_of_differentiableAt (hd1 ⟨x⟩)).deriv]
           rw [interior_Ici] at hx
           exact hanti (le_of_lt hx))
         τ₀ (Set.mem_Ici.mpr le_rfl) σ (Set.mem_Ici.mpr h.le) h.le
