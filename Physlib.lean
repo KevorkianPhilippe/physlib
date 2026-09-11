@@ -26,6 +26,7 @@ public import Physlib.ClassicalMechanics.Pendulum.SimplePendulum.Geometric.Traje
 public import Physlib.ClassicalMechanics.Pendulum.SimplePendulum.Hamiltonian
 public import Physlib.ClassicalMechanics.Pendulum.SimplePendulum.LiftInvariance
 public import Physlib.ClassicalMechanics.Pendulum.SimplePendulum.PeriodFormula
+public import Physlib.ClassicalMechanics.Pendulum.SimplePendulum.ReleasedFromRest
 public import Physlib.ClassicalMechanics.Pendulum.SimplePendulum.SmallAngle
 public import Physlib.ClassicalMechanics.Pendulum.SimplePendulum.Solution
 public import Physlib.ClassicalMechanics.Pendulum.SlidingPendulum
@@ -566,6 +567,7 @@ public import Physlib.Units.Integral
 public import Physlib.Units.LTMCTDimensionBase
 public import Physlib.Units.ParametricDimensionExamples
 public import Physlib.Units.ParametricUnits
+public import Physlib.Units.PositiveRealUnit
 public import Physlib.Units.SIUnitChoices
 public import Physlib.Units.UnitDependent
 public import Physlib.Units.UnitSystem
