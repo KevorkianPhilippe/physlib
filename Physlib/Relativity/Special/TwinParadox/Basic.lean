@@ -6,7 +6,7 @@ Authors: Joseph Tooby-Smith
 module
 
 public import Physlib.Relativity.Special.ProperTime
-public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.ReverseTriangle
+public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.CausallyFollows
 /-!
 # Twin Paradox
 
@@ -72,8 +72,8 @@ def ageGap : ℝ := T.properTimeTwinA - T.properTimeTwinB
   -/
 lemma ageGap_eq_zero_iff : T.ageGap = 0 ↔
     ∃ μ ∈ Set.Icc (0 : ℝ) 1, T.twinBMid = T.startPoint + μ • (T.endPoint - T.startPoint) := by
-  have hu := isFutureCausal_of_causallyFollows T.twinBMid_causallyFollows_startPoint
-  have hv := isFutureCausal_of_causallyFollows T.endPoint_causallyFollows_twinBMid
+  have hu := causallyFollows_zero_sub T.twinBMid_causallyFollows_startPoint
+  have hv := causallyFollows_zero_sub T.endPoint_causallyFollows_twinBMid
   have hsum : T.endPoint - T.startPoint
       = (T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid) := by abel
   have hgap : T.ageGap = √⟪(T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid),
@@ -117,8 +117,8 @@ lemma ageGap_eq_zero_iff : T.ageGap = 0 ↔
   Twin B: the age gap is nonnegative. This is the reverse triangle inequality of Minkowski space
   (`sqrt_add_sqrt_le_sqrt_add`) applied to the two legs of Twin B. -/
 lemma ageGap_nonneg : 0 ≤ T.ageGap := by
-  have hu := isFutureCausal_of_causallyFollows T.twinBMid_causallyFollows_startPoint
-  have hv := isFutureCausal_of_causallyFollows T.endPoint_causallyFollows_twinBMid
+  have hu := causallyFollows_zero_sub T.twinBMid_causallyFollows_startPoint
+  have hv := causallyFollows_zero_sub T.endPoint_causallyFollows_twinBMid
   have h := sqrt_add_sqrt_le_sqrt_add hu hv
   have hsum : T.endPoint - T.startPoint
       = (T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid) := by abel
