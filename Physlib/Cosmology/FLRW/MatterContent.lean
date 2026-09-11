@@ -37,13 +37,12 @@ Time derivatives of curves `Time → ℝ` are computed through the bridge
 
 ## iii. Table of contents
 
-- A. Time derivatives through the coordinate
-- B. The continuity equation
-  - B.1. The definition
-  - B.2. The derivative of the first-order Friedmann equation
-  - B.3. Continuity from the Friedmann equations
-  - B.4. The second-order Friedmann equation from continuity
-- C. Remaining TODO items
+- A. The continuity equation
+  - A.1. The definition
+  - A.2. The derivative of the first-order Friedmann equation
+  - A.3. Continuity from the Friedmann equations
+  - A.4. The second-order Friedmann equation from continuity
+- B. Remaining TODO items
 
 -/
 
@@ -55,26 +54,13 @@ open Real Time
 
 /-!
 
-## A. Time derivatives through the coordinate
-
--/
-
-/-- A curve `f : Time → ℝ` differentiable at `⟨τ⟩` gives the curve `σ ↦ f ⟨σ⟩` on `ℝ`,
-  whose Mathlib derivative at `τ` is the time derivative `∂ₜ f ⟨τ⟩`. -/
-lemma hasDerivAt_mk_of_differentiableAt {f : Time → ℝ} {τ : ℝ}
-    (hf : DifferentiableAt ℝ f ⟨τ⟩) :
-    HasDerivAt (fun σ : ℝ => f ⟨σ⟩) (∂ₜ f ⟨τ⟩) τ :=
-  hasDerivAt_comp_toRealCLE_symm f τ hf
-
-/-!
-
-## B. The continuity equation
+## A. The continuity equation
 
 -/
 
 /-!
 
-### B.1. The definition
+### A.1. The definition
 
 -/
 
@@ -85,7 +71,7 @@ def ContinuityEquation (a ρ p : Time → ℝ) (c : ℝ) (t : Time) : Prop :=
 
 /-!
 
-### B.2. The derivative of the first-order Friedmann equation
+### A.2. The derivative of the first-order Friedmann equation
 
 -/
 
@@ -113,7 +99,7 @@ lemma deriv_firstOrderFriedmann {a ρ : Time → ℝ} {k Λ G c τ : ℝ} (ha : 
 
 /-!
 
-### B.3. Continuity from the Friedmann equations
+### A.3. Continuity from the Friedmann equations
 
 -/
 
@@ -140,7 +126,7 @@ lemma continuityEquation_of_friedmann {a ρ p : Time → ℝ} {k Λ G c : ℝ} {
 
 /-!
 
-### B.4. The second-order Friedmann equation from continuity
+### A.4. The second-order Friedmann equation from continuity
 
 -/
 
@@ -166,7 +152,7 @@ lemma secondOrderFriedmann_of_continuityEquation {a ρ p : Time → ℝ} {k Λ G
 
 /-!
 
-## C. Remaining TODO items
+## B. Remaining TODO items
 
 -/
 
