@@ -26,13 +26,14 @@ parts, together with the Euclidean Cauchy-Schwarz inequality.
 
 - `causallyFollows_zero_iff`: `causallyFollows 0 u ↔ 0 ≤ ⟪u, u⟫ₘ ∧ 0 ≤ u⁰`;
   `causallyFollows_zero_sub`: `q - p` is in the causal future of `0` when `q` causally follows `p`.
-- `norm_spatialPart_le_timeComponent`: `‖u_spatial‖ ≤ u⁰`.
-- `sqrt_mul_sqrt_le_minkowskiProduct`: the reverse Cauchy-Schwarz inequality.
-- `sqrt_add_sqrt_le_sqrt_add`: the reverse triangle inequality; `causallyFollows_zero_add`.
-- `minkowskiProduct_eq_iff`: equality in the reverse Cauchy-Schwarz inequality holds if and only
-  if the two vectors are proportional (with a nonnegative factor).
-- `sqrt_add_eq_iff`: equality in the reverse triangle inequality holds if and only if equality
-  holds in the reverse Cauchy-Schwarz inequality.
+- `norm_spatialPart_le_timeComponent_of_causallyFollows`: `‖u_spatial‖ ≤ u⁰`.
+- `sqrt_mul_sqrt_le_minkowskiProduct_of_causallyFollows`: the reverse Cauchy-Schwarz inequality.
+- `sqrt_add_sqrt_le_sqrt_add_of_causallyFollows`: the reverse triangle inequality;
+  `causallyFollows_zero_add_of_causallyFollows`.
+- `minkowskiProduct_eq_iff_of_causallyFollows`: equality in the reverse Cauchy-Schwarz inequality
+  holds if and only if the two vectors are proportional (with a nonnegative factor).
+- `sqrt_add_eq_iff_of_causallyFollows`: equality in the reverse triangle inequality holds if and
+  only if equality holds in the reverse Cauchy-Schwarz inequality.
 
 ## iii. Table of contents
 
@@ -94,18 +95,18 @@ lemma causallyFollows_zero_sub {d : ℕ} {p q : Vector d} (h : causallyFollows p
 
 /-- For a vector in the causal future of the origin, the Euclidean norm of the spatial part is at
   most the time component. -/
-lemma norm_spatialPart_le_timeComponent {d : ℕ} {u : Vector d} (hu : causallyFollows 0 u) :
-    ‖u.spatialPart‖ ≤ u.timeComponent := by
+lemma norm_spatialPart_le_timeComponent_of_causallyFollows {d : ℕ} {u : Vector d}
+    (hu : causallyFollows 0 u) : ‖u.spatialPart‖ ≤ u.timeComponent := by
   obtain ⟨h1, _⟩ := causallyFollows_zero_iff.mp hu
   rw [minkowskiProduct_self_eq_sq_sub] at h1
   nlinarith [norm_nonneg u.spatialPart]
 
 /-- The reverse Cauchy-Schwarz inequality: for `u`, `v` in the causal future of the origin,
   `√⟪u, u⟫ₘ √⟪v, v⟫ₘ ≤ ⟪u, v⟫ₘ`. -/
-lemma sqrt_mul_sqrt_le_minkowskiProduct {d : ℕ} {u v : Vector d} (hu : causallyFollows 0 u)
-    (hv : causallyFollows 0 v) : √⟪u, u⟫ₘ * √⟪v, v⟫ₘ ≤ ⟪u, v⟫ₘ := by
-  have hu' := norm_spatialPart_le_timeComponent hu
-  have hv' := norm_spatialPart_le_timeComponent hv
+lemma sqrt_mul_sqrt_le_minkowskiProduct_of_causallyFollows {d : ℕ} {u v : Vector d}
+    (hu : causallyFollows 0 u) (hv : causallyFollows 0 v) : √⟪u, u⟫ₘ * √⟪v, v⟫ₘ ≤ ⟪u, v⟫ₘ := by
+  have hu' := norm_spatialPart_le_timeComponent_of_causallyFollows hu
+  have hv' := norm_spatialPart_le_timeComponent_of_causallyFollows hv
   rw [minkowskiProduct_self_eq_sq_sub u, minkowskiProduct_self_eq_sq_sub v,
     minkowskiProduct_eq_timeComponent_spatialPart u v]
   have hcs := real_inner_le_norm u.spatialPart v.spatialPart
@@ -134,9 +135,10 @@ lemma sqrt_mul_sqrt_le_minkowskiProduct {d : ℕ} {u v : Vector d} (hu : causall
 
 /-- The reverse triangle inequality: for `u`, `v` in the causal future of the origin,
   `√⟪u, u⟫ₘ + √⟪v, v⟫ₘ ≤ √⟪u + v, u + v⟫ₘ`. -/
-lemma sqrt_add_sqrt_le_sqrt_add {d : ℕ} {u v : Vector d} (hu : causallyFollows 0 u)
-    (hv : causallyFollows 0 v) : √⟪u, u⟫ₘ + √⟪v, v⟫ₘ ≤ √⟪u + v, u + v⟫ₘ := by
-  have hcs := sqrt_mul_sqrt_le_minkowskiProduct hu hv
+lemma sqrt_add_sqrt_le_sqrt_add_of_causallyFollows {d : ℕ} {u v : Vector d}
+    (hu : causallyFollows 0 u) (hv : causallyFollows 0 v) :
+    √⟪u, u⟫ₘ + √⟪v, v⟫ₘ ≤ √⟪u + v, u + v⟫ₘ := by
+  have hcs := sqrt_mul_sqrt_le_minkowskiProduct_of_causallyFollows hu hv
   have hu1 := (causallyFollows_zero_iff.mp hu).1
   have hv1 := (causallyFollows_zero_iff.mp hv).1
   have hsum : (√⟪u, u⟫ₘ + √⟪v, v⟫ₘ) ^ 2 ≤ ⟪u + v, u + v⟫ₘ := by
@@ -146,12 +148,12 @@ lemma sqrt_add_sqrt_le_sqrt_add {d : ℕ} {u v : Vector d} (hu : causallyFollows
 
 /-- The sum of two vectors in the causal future of the origin is in the causal future of the
   origin. -/
-lemma causallyFollows_zero_add {d : ℕ} {u v : Vector d} (hu : causallyFollows 0 u)
-    (hv : causallyFollows 0 v) : causallyFollows 0 (u + v) := by
+lemma causallyFollows_zero_add_of_causallyFollows {d : ℕ} {u v : Vector d}
+    (hu : causallyFollows 0 u) (hv : causallyFollows 0 v) : causallyFollows 0 (u + v) := by
   obtain ⟨hu1, hu2⟩ := causallyFollows_zero_iff.mp hu
   obtain ⟨hv1, hv2⟩ := causallyFollows_zero_iff.mp hv
   refine causallyFollows_zero_iff.mpr ⟨?_, ?_⟩
-  · have hcs := sqrt_mul_sqrt_le_minkowskiProduct hu hv
+  · have hcs := sqrt_mul_sqrt_le_minkowskiProduct_of_causallyFollows hu hv
     have hsq : 0 ≤ (√⟪u, u⟫ₘ + √⟪v, v⟫ₘ) ^ 2 := sq_nonneg _
     rw [add_sq, Real.sq_sqrt hu1, Real.sq_sqrt hv1] at hsq
     rw [minkowskiProduct_add_self]
@@ -169,7 +171,7 @@ lemma causallyFollows_zero_add {d : ℕ} {u v : Vector d} (hu : causallyFollows 
 /-- Equality in the reverse Cauchy-Schwarz inequality: for `u`, `v` in the causal future of the
   origin, `⟪u, v⟫ₘ = √⟪u, u⟫ₘ √⟪v, v⟫ₘ` if and only if one of the vectors is a nonnegative
   multiple of the other. -/
-lemma minkowskiProduct_eq_iff {d : ℕ} {u v : Vector d} (hu : causallyFollows 0 u)
+lemma minkowskiProduct_eq_iff_of_causallyFollows {d : ℕ} {u v : Vector d} (hu : causallyFollows 0 u)
     (hv : causallyFollows 0 v) :
     ⟪u, v⟫ₘ = √⟪u, u⟫ₘ * √⟪v, v⟫ₘ ↔ ∃ μ : ℝ, 0 ≤ μ ∧ (v = μ • u ∨ u = μ • v) := by
   have hu1 := (causallyFollows_zero_iff.mp hu).1
@@ -178,8 +180,8 @@ lemma minkowskiProduct_eq_iff {d : ℕ} {u v : Vector d} (hu : causallyFollows 0
   have hv2 := (causallyFollows_zero_iff.mp hv).2
   constructor
   · intro heq
-    have hu' := norm_spatialPart_le_timeComponent hu
-    have hv' := norm_spatialPart_le_timeComponent hv
+    have hu' := norm_spatialPart_le_timeComponent_of_causallyFollows hu
+    have hv' := norm_spatialPart_le_timeComponent_of_causallyFollows hv
     have hcs := real_inner_le_norm u.spatialPart v.spatialPart
     rw [minkowskiProduct_self_eq_sq_sub u, minkowskiProduct_self_eq_sq_sub v,
       minkowskiProduct_eq_timeComponent_spatialPart u v] at heq
@@ -250,13 +252,13 @@ lemma minkowskiProduct_eq_iff {d : ℕ} {u v : Vector d} (hu : causallyFollows 0
 
 /-- Equality in the reverse triangle inequality holds if and only if equality holds in the
   reverse Cauchy-Schwarz inequality. -/
-lemma sqrt_add_eq_iff {d : ℕ} {u v : Vector d} (hu : causallyFollows 0 u)
+lemma sqrt_add_eq_iff_of_causallyFollows {d : ℕ} {u v : Vector d} (hu : causallyFollows 0 u)
     (hv : causallyFollows 0 v) :
     √⟪u + v, u + v⟫ₘ = √⟪u, u⟫ₘ + √⟪v, v⟫ₘ ↔ ⟪u, v⟫ₘ = √⟪u, u⟫ₘ * √⟪v, v⟫ₘ := by
   have hu1 := (causallyFollows_zero_iff.mp hu).1
   have hv1 := (causallyFollows_zero_iff.mp hv).1
   have hsum := minkowskiProduct_add_self u v
-  have hnn := (causallyFollows_zero_iff.mp (causallyFollows_zero_add hu hv)).1
+  have hnn := (causallyFollows_zero_iff.mp (causallyFollows_zero_add_of_causallyFollows hu hv)).1
   constructor
   · intro h
     have h2 := congrArg (· ^ 2) h

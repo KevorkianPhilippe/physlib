@@ -68,7 +68,8 @@ def ageGap : ℝ := T.properTimeTwinA - T.properTimeTwinB
 
 /-- The age gap vanishes if and only if the turning point of Twin B lies on the straight
   worldline of Twin A between the start and end points: Twin B does not turn. This is the
-  equality case of the reverse triangle inequality (`sqrt_add_eq_iff`, `minkowskiProduct_eq_iff`).
+  equality case of the reverse triangle inequality (`sqrt_add_eq_iff_of_causallyFollows`,
+  `minkowskiProduct_eq_iff_of_causallyFollows`).
   -/
 lemma ageGap_eq_zero_iff : T.ageGap = 0 ↔
     ∃ μ ∈ Set.Icc (0 : ℝ) 1, T.twinBMid = T.startPoint + μ • (T.endPoint - T.startPoint) := by
@@ -82,7 +83,8 @@ lemma ageGap_eq_zero_iff : T.ageGap = 0 ↔
         + √⟪T.endPoint - T.twinBMid, T.endPoint - T.twinBMid⟫ₘ) := by
     unfold ageGap properTimeTwinA properTimeTwinB properTime
     rw [hsum]
-  rw [hgap, sub_eq_zero, sqrt_add_eq_iff hu hv, minkowskiProduct_eq_iff hu hv]
+  rw [hgap, sub_eq_zero, sqrt_add_eq_iff_of_causallyFollows hu hv,
+    minkowskiProduct_eq_iff_of_causallyFollows hu hv]
   constructor
   · rintro ⟨l, hl, h | h⟩
     · refine ⟨1 / (1 + l), ⟨by positivity, ?_⟩, ?_⟩
@@ -115,11 +117,11 @@ lemma ageGap_eq_zero_iff : T.ageGap = 0 ↔
 
 /-- In the twin paradox with instantaneous acceleration, Twin A is always at least as old as
   Twin B: the age gap is nonnegative. This is the reverse triangle inequality of Minkowski space
-  (`sqrt_add_sqrt_le_sqrt_add`) applied to the two legs of Twin B. -/
+  (`sqrt_add_sqrt_le_sqrt_add_of_causallyFollows`) applied to the two legs of Twin B. -/
 lemma ageGap_nonneg : 0 ≤ T.ageGap := by
   have hu := causallyFollows_zero_sub T.twinBMid_causallyFollows_startPoint
   have hv := causallyFollows_zero_sub T.endPoint_causallyFollows_twinBMid
-  have h := sqrt_add_sqrt_le_sqrt_add hu hv
+  have h := sqrt_add_sqrt_le_sqrt_add_of_causallyFollows hu hv
   have hsum : T.endPoint - T.startPoint
       = (T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid) := by abel
   unfold ageGap properTimeTwinA properTimeTwinB properTime
