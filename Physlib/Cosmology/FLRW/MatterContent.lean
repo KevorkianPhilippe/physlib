@@ -49,18 +49,17 @@ Time derivatives of curves `Time → ℝ` are computed through the bridge
 
 ## iii. Table of contents
 
-- A. Time derivatives through the coordinate
-- B. The continuity equation
-  - B.1. The definition
-  - B.2. The derivative of the first-order Friedmann equation
-  - B.3. Continuity from the Friedmann equations
-  - B.4. The second-order Friedmann equation from continuity
-- C. The barotropic equation of state and the density scaling law
-  - C.1. The equation of state
-  - C.2. The density scaling law
-  - C.3. Dust, radiation and vacuum energy
-- D. The cosmological constant as a fluid
-- E. Remaining TODO items
+- A. The continuity equation
+  - A.1. The definition
+  - A.2. The derivative of the first-order Friedmann equation
+  - A.3. Continuity from the Friedmann equations
+  - A.4. The second-order Friedmann equation from continuity
+- B. The barotropic equation of state and the density scaling law
+  - B.1. The equation of state
+  - B.2. The density scaling law
+  - B.3. Dust, radiation and vacuum energy
+- C. The cosmological constant as a fluid
+- D. Remaining TODO items
 
 -/
 
@@ -72,26 +71,13 @@ open Real Time
 
 /-!
 
-## A. Time derivatives through the coordinate
-
--/
-
-/-- A curve `f : Time → ℝ` differentiable at `⟨τ⟩` gives the curve `σ ↦ f ⟨σ⟩` on `ℝ`,
-  whose Mathlib derivative at `τ` is the time derivative `∂ₜ f ⟨τ⟩`. -/
-lemma hasDerivAt_mk_of_differentiableAt {f : Time → ℝ} {τ : ℝ}
-    (hf : DifferentiableAt ℝ f ⟨τ⟩) :
-    HasDerivAt (fun σ : ℝ => f ⟨σ⟩) (∂ₜ f ⟨τ⟩) τ :=
-  hasDerivAt_comp_toRealCLE_symm f τ hf
-
-/-!
-
-## B. The continuity equation
+## A. The continuity equation
 
 -/
 
 /-!
 
-### B.1. The definition
+### A.1. The definition
 
 -/
 
@@ -102,7 +88,7 @@ def ContinuityEquation (a ρ p : Time → ℝ) (c : ℝ) (t : Time) : Prop :=
 
 /-!
 
-### B.2. The derivative of the first-order Friedmann equation
+### A.2. The derivative of the first-order Friedmann equation
 
 -/
 
@@ -130,7 +116,7 @@ lemma deriv_firstOrderFriedmann {a ρ : Time → ℝ} {k Λ G c τ : ℝ} (ha : 
 
 /-!
 
-### B.3. Continuity from the Friedmann equations
+### A.3. Continuity from the Friedmann equations
 
 -/
 
@@ -157,7 +143,7 @@ lemma continuityEquation_of_friedmann {a ρ p : Time → ℝ} {k Λ G c : ℝ} {
 
 /-!
 
-### B.4. The second-order Friedmann equation from continuity
+### A.4. The second-order Friedmann equation from continuity
 
 -/
 
@@ -183,13 +169,13 @@ lemma secondOrderFriedmann_of_continuityEquation {a ρ p : Time → ℝ} {k Λ G
 
 /-!
 
-## C. The barotropic equation of state and the density scaling law
+## B. The barotropic equation of state and the density scaling law
 
 -/
 
 /-!
 
-### C.1. The equation of state
+### B.1. The equation of state
 
 -/
 
@@ -209,7 +195,7 @@ lemma deriv_of_continuityEquation_barotropic {a ρ : Time → ℝ} {w c : ℝ} {
 
 /-!
 
-### C.2. The density scaling law
+### B.2. The density scaling law
 
 -/
 
@@ -269,7 +255,7 @@ lemma continuityEquation_of_scaling {a : Time → ℝ} {w c ρ₀ a₀ : ℝ} (h
 
 /-!
 
-### C.3. Dust, radiation and vacuum energy
+### B.3. Dust, radiation and vacuum energy
 
 -/
 
@@ -303,7 +289,7 @@ lemma density_scaling_vacuum {a ρ : Time → ℝ} {c : ℝ} (hc : c ≠ 0) (hd1
 
 /-!
 
-## D. The cosmological constant as a fluid
+## C. The cosmological constant as a fluid
 
 -/
 
@@ -354,7 +340,7 @@ lemma cosmologicalConstantPressure_eq_barotropic (Λ G c : ℝ) (t : Time) :
 
 /-!
 
-## E. Remaining TODO items
+## D. Remaining TODO items
 
 -/
 
