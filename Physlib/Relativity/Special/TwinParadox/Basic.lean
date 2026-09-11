@@ -6,7 +6,7 @@ Authors: Joseph Tooby-Smith
 module
 
 public import Physlib.Relativity.Special.ProperTime
-public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.ReverseTriangle
+public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.CausallyFollows
 /-!
 # Twin Paradox
 
@@ -72,8 +72,8 @@ TODO "Find the conditions for which the age gap for the twin paradox is zero."
   Twin B: the age gap is nonnegative. This is the reverse triangle inequality of Minkowski space
   (`sqrt_add_sqrt_le_sqrt_add`) applied to the two legs of Twin B. -/
 lemma ageGap_nonneg : 0 ≤ T.ageGap := by
-  have hu := isFutureCausal_of_causallyFollows T.twinBMid_causallyFollows_startPoint
-  have hv := isFutureCausal_of_causallyFollows T.endPoint_causallyFollows_twinBMid
+  have hu := causallyFollows_zero_sub T.twinBMid_causallyFollows_startPoint
+  have hv := causallyFollows_zero_sub T.endPoint_causallyFollows_twinBMid
   have h := sqrt_add_sqrt_le_sqrt_add hu hv
   have hsum : T.endPoint - T.startPoint
       = (T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid) := by abel
