@@ -33,12 +33,11 @@ coordinate `t.val`. Its time derivative `∂ₜ a` is computed through the bridg
 
 ## iii. Table of contents
 
-- A. Time derivatives of curves given by a function of the coordinate
-- B. The de Sitter solution
-  - B.1. The scale factor and its derivatives
-  - B.2. The Friedmann equations
-  - B.3. The Hubble and deceleration parameters
-- C. Remaining TODO items
+- A. The de Sitter solution
+  - A.1. The scale factor and its derivatives
+  - A.2. The Friedmann equations
+  - A.3. The Hubble and deceleration parameters
+- B. Remaining TODO items
 
 -/
 
@@ -50,27 +49,13 @@ open Real Time
 
 /-!
 
-## A. Time derivatives of curves given by a function of the coordinate
-
-A curve `t ↦ γ t.val` on `Time` is the pull-back through `toRealCLE` of the curve `γ` on `ℝ`;
-its time derivative is the Mathlib derivative of `γ`.
-
--/
-
-/-- The time derivative of `t ↦ γ t.val` at `t` is the derivative of `γ` at `t.val`. -/
-lemma deriv_comp_val {γ : ℝ → ℝ} {t : Time} {v : ℝ} (h : HasDerivAt γ v t.val) :
-    ∂ₜ (fun s : Time => γ s.val) t = v :=
-  deriv_comp_toRealCLE_of_hasDerivAt γ t v h
-
-/-!
-
-## B. The de Sitter solution
+## A. The de Sitter solution
 
 -/
 
 /-!
 
-### B.1. The scale factor and its derivatives
+### A.1. The scale factor and its derivatives
 
 -/
 
@@ -79,19 +64,17 @@ lemma deriv_comp_val {γ : ℝ → ℝ} {t : Time} {v : ℝ} (h : HasDerivAt γ 
 noncomputable def deSitterScaleFactor (a₀ σ Λ c : ℝ) : Time → ℝ :=
   fun t => a₀ * Real.exp (σ * √(Λ / 3) * c * t.val)
 
-/-- Mathlib derivative of `y ↦ a₀ exp (K y)`. -/
-lemma hasDerivAt_mul_exp_mul (a₀ K x : ℝ) :
-    HasDerivAt (fun y : ℝ => a₀ * Real.exp (K * y)) (a₀ * K * Real.exp (K * x)) x := by
-  have h := (((hasDerivAt_id x).const_mul K).exp).const_mul a₀
-  refine h.congr_deriv ?_
-  simp only [id_eq]
-  ring
-
 lemma deriv_deSitterScaleFactor (a₀ σ Λ c : ℝ) :
     ∂ₜ (deSitterScaleFactor a₀ σ Λ c) =
       fun t => a₀ * (σ * √(Λ / 3) * c) * Real.exp (σ * √(Λ / 3) * c * t.val) := by
   funext t
-  exact deriv_comp_val (hasDerivAt_mul_exp_mul a₀ (σ * √(Λ / 3) * c) t.val)
+  have h : HasDerivAt (fun y : ℝ => a₀ * Real.exp (σ * √(Λ / 3) * c * y))
+      (a₀ * (σ * √(Λ / 3) * c) * Real.exp (σ * √(Λ / 3) * c * t.val)) t.val := by
+    have h := (((hasDerivAt_id t.val).const_mul (σ * √(Λ / 3) * c)).exp).const_mul a₀
+    refine h.congr_deriv ?_
+    simp only [id_eq]
+    ring
+  exact deriv_comp_val h
 
 lemma deriv_deriv_deSitterScaleFactor (a₀ σ Λ c : ℝ) :
     ∂ₜ (∂ₜ (deSitterScaleFactor a₀ σ Λ c)) =
@@ -99,8 +82,15 @@ lemma deriv_deriv_deSitterScaleFactor (a₀ σ Λ c : ℝ) :
         Real.exp (σ * √(Λ / 3) * c * t.val) := by
   rw [deriv_deSitterScaleFactor]
   funext t
-  exact deriv_comp_val
-    (hasDerivAt_mul_exp_mul (a₀ * (σ * √(Λ / 3) * c)) (σ * √(Λ / 3) * c) t.val)
+  have h : HasDerivAt (fun y : ℝ => a₀ * (σ * √(Λ / 3) * c) * Real.exp (σ * √(Λ / 3) * c * y))
+      (a₀ * (σ * √(Λ / 3) * c) * (σ * √(Λ / 3) * c) * Real.exp (σ * √(Λ / 3) * c * t.val))
+      t.val := by
+    have h := (((hasDerivAt_id t.val).const_mul (σ * √(Λ / 3) * c)).exp).const_mul
+      (a₀ * (σ * √(Λ / 3) * c))
+    refine h.congr_deriv ?_
+    simp only [id_eq]
+    ring
+  exact deriv_comp_val h
 
 /-- `σ² (√(Λ/3))² c² = Λ c² / 3` for `σ = ±1` and `0 ≤ Λ`. -/
 lemma sq_deSitterRate {σ Λ c : ℝ} (hΛ : 0 ≤ Λ) (hσ : σ = 1 ∨ σ = -1) :
@@ -110,7 +100,7 @@ lemma sq_deSitterRate {σ Λ c : ℝ} (hΛ : 0 ≤ Λ) (hσ : σ = 1 ∨ σ = -1
 
 /-!
 
-### B.2. The Friedmann equations
+### A.2. The Friedmann equations
 
 -/
 
@@ -145,7 +135,7 @@ lemma deSitterScaleFactor_secondOrderFriedmann {a₀ σ Λ G c : ℝ} (hΛ : 0 <
 
 /-!
 
-### B.3. The Hubble and deceleration parameters
+### A.3. The Hubble and deceleration parameters
 
 -/
 
@@ -178,7 +168,7 @@ lemma decelerationParameter_deSitterScaleFactor {a₀ σ Λ c : ℝ} (hΛ : 0 < 
 
 /-!
 
-## C. Remaining TODO items
+## B. Remaining TODO items
 
 -/
 

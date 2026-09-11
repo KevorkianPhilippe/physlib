@@ -115,6 +115,11 @@ lemma deriv_comp_toRealCLE_of_hasDerivAt [NormedAddCommGroup M] [NormedSpace ℝ
     fderiv_eq_smul_deriv, h.deriv]
   exact Eq.trans (by rfl) (Time.one_val ▸ one_smul _ v)
 
+/-- The time derivative of `t ↦ γ t.val` at `t` is the derivative of `γ` at `t.val`. -/
+lemma deriv_comp_val {γ : ℝ → ℝ} {t : Time} {v : ℝ} (h : HasDerivAt γ v t.val) :
+    ∂ₜ (fun s : Time => γ s.val) t = v :=
+  deriv_comp_toRealCLE_of_hasDerivAt γ t v h
+
 /-!
 
 ### A.3. Derivatives of functions into manifolds
