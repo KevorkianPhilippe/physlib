@@ -148,3 +148,4 @@ public import PhyslibAlpha.AlgebraicFramework.Representation.PVM
 public import PhyslibAlpha.AlgebraicFramework.Representation.Covariance.Basic
 public import PhyslibAlpha.AlgebraicFramework.Representation.Covariance.Finite
 public import PhyslibAlpha.AlgebraicFramework.Representation.Schur
+public import PhyslibAlpha.Relativity.General.Schwarzschild.IncompressibleSphere
