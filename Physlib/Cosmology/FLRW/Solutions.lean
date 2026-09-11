@@ -54,19 +54,18 @@ coordinate `t.val`. Its time derivative `∂ₜ a` is computed through the bridg
 
 ## iii. Table of contents
 
-- A. Time derivatives of curves given by a function of the coordinate
-- B. The de Sitter solution
-  - B.1. The scale factor and its derivatives
-  - B.2. The Friedmann equations
-  - B.3. The Hubble and deceleration parameters
-- C. The spatially flat power-law solutions
-  - C.1. The power-law scale factor and its derivatives
-  - C.2. The Hubble and deceleration parameters
-  - C.3. The radiation-dominated solution
-  - C.4. The Einstein-de Sitter solution
-- D. The Milne solution
-- E. The Einstein static universe
-- F. Remaining TODO items
+- A. The de Sitter solution
+  - A.1. The scale factor and its derivatives
+  - A.2. The Friedmann equations
+  - A.3. The Hubble and deceleration parameters
+- B. The spatially flat power-law solutions
+  - B.1. The power-law scale factor and its derivatives
+  - B.2. The Hubble and deceleration parameters
+  - B.3. The radiation-dominated solution
+  - B.4. The Einstein-de Sitter solution
+- C. The Milne solution
+- D. The Einstein static universe
+- E. Remaining TODO items
 
 -/
 
@@ -78,33 +77,13 @@ open Real Time
 
 /-!
 
-## A. Time derivatives of curves given by a function of the coordinate
-
-A curve `t ↦ γ t.val` on `Time` is the pull-back through `toRealCLE` of the curve `γ` on `ℝ`;
-its time derivative is the Mathlib derivative of `γ`.
-
--/
-
-/-- The time derivative of `t ↦ γ t.val` at `t` is the derivative of `γ` at `t.val`. -/
-lemma deriv_comp_val {γ : ℝ → ℝ} {t : Time} {v : ℝ} (h : HasDerivAt γ v t.val) :
-    ∂ₜ (fun s : Time => γ s.val) t = v :=
-  deriv_comp_toRealCLE_of_hasDerivAt γ t v h
-
-/-- The time derivative of any `f : Time → ℝ` at `t` is the derivative at `t.val` of the curve
-  `τ ↦ f ⟨τ⟩` on `ℝ`. -/
-lemma deriv_eq_of_hasDerivAt {f : Time → ℝ} {t : Time} {v : ℝ}
-    (h : HasDerivAt (fun τ : ℝ => f ⟨τ⟩) v t.val) : ∂ₜ f t = v :=
-  deriv_comp_toRealCLE_of_hasDerivAt (fun τ : ℝ => f ⟨τ⟩) t v h
-
-/-!
-
-## B. The de Sitter solution
+## A. The de Sitter solution
 
 -/
 
 /-!
 
-### B.1. The scale factor and its derivatives
+### A.1. The scale factor and its derivatives
 
 -/
 
@@ -113,19 +92,17 @@ lemma deriv_eq_of_hasDerivAt {f : Time → ℝ} {t : Time} {v : ℝ}
 noncomputable def deSitterScaleFactor (a₀ σ Λ c : ℝ) : Time → ℝ :=
   fun t => a₀ * Real.exp (σ * √(Λ / 3) * c * t.val)
 
-/-- Mathlib derivative of `y ↦ a₀ exp (K y)`. -/
-lemma hasDerivAt_mul_exp_mul (a₀ K x : ℝ) :
-    HasDerivAt (fun y : ℝ => a₀ * Real.exp (K * y)) (a₀ * K * Real.exp (K * x)) x := by
-  have h := (((hasDerivAt_id x).const_mul K).exp).const_mul a₀
-  refine h.congr_deriv ?_
-  simp only [id_eq]
-  ring
-
 lemma deriv_deSitterScaleFactor (a₀ σ Λ c : ℝ) :
     ∂ₜ (deSitterScaleFactor a₀ σ Λ c) =
       fun t => a₀ * (σ * √(Λ / 3) * c) * Real.exp (σ * √(Λ / 3) * c * t.val) := by
   funext t
-  exact deriv_comp_val (hasDerivAt_mul_exp_mul a₀ (σ * √(Λ / 3) * c) t.val)
+  have h : HasDerivAt (fun y : ℝ => a₀ * Real.exp (σ * √(Λ / 3) * c * y))
+      (a₀ * (σ * √(Λ / 3) * c) * Real.exp (σ * √(Λ / 3) * c * t.val)) t.val := by
+    have h := (((hasDerivAt_id t.val).const_mul (σ * √(Λ / 3) * c)).exp).const_mul a₀
+    refine h.congr_deriv ?_
+    simp only [id_eq]
+    ring
+  exact deriv_comp_val h
 
 lemma deriv_deriv_deSitterScaleFactor (a₀ σ Λ c : ℝ) :
     ∂ₜ (∂ₜ (deSitterScaleFactor a₀ σ Λ c)) =
@@ -133,8 +110,15 @@ lemma deriv_deriv_deSitterScaleFactor (a₀ σ Λ c : ℝ) :
         Real.exp (σ * √(Λ / 3) * c * t.val) := by
   rw [deriv_deSitterScaleFactor]
   funext t
-  exact deriv_comp_val
-    (hasDerivAt_mul_exp_mul (a₀ * (σ * √(Λ / 3) * c)) (σ * √(Λ / 3) * c) t.val)
+  have h : HasDerivAt (fun y : ℝ => a₀ * (σ * √(Λ / 3) * c) * Real.exp (σ * √(Λ / 3) * c * y))
+      (a₀ * (σ * √(Λ / 3) * c) * (σ * √(Λ / 3) * c) * Real.exp (σ * √(Λ / 3) * c * t.val))
+      t.val := by
+    have h := (((hasDerivAt_id t.val).const_mul (σ * √(Λ / 3) * c)).exp).const_mul
+      (a₀ * (σ * √(Λ / 3) * c))
+    refine h.congr_deriv ?_
+    simp only [id_eq]
+    ring
+  exact deriv_comp_val h
 
 /-- `σ² (√(Λ/3))² c² = Λ c² / 3` for `σ = ±1` and `0 ≤ Λ`. -/
 lemma sq_deSitterRate {σ Λ c : ℝ} (hΛ : 0 ≤ Λ) (hσ : σ = 1 ∨ σ = -1) :
@@ -144,7 +128,7 @@ lemma sq_deSitterRate {σ Λ c : ℝ} (hΛ : 0 ≤ Λ) (hσ : σ = 1 ∨ σ = -1
 
 /-!
 
-### B.2. The Friedmann equations
+### A.2. The Friedmann equations
 
 -/
 
@@ -179,7 +163,7 @@ lemma deSitterScaleFactor_secondOrderFriedmann {a₀ σ Λ G c : ℝ} (hΛ : 0 <
 
 /-!
 
-### B.3. The Hubble and deceleration parameters
+### A.3. The Hubble and deceleration parameters
 
 -/
 
@@ -212,7 +196,7 @@ lemma decelerationParameter_deSitterScaleFactor {a₀ σ Λ c : ℝ} (hΛ : 0 < 
 
 /-!
 
-## C. The spatially flat power-law solutions
+## B. The spatially flat power-law solutions
 
 The radiation-dominated and Einstein-de Sitter solutions are both of the form
 `a(t) = (t / t₀) ^ n` for `t > 0`; the Hubble parameter is `n / t` and the deceleration
@@ -223,7 +207,7 @@ parameter `(1 - n) / n`. Their densities are imposed by the first-order Friedman
 
 /-!
 
-### C.1. The power-law scale factor and its derivatives
+### B.1. The power-law scale factor and its derivatives
 
 -/
 
@@ -231,20 +215,17 @@ parameter `(1 - n) / n`. Their densities are imposed by the first-order Friedman
 noncomputable def powerLawScaleFactor (t₀ n : ℝ) : Time → ℝ :=
   fun t => (t.val / t₀) ^ n
 
-/-- Mathlib derivative of `y ↦ (y / t₀) ^ n` away from `y = 0`. -/
-lemma hasDerivAt_div_rpow {t₀ : ℝ} (ht₀ : t₀ ≠ 0) (n : ℝ) {x : ℝ} (hx : x ≠ 0) :
-    HasDerivAt (fun y : ℝ => (y / t₀) ^ n) (n / t₀ * (x / t₀) ^ (n - 1)) x := by
-  have h := ((hasDerivAt_id x).div_const t₀).rpow_const (p := n)
-    (Or.inl (div_ne_zero hx ht₀))
-  refine h.congr_deriv ?_
-  simp only [id_eq]
-  ring
-
 /-- `∂ₜ a = n / t₀ (t / t₀) ^ (n - 1)` away from `t = 0`. -/
 lemma deriv_powerLawScaleFactor {t₀ : ℝ} (ht₀ : t₀ ≠ 0) (n : ℝ) {t : Time}
     (ht : t.val ≠ 0) :
-    ∂ₜ (powerLawScaleFactor t₀ n) t = n / t₀ * (t.val / t₀) ^ (n - 1) :=
-  deriv_comp_val (hasDerivAt_div_rpow ht₀ n ht)
+    ∂ₜ (powerLawScaleFactor t₀ n) t = n / t₀ * (t.val / t₀) ^ (n - 1) := by
+  have h : HasDerivAt (fun y : ℝ => (y / t₀) ^ n) (n / t₀ * (t.val / t₀) ^ (n - 1)) t.val := by
+    have h := ((hasDerivAt_id t.val).div_const t₀).rpow_const (p := n)
+      (Or.inl (div_ne_zero ht ht₀))
+    refine h.congr_deriv ?_
+    simp only [id_eq]
+    ring
+  exact deriv_comp_val h
 
 /-- `∂ₜ ∂ₜ a = n (n - 1) / t₀² (t / t₀) ^ (n - 2)` for `t > 0`. The derivative `∂ₜ a` is
   only known away from `t = 0`, which is enough since `t > 0` is an open condition. -/
@@ -253,14 +234,21 @@ lemma deriv_deriv_powerLawScaleFactor {t₀ : ℝ} (ht₀ : t₀ ≠ 0) (n : ℝ
     ∂ₜ (∂ₜ (powerLawScaleFactor t₀ n)) t =
       n / t₀ * ((n - 1) / t₀ * (t.val / t₀) ^ (n - 1 - 1)) := by
   apply deriv_eq_of_hasDerivAt
-  have h := (hasDerivAt_div_rpow ht₀ (n - 1) ht.ne').const_mul (n / t₀)
+  have h₁ : HasDerivAt (fun y : ℝ => (y / t₀) ^ (n - 1))
+      ((n - 1) / t₀ * (t.val / t₀) ^ (n - 1 - 1)) t.val := by
+    have h := ((hasDerivAt_id t.val).div_const t₀).rpow_const (p := n - 1)
+      (Or.inl (div_ne_zero ht.ne' ht₀))
+    refine h.congr_deriv ?_
+    simp only [id_eq]
+    ring
+  have h := h₁.const_mul (n / t₀)
   refine h.congr_of_eventuallyEq ?_
   filter_upwards [eventually_ne_nhds ht.ne'] with τ hτ
   exact deriv_powerLawScaleFactor ht₀ n (t := ⟨τ⟩) hτ
 
 /-!
 
-### C.2. The Hubble and deceleration parameters
+### B.2. The Hubble and deceleration parameters
 
 -/
 
@@ -323,7 +311,7 @@ lemma powerLawScaleFactor_secondOrderFriedmann {t₀ G c n w : ℝ} (ht₀ : 0 <
 
 /-!
 
-### C.3. The radiation-dominated solution
+### B.3. The radiation-dominated solution
 
 -/
 
@@ -381,7 +369,7 @@ lemma hubbleConstant_radiationScaleFactor_t₀ {t₀ : ℝ} (ht₀ : 0 < t₀) :
 
 /-!
 
-### C.4. The Einstein-de Sitter solution
+### B.4. The Einstein-de Sitter solution
 
 -/
 
@@ -437,7 +425,7 @@ lemma hubbleConstant_einsteinDeSitterScaleFactor_t₀ {t₀ : ℝ} (ht₀ : 0 < 
 
 /-!
 
-## D. The Milne solution
+## C. The Milne solution
 
 The Milne universe is the empty (`ρ = 0`, `p = 0`, `Λ = 0`) solution with `k = -1` and
 `a(t) = c t` for `t > 0`. That it is Minkowski space in expanding coordinates (vanishing
@@ -485,7 +473,7 @@ lemma decelerationParameter_milneScaleFactor (c : ℝ) (t : Time) :
 
 /-!
 
-## E. The Einstein static universe
+## D. The Einstein static universe
 
 At an instant where `∂ₜ a = ∂ₜ ∂ₜ a = 0`, the two Friedmann equations with dust (`p = 0`)
 force the density `ρ = Λ c² / (4 π G)`, twice the density `cosmologicalConstantDensity`
@@ -537,7 +525,7 @@ lemma einsteinStatic_curvature_pos {a ρ : Time → ℝ} {k Λ G c : ℝ} {t : T
 
 /-!
 
-## F. Remaining TODO items
+## E. Remaining TODO items
 
 -/
 
