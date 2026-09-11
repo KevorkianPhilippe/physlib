@@ -66,6 +66,17 @@ def properTimeTwinB : ℝ := SpaceTime.properTime T.startPoint T.twinBMid +
 /-- The proper time of twin A minus the proper time of twin B. -/
 def ageGap : ℝ := T.properTimeTwinA - T.properTimeTwinB
 
+/-- The age gap in terms of the two legs of Twin B, `u = twinBMid - startPoint` and
+  `v = endPoint - twinBMid`: `ageGap = √⟪u + v, u + v⟫ₘ - (√⟪u, u⟫ₘ + √⟪v, v⟫ₘ)`. -/
+lemma ageGap_eq : T.ageGap = √⟪(T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid),
+      (T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid)⟫ₘ
+      - (√⟪T.twinBMid - T.startPoint, T.twinBMid - T.startPoint⟫ₘ
+        + √⟪T.endPoint - T.twinBMid, T.endPoint - T.twinBMid⟫ₘ) := by
+  have hsum : T.endPoint - T.startPoint
+      = (T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid) := by abel
+  unfold ageGap properTimeTwinA properTimeTwinB properTime
+  rw [hsum]
+
 /-- The age gap vanishes if and only if the turning point of Twin B lies on the straight
   worldline of Twin A between the start and end points: Twin B does not turn. This is the
   equality case of the reverse triangle inequality (`sqrt_add_eq_iff_of_causallyFollows`,
@@ -77,13 +88,7 @@ lemma ageGap_eq_zero_iff : T.ageGap = 0 ↔
   have hv := causallyFollows_zero_sub T.endPoint_causallyFollows_twinBMid
   have hsum : T.endPoint - T.startPoint
       = (T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid) := by abel
-  have hgap : T.ageGap = √⟪(T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid),
-      (T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid)⟫ₘ
-      - (√⟪T.twinBMid - T.startPoint, T.twinBMid - T.startPoint⟫ₘ
-        + √⟪T.endPoint - T.twinBMid, T.endPoint - T.twinBMid⟫ₘ) := by
-    unfold ageGap properTimeTwinA properTimeTwinB properTime
-    rw [hsum]
-  rw [hgap, sub_eq_zero, sqrt_add_eq_iff_of_causallyFollows hu hv,
+  rw [ageGap_eq, sub_eq_zero, sqrt_add_eq_iff_of_causallyFollows hu hv,
     minkowskiProduct_eq_iff_of_causallyFollows hu hv]
   constructor
   · rintro ⟨l, hl, h | h⟩
@@ -122,10 +127,7 @@ lemma ageGap_nonneg : 0 ≤ T.ageGap := by
   have hu := causallyFollows_zero_sub T.twinBMid_causallyFollows_startPoint
   have hv := causallyFollows_zero_sub T.endPoint_causallyFollows_twinBMid
   have h := sqrt_add_sqrt_le_sqrt_add_of_causallyFollows hu hv
-  have hsum : T.endPoint - T.startPoint
-      = (T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid) := by abel
-  unfold ageGap properTimeTwinA properTimeTwinB properTime
-  rw [hsum]
+  rw [ageGap_eq]
   linarith
 
 /-!
