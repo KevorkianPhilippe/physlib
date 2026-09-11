@@ -127,10 +127,6 @@ lemma densityParameter_add_curvature {a ρ : Time → ℝ} {k G c : ℝ} {t : Ti
 noncomputable def reducedHubble (ΩΛ Ωm Ωr ΩK x : ℝ) : ℝ :=
   √(ΩΛ + Ωm * x ^ (-3 : ℝ) + Ωr * x ^ (-4 : ℝ) + ΩK * x ^ (-2 : ℝ))
 
-/-- `x ^ (-n) = (x ^ n)⁻¹` for `x > 0` and a natural `n`. -/
-lemma rpow_neg_natCast_of_pos {x : ℝ} (hx : 0 < x) (n : ℕ) : x ^ (-(n : ℝ)) = (x ^ n)⁻¹ := by
-  rw [Real.rpow_neg hx.le, Real.rpow_natCast]
-
 /-- The argument of the square root in `reducedHubble`, for a universe of matter and radiation
   obeying their scaling laws, equals `H² / H₀²`: the normalised Friedmann equation. -/
 lemma sq_hubbleConstant_eq_mul_reducedHubbleSq {a ρm ρr : Time → ℝ} {k Λ G c : ℝ}
@@ -142,9 +138,11 @@ lemma sq_hubbleConstant_eq_mul_reducedHubbleSq {a ρm ρr : Time → ℝ} {k Λ 
         + densityParameter a ρr G t₀ * (a t / a t₀) ^ (-4 : ℝ)
         + curvatureDensityParameter a k c t₀ * (a t / a t₀) ^ (-2 : ℝ)) := by
   have hx : 0 < a t / a t₀ := div_pos (hapos t) (hapos t₀)
+  have hpow : ∀ j : ℕ, (a t / a t₀) ^ (-(j : ℝ)) = ((a t / a t₀) ^ j)⁻¹ := fun j => by
+    rw [Real.rpow_neg hx.le, Real.rpow_natCast]
   rw [show (-3 : ℝ) = -((3 : ℕ) : ℝ) by norm_num, show (-4 : ℝ) = -((4 : ℕ) : ℝ) by norm_num,
-    show (-2 : ℝ) = -((2 : ℕ) : ℝ) by norm_num, rpow_neg_natCast_of_pos hx,
-    rpow_neg_natCast_of_pos hx, rpow_neg_natCast_of_pos hx]
+    show (-2 : ℝ) = -((2 : ℕ) : ℝ) by norm_num, hpow,
+    hpow, hpow]
   unfold FirstOrderFriedmann at hF1
   dsimp only at hF1
   rw [hm, hr] at hF1
@@ -230,8 +228,10 @@ lemma equalityScaleFactorRadiationMatter_spec {Ωr Ωm : ℝ} (hr : 0 < Ωr) (hm
       = Ωr * equalityScaleFactorRadiationMatter Ωr Ωm ^ (-4 : ℝ) := by
   unfold equalityScaleFactorRadiationMatter
   have hx : 0 < Ωr / Ωm := div_pos hr hm
+  have hpow : ∀ j : ℕ, (Ωr / Ωm) ^ (-(j : ℝ)) = ((Ωr / Ωm) ^ j)⁻¹ := fun j => by
+    rw [Real.rpow_neg hx.le, Real.rpow_natCast]
   rw [show (-3 : ℝ) = -((3 : ℕ) : ℝ) by norm_num, show (-4 : ℝ) = -((4 : ℕ) : ℝ) by norm_num,
-    rpow_neg_natCast_of_pos hx, rpow_neg_natCast_of_pos hx]
+    hpow, hpow]
   field_simp
 
 /-- At `a_Λ`, the matter term of `E²` equals `Ω_Λ`. -/
