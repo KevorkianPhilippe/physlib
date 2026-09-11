@@ -68,7 +68,8 @@ def ageGap : ℝ := T.properTimeTwinA - T.properTimeTwinB
 
 /-- The age gap in terms of the two legs of Twin B, `u = twinBMid - startPoint` and
   `v = endPoint - twinBMid`: `ageGap = √⟪u + v, u + v⟫ₘ - (√⟪u, u⟫ₘ + √⟪v, v⟫ₘ)`. -/
-lemma ageGap_eq : T.ageGap = √⟪(T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid),
+lemma ageGap_eq :
+    T.ageGap = √⟪(T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid),
       (T.twinBMid - T.startPoint) + (T.endPoint - T.twinBMid)⟫ₘ
       - (√⟪T.twinBMid - T.startPoint, T.twinBMid - T.startPoint⟫ₘ
         + √⟪T.endPoint - T.twinBMid, T.endPoint - T.twinBMid⟫ₘ) := by
