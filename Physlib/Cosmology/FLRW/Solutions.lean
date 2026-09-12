@@ -34,23 +34,29 @@ coordinate `t.val`. Its time derivative `∂ₜ a` is computed through the bridg
 - `hubbleConstant_deSitterScaleFactor`: its Hubble parameter is the constant `σ √(Λ/3) c`
   (for any `σ`, `Λ`, `c`).
 - `decelerationParameter_deSitterScaleFactor`: its deceleration parameter is `q = -1`.
-- `powerLawScaleFactor`: `a(t) = (t / t₀) ^ n`, with Hubble parameter `n / t`
-  (`hubbleConstant_powerLawScaleFactor`) and deceleration parameter `(1 - n) / n`
-  (`decelerationParameter_powerLawScaleFactor`) for `t > 0`.
+- `hubbleConstant_powerLaw`, `decelerationParameter_powerLaw`, `powerLaw_firstOrderFriedmann`,
+  `powerLaw_secondOrderFriedmann`: the flat power-law solutions `a = (t / t₀) ^ n`, stated
+  inline, have Hubble parameter `n / t` and deceleration parameter `(1 - n) / n`, and solve the
+  flat (`k = 0`, `Λ = 0`) Friedmann equations with the density `ρ = 3 n² / (8 π G t²)` and the
+  pressure `p = w ρ c²`, `1 + 3 w = 2 (1 - n) / n`, for `t > 0`.
 - `radiationScaleFactor_firstOrderFriedmann`, `radiationScaleFactor_secondOrderFriedmann`:
-  `a = (t / t₀) ^ (1/2)` solves the flat (`k = 0`, `Λ = 0`) Friedmann equations with the
-  density `ρ = 3 / (32 π G t²)` and the radiation pressure `p = ρ c² / 3`; `q = 1` and
+  `a = (t / t₀) ^ (1/2)` solves the flat Friedmann equations with the density
+  `ρ = 3 / (32 π G t²)` and the radiation pressure `p = ρ c² / 3`; `q = 1` and
   `H(t₀) = 1 / (2 t₀)`.
 - `einsteinDeSitterScaleFactor_firstOrderFriedmann`,
   `einsteinDeSitterScaleFactor_secondOrderFriedmann`: `a = (t / t₀) ^ (2/3)` solves the flat
   Friedmann equations with the dust density `ρ = 1 / (6 π G t²)` and `p = 0`; `q = 1 / 2` and
   `H(t₀) = 2 / (3 t₀)`.
+
 - `milneScaleFactor_firstOrderFriedmann`, `milneScaleFactor_secondOrderFriedmann`: the Milne
   scale factor `a = c t` solves the empty (`ρ = 0`, `p = 0`, `Λ = 0`) Friedmann equations with
   `k = -1`; `q = 0`.
 - `einsteinStatic_density`, `einsteinStatic_curvature`: if `∂ₜ a = ∂ₜ ∂ₜ a = 0` at `t` and the
-  Friedmann equations hold there with `p = 0`, then `ρ = Λ c² / (4 π G) = 2 ρ_Λ` and
+  Friedmann equations hold there with `p = 0`, then `ρ = Λ c² / (4 π G)` and
   `k c² / a² = 4 π G ρ`, so that `k > 0` when `ρ > 0` (`einsteinStatic_curvature_pos`).
+
+In the power-law solutions `t₀ : Time` is the normalisation epoch (`a(t₀) = 1`) and the Big
+Bang is at the origin `t.val = 0` of the time chart.
 
 ## iii. Table of contents
 
@@ -59,7 +65,7 @@ coordinate `t.val`. Its time derivative `∂ₜ a` is computed through the bridg
   - A.2. The Friedmann equations
   - A.3. The Hubble and deceleration parameters
 - B. The spatially flat power-law solutions
-  - B.1. The power-law scale factor and its derivatives
+  - B.1. Derivatives of the power-law scale factor
   - B.2. The Hubble and deceleration parameters
   - B.3. The radiation-dominated solution
   - B.4. The Einstein-de Sitter solution
@@ -199,52 +205,55 @@ lemma decelerationParameter_deSitterScaleFactor {a₀ σ Λ c : ℝ} (hΛ : 0 < 
 ## B. The spatially flat power-law solutions
 
 The radiation-dominated and Einstein-de Sitter solutions are both of the form
-`a(t) = (t / t₀) ^ n` for `t > 0`; the Hubble parameter is `n / t` and the deceleration
-parameter `(1 - n) / n`. Their densities are imposed by the first-order Friedmann equation with
-`k = 0` and `Λ = 0`: `ρ = 3 H² / (8 π G) = 3 n² / (8 π G t²)`.
+`a(t) = (t / t₀) ^ n`; the Hubble parameter is `n / t` and the deceleration parameter
+`(1 - n) / n`. Their densities are imposed by the first-order Friedmann equation with `k = 0`
+and `Λ = 0`: `ρ = 3 H² / (8 π G) = 3 n² / (8 π G t²)`. The general power-law solution is
+stated inline, only the two named solutions get a definition.
+
+Throughout, `t₀` is the normalisation epoch, `a(t₀) = 1`, the Big Bang sits at the origin
+`t.val = 0` of the time chart (`Time` has no distinguished origin by itself), and the values
+for `t.val ≤ 0` are junk (`Real.rpow` on a non-positive base); every statement therefore
+assumes `0 < t.val`.
 
 -/
 
 /-!
 
-### B.1. The power-law scale factor and its derivatives
+### B.1. Derivatives of the power-law scale factor
 
 -/
 
-/-- The power-law scale factor `a(t) = (t / t₀) ^ n` (real power). -/
-noncomputable def powerLawScaleFactor (t₀ n : ℝ) : Time → ℝ :=
-  fun t => (t.val / t₀) ^ n
-
-/-- `∂ₜ a = n / t₀ (t / t₀) ^ (n - 1)` away from `t = 0`. -/
-lemma deriv_powerLawScaleFactor {t₀ : ℝ} (ht₀ : t₀ ≠ 0) (n : ℝ) {t : Time}
-    (ht : t.val ≠ 0) :
-    ∂ₜ (powerLawScaleFactor t₀ n) t = n / t₀ * (t.val / t₀) ^ (n - 1) := by
-  have h : HasDerivAt (fun y : ℝ => (y / t₀) ^ n) (n / t₀ * (t.val / t₀) ^ (n - 1)) t.val := by
-    have h := ((hasDerivAt_id t.val).div_const t₀).rpow_const (p := n)
+/-- `∂ₜ (t / t₀) ^ n = n / t₀ (t / t₀) ^ (n - 1)` away from `t.val = 0`. -/
+lemma deriv_powerLaw {t₀ : Time} (ht₀ : t₀.val ≠ 0) (n : ℝ) {t : Time} (ht : t.val ≠ 0) :
+    ∂ₜ (fun s : Time => (s.val / t₀.val) ^ n) t = n / t₀.val * (t.val / t₀.val) ^ (n - 1) := by
+  have h : HasDerivAt (fun y : ℝ => (y / t₀.val) ^ n)
+      (n / t₀.val * (t.val / t₀.val) ^ (n - 1)) t.val := by
+    have h := ((hasDerivAt_id t.val).div_const t₀.val).rpow_const (p := n)
       (Or.inl (div_ne_zero ht ht₀))
     refine h.congr_deriv ?_
     simp only [id_eq]
     ring
   exact deriv_comp_val h
 
-/-- `∂ₜ ∂ₜ a = n (n - 1) / t₀² (t / t₀) ^ (n - 2)` for `t > 0`. The derivative `∂ₜ a` is
-  only known away from `t = 0`, which is enough since `t > 0` is an open condition. -/
-lemma deriv_deriv_powerLawScaleFactor {t₀ : ℝ} (ht₀ : t₀ ≠ 0) (n : ℝ) {t : Time}
+/-- `∂ₜ ∂ₜ (t / t₀) ^ n = n (n - 1) / t₀² (t / t₀) ^ (n - 2)` for `0 < t.val`. The first
+  derivative is only known away from `t.val = 0`, which is enough since `0 < t.val` is an open
+  condition. -/
+lemma deriv_deriv_powerLaw {t₀ : Time} (ht₀ : t₀.val ≠ 0) (n : ℝ) {t : Time}
     (ht : 0 < t.val) :
-    ∂ₜ (∂ₜ (powerLawScaleFactor t₀ n)) t =
-      n / t₀ * ((n - 1) / t₀ * (t.val / t₀) ^ (n - 1 - 1)) := by
+    ∂ₜ (∂ₜ (fun s : Time => (s.val / t₀.val) ^ n)) t =
+      n / t₀.val * ((n - 1) / t₀.val * (t.val / t₀.val) ^ (n - 1 - 1)) := by
   apply deriv_eq_of_hasDerivAt
-  have h₁ : HasDerivAt (fun y : ℝ => (y / t₀) ^ (n - 1))
-      ((n - 1) / t₀ * (t.val / t₀) ^ (n - 1 - 1)) t.val := by
-    have h := ((hasDerivAt_id t.val).div_const t₀).rpow_const (p := n - 1)
+  have h₁ : HasDerivAt (fun y : ℝ => (y / t₀.val) ^ (n - 1))
+      ((n - 1) / t₀.val * (t.val / t₀.val) ^ (n - 1 - 1)) t.val := by
+    have h := ((hasDerivAt_id t.val).div_const t₀.val).rpow_const (p := n - 1)
       (Or.inl (div_ne_zero ht.ne' ht₀))
     refine h.congr_deriv ?_
     simp only [id_eq]
     ring
-  have h := h₁.const_mul (n / t₀)
+  have h := h₁.const_mul (n / t₀.val)
   refine h.congr_of_eventuallyEq ?_
   filter_upwards [eventually_ne_nhds ht.ne'] with τ hτ
-  exact deriv_powerLawScaleFactor ht₀ n (t := ⟨τ⟩) hτ
+  exact deriv_powerLaw ht₀ n (t := ⟨τ⟩) hτ
 
 /-!
 
@@ -252,58 +261,52 @@ lemma deriv_deriv_powerLawScaleFactor {t₀ : ℝ} (ht₀ : t₀ ≠ 0) (n : ℝ
 
 -/
 
-/-- The Hubble parameter of the power-law solution is `n / t` for `t > 0`. -/
-lemma hubbleConstant_powerLawScaleFactor {t₀ : ℝ} (ht₀ : 0 < t₀) (n : ℝ) {t : Time}
+/-- The Hubble parameter of the power-law solution is `n / t` for `0 < t.val`. -/
+lemma hubbleConstant_powerLaw {t₀ : Time} (ht₀ : 0 < t₀.val) (n : ℝ) {t : Time}
     (ht : 0 < t.val) :
-    hubbleConstant (powerLawScaleFactor t₀ n) t = n / t.val := by
+    hubbleConstant (fun s : Time => (s.val / t₀.val) ^ n) t = n / t.val := by
   unfold hubbleConstant
-  rw [deriv_powerLawScaleFactor ht₀.ne' n ht.ne', powerLawScaleFactor,
-    Real.rpow_sub_one (div_pos ht ht₀).ne']
-  have hx : (t.val / t₀) ^ n ≠ 0 := (Real.rpow_pos_of_pos (div_pos ht ht₀) n).ne'
+  rw [deriv_powerLaw ht₀.ne' n ht.ne', Real.rpow_sub_one (div_pos ht ht₀).ne']
+  have hx : (t.val / t₀.val) ^ n ≠ 0 := (Real.rpow_pos_of_pos (div_pos ht ht₀) n).ne'
   field_simp
 
-/-- The deceleration parameter of the power-law solution is `(1 - n) / n` for `t > 0`,
+/-- The deceleration parameter of the power-law solution is `(1 - n) / n` for `0 < t.val`,
   `n ≠ 0`. -/
-lemma decelerationParameter_powerLawScaleFactor {t₀ n : ℝ} (ht₀ : 0 < t₀) (hn : n ≠ 0)
+lemma decelerationParameter_powerLaw {t₀ : Time} {n : ℝ} (ht₀ : 0 < t₀.val) (hn : n ≠ 0)
     {t : Time} (ht : 0 < t.val) :
-    decelerationParameter (powerLawScaleFactor t₀ n) t = (1 - n) / n := by
+    decelerationParameter (fun s : Time => (s.val / t₀.val) ^ n) t = (1 - n) / n := by
   unfold decelerationParameter
-  rw [deriv_deriv_powerLawScaleFactor ht₀.ne' n ht, deriv_powerLawScaleFactor ht₀.ne' n ht.ne',
-    powerLawScaleFactor, Real.rpow_sub_one (div_pos ht ht₀).ne',
-    Real.rpow_sub_one (div_pos ht ht₀).ne']
-  have hx : (t.val / t₀) ^ n ≠ 0 := (Real.rpow_pos_of_pos (div_pos ht ht₀) n).ne'
+  rw [deriv_deriv_powerLaw ht₀.ne' n ht, deriv_powerLaw ht₀.ne' n ht.ne',
+    Real.rpow_sub_one (div_pos ht ht₀).ne', Real.rpow_sub_one (div_pos ht ht₀).ne']
+  have hx : (t.val / t₀.val) ^ n ≠ 0 := (Real.rpow_pos_of_pos (div_pos ht ht₀) n).ne'
   field_simp
   ring
 
-/-- The density imposed on the flat power-law solution by the first-order Friedmann equation,
-  `ρ = 3 n² / (8 π G t²)`. -/
-noncomputable def powerLawDensity (G n : ℝ) : Time → ℝ :=
-  fun t => 3 * n ^ 2 / (8 * π * G * t.val ^ 2)
-
 /-- The flat power-law solution solves the first-order Friedmann equation with `k = 0`,
-  `Λ = 0` and the density `powerLawDensity`, for `t > 0`. -/
-lemma powerLawScaleFactor_firstOrderFriedmann {t₀ G c : ℝ} (ht₀ : 0 < t₀) (hG : 0 < G)
+  `Λ = 0` and the density `ρ = 3 n² / (8 π G t²)` that it imposes, for `0 < t.val`. -/
+lemma powerLaw_firstOrderFriedmann {t₀ : Time} {G c : ℝ} (ht₀ : 0 < t₀.val) (hG : 0 < G)
     (n : ℝ) {t : Time} (ht : 0 < t.val) :
-    FirstOrderFriedmann (powerLawScaleFactor t₀ n) (powerLawDensity G n) 0 0 G c t := by
+    FirstOrderFriedmann (fun s : Time => (s.val / t₀.val) ^ n)
+      (fun s => 3 * n ^ 2 / (8 * π * G * s.val ^ 2)) 0 0 G c t := by
   unfold FirstOrderFriedmann
-  have hH := hubbleConstant_powerLawScaleFactor ht₀ n ht
+  have hH := hubbleConstant_powerLaw ht₀ n ht
   unfold hubbleConstant at hH
-  rw [hH, powerLawDensity]
+  rw [hH]
   have hπ := Real.pi_pos
   field_simp
   ring
 
 /-- The second-order Friedmann equation for the flat power-law solution with the pressure
-  `p = w ρ c²`, where `1 + 3 w = 2 (1 - n) / n`, for `t > 0`. -/
-lemma powerLawScaleFactor_secondOrderFriedmann {t₀ G c n w : ℝ} (ht₀ : 0 < t₀) (hG : 0 < G)
+  `p = w ρ c²`, where `1 + 3 w = 2 (1 - n) / n`, for `0 < t.val`. -/
+lemma powerLaw_secondOrderFriedmann {t₀ : Time} {G c n w : ℝ} (ht₀ : 0 < t₀.val) (hG : 0 < G)
     (hc : 0 < c) (hn : n ≠ 0) (hw : 1 + 3 * w = 2 * (1 - n) / n) {t : Time} (ht : 0 < t.val) :
-    SecondOrderFriedmann (powerLawScaleFactor t₀ n) (powerLawDensity G n)
-      (fun s => w * powerLawDensity G n s * c ^ 2) 0 G c t := by
+    SecondOrderFriedmann (fun s : Time => (s.val / t₀.val) ^ n)
+      (fun s => 3 * n ^ 2 / (8 * π * G * s.val ^ 2))
+      (fun s => w * (3 * n ^ 2 / (8 * π * G * s.val ^ 2)) * c ^ 2) 0 G c t := by
   unfold SecondOrderFriedmann
-  simp only [powerLawDensity]
-  rw [deriv_deriv_powerLawScaleFactor ht₀.ne' n ht, powerLawScaleFactor,
-    Real.rpow_sub_one (div_pos ht ht₀).ne', Real.rpow_sub_one (div_pos ht ht₀).ne']
-  have hx : (t.val / t₀) ^ n ≠ 0 := (Real.rpow_pos_of_pos (div_pos ht ht₀) n).ne'
+  rw [deriv_deriv_powerLaw ht₀.ne' n ht, Real.rpow_sub_one (div_pos ht ht₀).ne',
+    Real.rpow_sub_one (div_pos ht ht₀).ne']
+  have hx : (t.val / t₀.val) ^ n ≠ 0 := (Real.rpow_pos_of_pos (div_pos ht ht₀) n).ne'
   have hπ := Real.pi_pos
   rw [show w = (2 * (1 - n) / n - 1) / 3 by linarith]
   field_simp
@@ -315,56 +318,54 @@ lemma powerLawScaleFactor_secondOrderFriedmann {t₀ G c n w : ℝ} (ht₀ : 0 <
 
 -/
 
-/-- The radiation-dominated scale factor `a(t) = (t / t₀) ^ (1/2)`. -/
-noncomputable def radiationScaleFactor (t₀ : ℝ) : Time → ℝ :=
-  powerLawScaleFactor t₀ (1 / 2)
-
-/-- The density of the flat radiation-dominated solution, `ρ = 3 / (32 π G t²)`, imposed by
-  the first-order Friedmann equation. -/
-noncomputable def radiationDensity (G : ℝ) : Time → ℝ :=
-  fun t => 3 / (32 * π * G * t.val ^ 2)
-
-/-- The radiation pressure `p = ρ c² / 3`. -/
-noncomputable def radiationPressure (G c : ℝ) : Time → ℝ :=
-  fun t => radiationDensity G t * c ^ 2 / 3
-
-lemma radiationDensity_eq (G : ℝ) : radiationDensity G = powerLawDensity G (1 / 2) := by
-  funext t
-  simp only [radiationDensity, powerLawDensity]
-  ring
+/-- The radiation-dominated scale factor `a(t) = (t / t₀) ^ (1/2)`, normalised by `a(t₀) = 1`.
+  The Big Bang is at the origin `t.val = 0` of the time chart; the values for `t.val ≤ 0` are
+  junk. -/
+noncomputable def radiationScaleFactor (t₀ : Time) : Time → ℝ :=
+  fun t => (t.val / t₀.val) ^ (1 / 2 : ℝ)
 
 /-- The radiation-dominated solution solves the first-order Friedmann equation with `k = 0`,
-  `Λ = 0`, for `t > 0`. -/
-lemma radiationScaleFactor_firstOrderFriedmann {t₀ G c : ℝ} (ht₀ : 0 < t₀) (hG : 0 < G)
-    {t : Time} (ht : 0 < t.val) :
-    FirstOrderFriedmann (radiationScaleFactor t₀) (radiationDensity G) 0 0 G c t := by
-  rw [radiationScaleFactor, radiationDensity_eq]
-  exact powerLawScaleFactor_firstOrderFriedmann ht₀ hG _ ht
+  `Λ = 0` and the density `ρ = 3 / (32 π G t²)`, for `0 < t.val`. -/
+lemma radiationScaleFactor_firstOrderFriedmann {t₀ : Time} {G c : ℝ} (ht₀ : 0 < t₀.val)
+    (hG : 0 < G) {t : Time} (ht : 0 < t.val) :
+    FirstOrderFriedmann (radiationScaleFactor t₀) (fun s => 3 / (32 * π * G * s.val ^ 2))
+      0 0 G c t := by
+  unfold FirstOrderFriedmann radiationScaleFactor
+  have hH := hubbleConstant_powerLaw ht₀ (1 / 2) ht
+  unfold hubbleConstant at hH
+  rw [hH]
+  have hπ := Real.pi_pos
+  field_simp
+  ring
 
-/-- The radiation-dominated solution solves the second-order Friedmann equation with
-  `p = ρ c² / 3`, `Λ = 0`, for `t > 0`. -/
-lemma radiationScaleFactor_secondOrderFriedmann {t₀ G c : ℝ} (ht₀ : 0 < t₀) (hG : 0 < G)
-    (hc : 0 < c) {t : Time} (ht : 0 < t.val) :
-    SecondOrderFriedmann (radiationScaleFactor t₀) (radiationDensity G) (radiationPressure G c)
-      0 G c t := by
-  have h := powerLawScaleFactor_secondOrderFriedmann (w := 1 / 3) ht₀ hG hc
-    (by norm_num : (1 / 2 : ℝ) ≠ 0) (by norm_num) ht
-  rw [radiationScaleFactor, radiationDensity_eq]
-  convert h using 2
-  simp only [radiationPressure, radiationDensity_eq]
+/-- The radiation-dominated solution solves the second-order Friedmann equation with the
+  density `ρ = 3 / (32 π G t²)`, the pressure `p = ρ c² / 3` and `Λ = 0`, for `0 < t.val`. -/
+lemma radiationScaleFactor_secondOrderFriedmann {t₀ : Time} {G c : ℝ} (ht₀ : 0 < t₀.val)
+    (hG : 0 < G) (hc : 0 < c) {t : Time} (ht : 0 < t.val) :
+    SecondOrderFriedmann (radiationScaleFactor t₀) (fun s => 3 / (32 * π * G * s.val ^ 2))
+      (fun s => 3 / (32 * π * G * s.val ^ 2) * c ^ 2 / 3) 0 G c t := by
+  unfold SecondOrderFriedmann radiationScaleFactor
+  rw [deriv_deriv_powerLaw ht₀.ne' (1 / 2) ht, Real.rpow_sub_one (div_pos ht ht₀).ne',
+    Real.rpow_sub_one (div_pos ht ht₀).ne']
+  have hx : (t.val / t₀.val) ^ (1 / 2 : ℝ) ≠ 0 :=
+    (Real.rpow_pos_of_pos (div_pos ht ht₀) _).ne'
+  have hπ := Real.pi_pos
+  field_simp
   ring
 
 /-- The deceleration parameter of the radiation-dominated solution is `q = 1`. -/
-lemma decelerationParameter_radiationScaleFactor {t₀ : ℝ} (ht₀ : 0 < t₀) {t : Time}
+lemma decelerationParameter_radiationScaleFactor {t₀ : Time} (ht₀ : 0 < t₀.val) {t : Time}
     (ht : 0 < t.val) :
     decelerationParameter (radiationScaleFactor t₀) t = 1 := by
-  rw [radiationScaleFactor, decelerationParameter_powerLawScaleFactor ht₀ (by norm_num) ht]
+  unfold radiationScaleFactor
+  rw [decelerationParameter_powerLaw ht₀ (by norm_num) ht]
   norm_num
 
 /-- `H(t₀) = 1 / (2 t₀)` for the radiation-dominated solution, that is `t₀ = 1 / (2 H₀)`. -/
-lemma hubbleConstant_radiationScaleFactor_t₀ {t₀ : ℝ} (ht₀ : 0 < t₀) :
-    hubbleConstant (radiationScaleFactor t₀) ⟨t₀⟩ = 1 / (2 * t₀) := by
-  rw [radiationScaleFactor, hubbleConstant_powerLawScaleFactor ht₀ _ ht₀]
+lemma hubbleConstant_radiationScaleFactor_t₀ {t₀ : Time} (ht₀ : 0 < t₀.val) :
+    hubbleConstant (radiationScaleFactor t₀) t₀ = 1 / (2 * t₀.val) := by
+  unfold radiationScaleFactor
+  rw [hubbleConstant_powerLaw ht₀ _ ht₀]
   ring
 
 /-!
@@ -373,54 +374,54 @@ lemma hubbleConstant_radiationScaleFactor_t₀ {t₀ : ℝ} (ht₀ : 0 < t₀) :
 
 -/
 
-/-- The Einstein-de Sitter (flat, dust) scale factor `a(t) = (t / t₀) ^ (2/3)`. -/
-noncomputable def einsteinDeSitterScaleFactor (t₀ : ℝ) : Time → ℝ :=
-  powerLawScaleFactor t₀ (2 / 3)
-
-/-- The dust density of the Einstein-de Sitter solution, `ρ = 1 / (6 π G t²)`, imposed by the
-  first-order Friedmann equation. -/
-noncomputable def einsteinDeSitterDensity (G : ℝ) : Time → ℝ :=
-  fun t => 1 / (6 * π * G * t.val ^ 2)
-
-lemma einsteinDeSitterDensity_eq (G : ℝ) :
-    einsteinDeSitterDensity G = powerLawDensity G (2 / 3) := by
-  funext t
-  simp only [einsteinDeSitterDensity, powerLawDensity]
-  ring
+/-- The Einstein-de Sitter (flat, dust) scale factor `a(t) = (t / t₀) ^ (2/3)`, normalised by
+  `a(t₀) = 1`. The Big Bang is at the origin `t.val = 0` of the time chart; the values for
+  `t.val ≤ 0` are junk. -/
+noncomputable def einsteinDeSitterScaleFactor (t₀ : Time) : Time → ℝ :=
+  fun t => (t.val / t₀.val) ^ (2 / 3 : ℝ)
 
 /-- The Einstein-de Sitter solution solves the first-order Friedmann equation with `k = 0`,
-  `Λ = 0`, for `t > 0`. -/
-lemma einsteinDeSitterScaleFactor_firstOrderFriedmann {t₀ G c : ℝ} (ht₀ : 0 < t₀)
+  `Λ = 0` and the dust density `ρ = 1 / (6 π G t²)`, for `0 < t.val`. -/
+lemma einsteinDeSitterScaleFactor_firstOrderFriedmann {t₀ : Time} {G c : ℝ} (ht₀ : 0 < t₀.val)
     (hG : 0 < G) {t : Time} (ht : 0 < t.val) :
-    FirstOrderFriedmann (einsteinDeSitterScaleFactor t₀) (einsteinDeSitterDensity G)
+    FirstOrderFriedmann (einsteinDeSitterScaleFactor t₀) (fun s => 1 / (6 * π * G * s.val ^ 2))
       0 0 G c t := by
-  rw [einsteinDeSitterScaleFactor, einsteinDeSitterDensity_eq]
-  exact powerLawScaleFactor_firstOrderFriedmann ht₀ hG _ ht
+  unfold FirstOrderFriedmann einsteinDeSitterScaleFactor
+  have hH := hubbleConstant_powerLaw ht₀ (2 / 3) ht
+  unfold hubbleConstant at hH
+  rw [hH]
+  have hπ := Real.pi_pos
+  field_simp
+  ring
 
-/-- The Einstein-de Sitter solution solves the second-order Friedmann equation with `p = 0`,
-  `Λ = 0`, for `t > 0`. -/
-lemma einsteinDeSitterScaleFactor_secondOrderFriedmann {t₀ G c : ℝ} (ht₀ : 0 < t₀)
+/-- The Einstein-de Sitter solution solves the second-order Friedmann equation with the dust
+  density `ρ = 1 / (6 π G t²)`, `p = 0` and `Λ = 0`, for `0 < t.val`. -/
+lemma einsteinDeSitterScaleFactor_secondOrderFriedmann {t₀ : Time} {G c : ℝ} (ht₀ : 0 < t₀.val)
     (hG : 0 < G) (hc : 0 < c) {t : Time} (ht : 0 < t.val) :
-    SecondOrderFriedmann (einsteinDeSitterScaleFactor t₀) (einsteinDeSitterDensity G)
+    SecondOrderFriedmann (einsteinDeSitterScaleFactor t₀) (fun s => 1 / (6 * π * G * s.val ^ 2))
       (fun _ => 0) 0 G c t := by
-  have h := powerLawScaleFactor_secondOrderFriedmann (w := 0) ht₀ hG hc
-    (by norm_num : (2 / 3 : ℝ) ≠ 0) (by norm_num) ht
-  rw [einsteinDeSitterScaleFactor, einsteinDeSitterDensity_eq]
-  convert h using 2
+  unfold SecondOrderFriedmann einsteinDeSitterScaleFactor
+  rw [deriv_deriv_powerLaw ht₀.ne' (2 / 3) ht, Real.rpow_sub_one (div_pos ht ht₀).ne',
+    Real.rpow_sub_one (div_pos ht ht₀).ne']
+  have hx : (t.val / t₀.val) ^ (2 / 3 : ℝ) ≠ 0 :=
+    (Real.rpow_pos_of_pos (div_pos ht ht₀) _).ne'
+  have hπ := Real.pi_pos
+  field_simp
   ring
 
 /-- The deceleration parameter of the Einstein-de Sitter solution is `q = 1 / 2`. -/
-lemma decelerationParameter_einsteinDeSitterScaleFactor {t₀ : ℝ} (ht₀ : 0 < t₀) {t : Time}
-    (ht : 0 < t.val) :
+lemma decelerationParameter_einsteinDeSitterScaleFactor {t₀ : Time} (ht₀ : 0 < t₀.val)
+    {t : Time} (ht : 0 < t.val) :
     decelerationParameter (einsteinDeSitterScaleFactor t₀) t = 1 / 2 := by
-  rw [einsteinDeSitterScaleFactor,
-    decelerationParameter_powerLawScaleFactor ht₀ (by norm_num) ht]
+  unfold einsteinDeSitterScaleFactor
+  rw [decelerationParameter_powerLaw ht₀ (by norm_num) ht]
   norm_num
 
 /-- `H(t₀) = 2 / (3 t₀)` for the Einstein-de Sitter solution, that is `t₀ = 2 / (3 H₀)`. -/
-lemma hubbleConstant_einsteinDeSitterScaleFactor_t₀ {t₀ : ℝ} (ht₀ : 0 < t₀) :
-    hubbleConstant (einsteinDeSitterScaleFactor t₀) ⟨t₀⟩ = 2 / (3 * t₀) := by
-  rw [einsteinDeSitterScaleFactor, hubbleConstant_powerLawScaleFactor ht₀ _ ht₀]
+lemma hubbleConstant_einsteinDeSitterScaleFactor_t₀ {t₀ : Time} (ht₀ : 0 < t₀.val) :
+    hubbleConstant (einsteinDeSitterScaleFactor t₀) t₀ = 2 / (3 * t₀.val) := by
+  unfold einsteinDeSitterScaleFactor
+  rw [hubbleConstant_powerLaw ht₀ _ ht₀]
   ring
 
 /-!
@@ -433,7 +434,8 @@ curvature) is not stated here: the FLRW metric is not yet an object of Physlib.
 
 -/
 
-/-- The Milne scale factor `a(t) = c t`. -/
+/-- The Milne scale factor `a(t) = c t`. The Big Bang is at the origin `t.val = 0` of the time
+  chart; the values for `t.val ≤ 0` are not part of the model. -/
 noncomputable def milneScaleFactor (c : ℝ) : Time → ℝ :=
   fun t => c * t.val
 
@@ -476,24 +478,20 @@ lemma decelerationParameter_milneScaleFactor (c : ℝ) (t : Time) :
 ## D. The Einstein static universe
 
 At an instant where `∂ₜ a = ∂ₜ ∂ₜ a = 0`, the two Friedmann equations with dust (`p = 0`)
-force the density `ρ = Λ c² / (4 π G)`, twice the density `ρ_Λ = Λ c² / (8 π G)` associated
-with the cosmological constant, and `k c² / a² = 4 π G ρ`, hence a positive curvature
+force the density `ρ = Λ c² / (4 π G)` (twice the density `Λ c² / (8 π G)` that the
+cosmological constant carries as a `w = -1` fluid, a matter-content statement that belongs to
+`Physlib.Cosmology.FLRW.MatterContent`) and `k c² / a² = 4 π G ρ`, hence a positive curvature
 parameter when `ρ > 0`. That this equilibrium is unstable is not stated here.
 
 -/
 
-/-- The density `ρ_Λ = Λ c² / (8 π G)` associated with the cosmological constant. -/
-noncomputable def cosmologicalConstantDensity (Λ G c : ℝ) : ℝ :=
-  Λ * c ^ 2 / (8 * π * G)
-
-/-- In the Einstein static universe the dust density is `ρ = Λ c² / (4 π G) = 2 ρ_Λ`. -/
+/-- In the Einstein static universe the dust density is `ρ = Λ c² / (4 π G)`. -/
 lemma einsteinStatic_density {a ρ : Time → ℝ} {Λ G c : ℝ} {t : Time} (hG : 0 < G)
     (h2 : ∂ₜ (∂ₜ a) t = 0) (hF2 : SecondOrderFriedmann a ρ (fun _ => 0) Λ G c t) :
-    ρ t = 2 * cosmologicalConstantDensity Λ G c := by
+    ρ t = Λ * c ^ 2 / (4 * π * G) := by
   unfold SecondOrderFriedmann at hF2
   rw [h2, zero_div] at hF2
   simp only [mul_zero, zero_div, add_zero] at hF2
-  unfold cosmologicalConstantDensity
   have hπ := Real.pi_pos
   field_simp
   linarith
