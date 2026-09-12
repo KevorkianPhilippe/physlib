@@ -226,13 +226,14 @@ noncomputable def eventHorizon (a : Time → ℝ) (c : ℝ) (t : Time) : ℝ :=
 
 /-- The particle horizon of the Einstein-de Sitter universe from `t = 0` is finite,
   `3 c t₀^(2/3) t^(1/3)`. -/
-lemma particleHorizon_einsteinDeSitter {t₀ c : ℝ} (ht₀ : 0 < t₀) {t : Time} (ht : 0 < t.val) :
+lemma particleHorizon_einsteinDeSitter {t₀ : Time} {c : ℝ} (ht₀ : 0 < t₀.val) {t : Time}
+    (ht : 0 < t.val) :
     particleHorizon (einsteinDeSitterScaleFactor t₀) c ⟨0⟩ t
-      = 3 * c * t₀ ^ (2 / 3 : ℝ) * t.val ^ (1 / 3 : ℝ) := by
-  unfold particleHorizon comovingDistance einsteinDeSitterScaleFactor powerLawScaleFactor
+      = 3 * c * t₀.val ^ (2 / 3 : ℝ) * t.val ^ (1 / 3 : ℝ) := by
+  unfold particleHorizon comovingDistance einsteinDeSitterScaleFactor
   dsimp only
-  have hcongr : Set.EqOn (fun τ : ℝ => 1 / (τ / t₀) ^ (2 / 3 : ℝ))
-      (fun τ : ℝ => t₀ ^ (2 / 3 : ℝ) * τ ^ (-(2 / 3) : ℝ)) (Set.uIcc 0 t.val) := by
+  have hcongr : Set.EqOn (fun τ : ℝ => 1 / (τ / t₀.val) ^ (2 / 3 : ℝ))
+      (fun τ : ℝ => t₀.val ^ (2 / 3 : ℝ) * τ ^ (-(2 / 3) : ℝ)) (Set.uIcc 0 t.val) := by
     intro τ hτ
     rw [Set.uIcc_of_le ht.le] at hτ
     have h0 : 0 ≤ τ := hτ.1
