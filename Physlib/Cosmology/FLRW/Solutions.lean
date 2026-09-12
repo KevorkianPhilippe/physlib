@@ -52,7 +52,7 @@ coordinate `t.val`. Its time derivative `∂ₜ a` is computed through the bridg
   scale factor `a = c t` solves the empty (`ρ = 0`, `p = 0`, `Λ = 0`) Friedmann equations with
   `k = -1`; `q = 0`.
 - `einsteinStatic_density`, `einsteinStatic_curvature`: if `∂ₜ a = ∂ₜ ∂ₜ a = 0` at `t` and the
-  Friedmann equations hold there with `p = 0`, then `ρ = Λ c² / (4 π G) = 2 ρ_Λ` and
+  Friedmann equations hold there with `p = 0`, then `ρ = Λ c² / (4 π G)` and
   `k c² / a² = 4 π G ρ`, so that `k > 0` when `ρ > 0` (`einsteinStatic_curvature_pos`).
 
 In the power-law solutions `t₀ : Time` is the normalisation epoch (`a(t₀) = 1`) and the Big
@@ -478,24 +478,20 @@ lemma decelerationParameter_milneScaleFactor (c : ℝ) (t : Time) :
 ## D. The Einstein static universe
 
 At an instant where `∂ₜ a = ∂ₜ ∂ₜ a = 0`, the two Friedmann equations with dust (`p = 0`)
-force the density `ρ = Λ c² / (4 π G)`, twice the density `ρ_Λ = Λ c² / (8 π G)` associated
-with the cosmological constant, and `k c² / a² = 4 π G ρ`, hence a positive curvature
+force the density `ρ = Λ c² / (4 π G)` (twice the density `Λ c² / (8 π G)` that the
+cosmological constant carries as a `w = -1` fluid, a matter-content statement that belongs to
+`Physlib.Cosmology.FLRW.MatterContent`) and `k c² / a² = 4 π G ρ`, hence a positive curvature
 parameter when `ρ > 0`. That this equilibrium is unstable is not stated here.
 
 -/
 
-/-- The density `ρ_Λ = Λ c² / (8 π G)` associated with the cosmological constant. -/
-noncomputable def cosmologicalConstantDensity (Λ G c : ℝ) : ℝ :=
-  Λ * c ^ 2 / (8 * π * G)
-
-/-- In the Einstein static universe the dust density is `ρ = Λ c² / (4 π G) = 2 ρ_Λ`. -/
+/-- In the Einstein static universe the dust density is `ρ = Λ c² / (4 π G)`. -/
 lemma einsteinStatic_density {a ρ : Time → ℝ} {Λ G c : ℝ} {t : Time} (hG : 0 < G)
     (h2 : ∂ₜ (∂ₜ a) t = 0) (hF2 : SecondOrderFriedmann a ρ (fun _ => 0) Λ G c t) :
-    ρ t = 2 * cosmologicalConstantDensity Λ G c := by
+    ρ t = Λ * c ^ 2 / (4 * π * G) := by
   unfold SecondOrderFriedmann at hF2
   rw [h2, zero_div] at hF2
   simp only [mul_zero, zero_div, add_zero] at hF2
-  unfold cosmologicalConstantDensity
   have hπ := Real.pi_pos
   field_simp
   linarith
