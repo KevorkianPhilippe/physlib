@@ -434,7 +434,8 @@ curvature) is not stated here: the FLRW metric is not yet an object of Physlib.
 
 -/
 
-/-- The Milne scale factor `a(t) = c t`. -/
+/-- The Milne scale factor `a(t) = c t`. The Big Bang is at the origin `t.val = 0` of the time
+  chart; the values for `t.val ≤ 0` are not part of the model. -/
 noncomputable def milneScaleFactor (c : ℝ) : Time → ℝ :=
   fun t => c * t.val
 
