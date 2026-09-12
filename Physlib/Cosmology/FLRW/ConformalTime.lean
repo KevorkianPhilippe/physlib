@@ -70,9 +70,10 @@ lemma deriv_conformalTime {a : Time → ℝ} (hcont : Continuous a) (hapos : ∀
       (hf.stronglyMeasurableAtFilter _ _) hf.continuousAt)
 
 /-- The conformal time of the Einstein-de Sitter universe from `t = 0`, `η = 3 t₀^(2/3) t^(1/3)`. -/
-lemma conformalTime_einsteinDeSitter {t₀ : ℝ} (ht₀ : 0 < t₀) {t : Time} (ht : 0 < t.val) :
+lemma conformalTime_einsteinDeSitter {t₀ : Time} (ht₀ : 0 < t₀.val) {t : Time}
+    (ht : 0 < t.val) :
     conformalTime (einsteinDeSitterScaleFactor t₀) ⟨0⟩ t
-      = 3 * t₀ ^ (2 / 3 : ℝ) * t.val ^ (1 / 3 : ℝ) := by
+      = 3 * t₀.val ^ (2 / 3 : ℝ) * t.val ^ (1 / 3 : ℝ) := by
   have h := particleHorizon_einsteinDeSitter (c := 1) ht₀ ht
   unfold particleHorizon comovingDistance at h
   unfold conformalTime
