@@ -48,7 +48,7 @@ In the `Basic` module:
 - `angularFrequency` selects the real frequency parameter from the damping regime.
 - `qualityFactor` and `relaxationTime` define the quality factor `Q = ω / (2 β)` and the
   amplitude relaxation time `τ = 1 / β` from the decay rate `β = γ / (2 m)`;
-  `isUnderdamped_iff_qualityFactor` and its companions characterise the three damping
+  `isUnderdamped_iff_half_lt_qualityFactor` and its companions characterise the three damping
   regimes by `Q`.
 - `toUndamped_equationOfMotion` relates the damped and undamped equations of motion when
   the damping coefficient is zero.
@@ -451,19 +451,19 @@ When `γ = 0` the value is `0` by the convention `0⁻¹ = 0`. -/
 noncomputable def relaxationTime : ℝ := S.decayRate⁻¹
 
 /-- The quality factor equals `m ω / γ`. -/
-lemma qualityFactor_eq_m_mul_ω_div : S.qualityFactor = S.m * S.ω / S.γ := by
+lemma qualityFactor_eq_m_mul_ω_div_γ : S.qualityFactor = S.m * S.ω / S.γ := by
   unfold qualityFactor decayRate
   field_simp [S.m_ne_zero]
 
 /-- The quality factor equals `√(m k) / γ`. -/
 lemma qualityFactor_eq_sqrt_div : S.qualityFactor = √(S.m * S.k) / S.γ := by
-  rw [S.qualityFactor_eq_m_mul_ω_div, S.k_eq_m_mul_ω_sq,
+  rw [S.qualityFactor_eq_m_mul_ω_div_γ, S.k_eq_m_mul_ω_sq,
     show S.m * (S.m * S.ω ^ 2) = (S.m * S.ω) ^ 2 by ring,
     Real.sqrt_sq (mul_nonneg S.m_pos.le S.ω_pos.le)]
 
 /-- The quality factor is positive when the damping coefficient is positive. -/
 lemma qualityFactor_pos (hγ : 0 < S.γ) : 0 < S.qualityFactor := by
-  rw [S.qualityFactor_eq_m_mul_ω_div]
+  rw [S.qualityFactor_eq_m_mul_ω_div_γ]
   exact div_pos (mul_pos S.m_pos S.ω_pos) hγ
 
 /-- The square of the quality factor equals `m k / γ ^ 2`. -/
@@ -472,7 +472,7 @@ lemma qualityFactor_sq : S.qualityFactor ^ 2 = S.m * S.k / S.γ ^ 2 := by
 
 /-- The discriminant in terms of the quality factor: `γ ^ 2 - 4 m k = 4 m k (1 / (4 Q ^ 2) - 1)`;
 for `γ = 0` both sides equal `-4 m k`. -/
-lemma discriminant_eq_qualityFactor :
+lemma discriminant_eq_mul_qualityFactor :
     S.discriminant = 4 * S.m * S.k * (1 / (4 * S.qualityFactor ^ 2) - 1) := by
   rw [S.qualityFactor_sq, discriminant]
   rcases eq_or_ne S.γ 0 with h | h
@@ -480,21 +480,21 @@ lemma discriminant_eq_qualityFactor :
   · field_simp [h, S.m_ne_zero, S.k_ne_zero]
 
 /-- The underdamped regime is characterised by `1 / 2 < Q` when `0 < γ`. -/
-lemma isUnderdamped_iff_qualityFactor (hγ : 0 < S.γ) :
+lemma isUnderdamped_iff_half_lt_qualityFactor (hγ : 0 < S.γ) :
     S.IsUnderdamped ↔ 1 / 2 < S.qualityFactor := by
   have hβ := S.decayRate_pos hγ
   rw [S.isUnderdamped_iff_decayRate_lt, qualityFactor, lt_div_iff₀ (by linarith)]
   constructor <;> intro h <;> linarith
 
 /-- The critically damped regime is characterised by `Q = 1 / 2` when `0 < γ`. -/
-lemma isCriticallyDamped_iff_qualityFactor (hγ : 0 < S.γ) :
+lemma isCriticallyDamped_iff_qualityFactor_eq_half (hγ : 0 < S.γ) :
     S.IsCriticallyDamped ↔ S.qualityFactor = 1 / 2 := by
   have hβ := S.decayRate_pos hγ
   rw [S.isCriticallyDamped_iff_eq_decayRate, qualityFactor, div_eq_iff (by linarith)]
   constructor <;> intro h <;> linarith
 
 /-- The overdamped regime is characterised by `Q < 1 / 2` when `0 < γ`. -/
-lemma isOverdamped_iff_qualityFactor (hγ : 0 < S.γ) :
+lemma isOverdamped_iff_qualityFactor_lt_half (hγ : 0 < S.γ) :
     S.IsOverdamped ↔ S.qualityFactor < 1 / 2 := by
   have hβ := S.decayRate_pos hγ
   rw [S.isOverdamped_iff_lt_decayRate, qualityFactor, div_lt_iff₀ (by linarith)]
@@ -502,7 +502,7 @@ lemma isOverdamped_iff_qualityFactor (hγ : 0 < S.γ) :
 
 /-- In the underdamped regime the selected angular frequency satisfies
 `ω_d ^ 2 = ω ^ 2 (1 - 1 / (4 Q ^ 2))` when `0 < γ`. -/
-lemma angularFrequency_sq_eq_qualityFactor (hγ : 0 < S.γ) (hS : S.IsUnderdamped) :
+lemma angularFrequency_sq_eq_mul_qualityFactor (hγ : 0 < S.γ) (hS : S.IsUnderdamped) :
     S.angularFrequency ^ 2 = S.ω ^ 2 * (1 - 1 / (4 * S.qualityFactor ^ 2)) := by
   have hβ := (S.decayRate_pos hγ).ne'
   rw [S.angularFrequency_sq_of_underdamped hS, qualityFactor]
