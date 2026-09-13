@@ -50,9 +50,7 @@ number operators and its relation to the Hamiltonian of `Basic.lean` are still T
 @[expose] public section
 
 noncomputable section
-namespace QuantumMechanics
-
-namespace HarmonicOscillator
+namespace QuantumMechanics.HarmonicOscillator
 
 open Complex Constants KroneckerDelta Bracket SchwartzMap ContinuousLinearMap
 
@@ -75,27 +73,21 @@ variable {d : ℕ} (Q : HarmonicOscillator d) (i j : Fin d)
 
 /-- The lowering (annihilation) operator `aᵢ = (xᵢ/ξᵢ + i ξᵢ pᵢ/ℏ)/√2`, as a continuous linear
   map on Schwartz maps. -/
-def lowering : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ) :=
+def loweringCLM : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ) :=
   (Real.sqrt 2 : ℂ)⁻¹ • (((Q.ξ i : ℝ) : ℂ)⁻¹ • 𝐱 i + (I * ((Q.ξ i : ℝ) : ℂ) / (ℏ : ℂ)) • 𝐩 i)
 
 /-- The raising (creation) operator `aᵢ† = (xᵢ/ξᵢ - i ξᵢ pᵢ/ℏ)/√2`, as a continuous linear
   map on Schwartz maps. -/
-def raising : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ) :=
+def raisingCLM : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ) :=
   (Real.sqrt 2 : ℂ)⁻¹ • (((Q.ξ i : ℝ) : ℂ)⁻¹ • 𝐱 i - (I * ((Q.ξ i : ℝ) : ℂ) / (ℏ : ℂ)) • 𝐩 i)
 
-lemma lowering_eq : Q.lowering i =
+lemma loweringCLM_eq : Q.loweringCLM i =
     (Real.sqrt 2 : ℂ)⁻¹ • (((Q.ξ i : ℝ) : ℂ)⁻¹ • 𝐱 i + (I * ((Q.ξ i : ℝ) : ℂ) / (ℏ : ℂ)) • 𝐩 i) :=
   rfl
 
-lemma raising_eq : Q.raising i =
+lemma raisingCLM_eq : Q.raisingCLM i =
     (Real.sqrt 2 : ℂ)⁻¹ • (((Q.ξ i : ℝ) : ℂ)⁻¹ • 𝐱 i - (I * ((Q.ξ i : ℝ) : ℂ) / (ℏ : ℂ)) • 𝐩 i) :=
   rfl
-
-/-- The characteristic length is nonzero as a complex number. -/
-lemma ξ_ofReal_ne_zero : ((Q.ξ i : ℝ) : ℂ) ≠ 0 := by exact_mod_cast Q.ξ_ne_zero i
-
-/-- `ℏ` is nonzero as a complex number. -/
-lemma ℏ_ofReal_ne_zero : (ℏ : ℂ) ≠ 0 := by exact_mod_cast ℏ_ne_zero
 
 /-- `(√2)² = 2` as complex numbers. -/
 lemma sqrt_two_sq_ofReal : ((Real.sqrt 2 : ℝ) : ℂ) ^ 2 = 2 := by
@@ -110,8 +102,8 @@ lemma sqrt_two_sq_ofReal : ((Real.sqrt 2 : ℝ) : ℂ) ^ 2 = 2 := by
 
 /-- `[aᵢ, aⱼ†] = δᵢⱼ 𝟙`. -/
 lemma lowering_commutation_raising :
-    ⁅Q.lowering i, Q.raising j⁆ = δ[i,j] • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ) := by
-  simp only [lowering, raising, lie_smul, smul_lie, add_lie, lie_sub,
+    ⁅Q.loweringCLM i, Q.raisingCLM j⁆ = δ[i,j] • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ) := by
+  simp only [loweringCLM, raisingCLM, lie_smul, smul_lie, add_lie, lie_sub,
     position_commutation_position, momentum_commutation_momentum, position_commutation_momentum,
     ← lie_skew (𝐩 i) (𝐱 j), smul_zero, zero_add, smul_neg, smul_smul, KroneckerDelta.symm j i]
   rcases eq_or_ne i j with rfl | hne
@@ -120,14 +112,14 @@ lemma lowering_commutation_raising :
     simp only [smul_apply, neg_apply, sub_apply, id_apply, smul_eq_mul]
     have hξ := Q.ξ_ofReal_ne_zero i
     have hℏ := ℏ_ofReal_ne_zero
+    ring_nf
+    rw [I_sq, inv_pow, sqrt_two_sq_ofReal]
     field_simp
-    rw [I_sq, sqrt_two_sq_ofReal]
-    ring
   · simp only [eq_zero_of_ne hne, zero_smul, smul_zero, sub_zero, neg_zero, add_zero]
 
 /-- `[aᵢ, aⱼ] = 0`. -/
-lemma lowering_commutation_lowering : ⁅Q.lowering i, Q.lowering j⁆ = 0 := by
-  simp only [lowering, lie_smul, smul_lie, lie_add, add_lie,
+lemma lowering_commutation_lowering : ⁅Q.loweringCLM i, Q.loweringCLM j⁆ = 0 := by
+  simp only [loweringCLM, lie_smul, smul_lie, lie_add, add_lie,
     position_commutation_position, momentum_commutation_momentum, position_commutation_momentum,
     ← lie_skew (𝐩 i) (𝐱 j), smul_zero, zero_add, smul_neg, smul_smul, KroneckerDelta.symm j i]
   rcases eq_or_ne i j with rfl | hne
@@ -141,8 +133,8 @@ lemma lowering_commutation_lowering : ⁅Q.lowering i, Q.lowering j⁆ = 0 := by
   · simp [eq_zero_of_ne hne]
 
 /-- `[aᵢ†, aⱼ†] = 0`. -/
-lemma raising_commutation_raising : ⁅Q.raising i, Q.raising j⁆ = 0 := by
-  simp only [raising, lie_smul, smul_lie, lie_sub, sub_lie,
+lemma raising_commutation_raising : ⁅Q.raisingCLM i, Q.raisingCLM j⁆ = 0 := by
+  simp only [raisingCLM, lie_smul, smul_lie, lie_sub, sub_lie,
     position_commutation_position, momentum_commutation_momentum, position_commutation_momentum,
     ← lie_skew (𝐩 i) (𝐱 j), smul_zero, zero_sub, smul_neg, smul_smul, KroneckerDelta.symm j i]
   rcases eq_or_ne i j with rfl | hne
@@ -158,7 +150,7 @@ lemma raising_commutation_raising : ⁅Q.raising i, Q.raising j⁆ = 0 := by
 
 /-- `[aᵢ†, aⱼ] = -δᵢⱼ 𝟙`. -/
 lemma raising_commutation_lowering :
-    ⁅Q.raising i, Q.lowering j⁆ = -(δ[i,j] • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)) := by
+    ⁅Q.raisingCLM i, Q.loweringCLM j⁆ = -(δ[i,j] • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)) := by
   rw [← lie_skew, lowering_commutation_raising, KroneckerDelta.symm j i]
 
 /-!
@@ -169,26 +161,26 @@ lemma raising_commutation_lowering :
 
 /-- `xᵢ = (ξᵢ/√2) (aᵢ + aᵢ†)`. -/
 lemma position_eq_lowering_add_raising :
-    𝐱 i = (((Q.ξ i : ℝ) : ℂ) / (Real.sqrt 2 : ℂ)) • (Q.lowering i + Q.raising i) := by
+    𝐱 i = (((Q.ξ i : ℝ) : ℂ) / (Real.sqrt 2 : ℂ)) • (Q.loweringCLM i + Q.raisingCLM i) := by
   ext ψ x
-  simp [lowering, raising]
+  simp [loweringCLM, raisingCLM]
   have hξ := Q.ξ_ofReal_ne_zero i
   have hℏ := ℏ_ofReal_ne_zero
-  field_simp
   ring_nf
-  rw [sqrt_two_sq_ofReal]
+  rw [inv_pow, sqrt_two_sq_ofReal]
+  field_simp
 
 /-- `pᵢ = (i ℏ/(√2 ξᵢ)) (aᵢ† - aᵢ)`. -/
 lemma momentum_eq_raising_sub_lowering :
     𝐩 i = (I * (ℏ : ℂ) / ((Real.sqrt 2 : ℂ) * ((Q.ξ i : ℝ) : ℂ))) •
-      (Q.raising i - Q.lowering i) := by
+      (Q.raisingCLM i - Q.loweringCLM i) := by
   ext ψ x
-  simp [lowering, raising]
+  simp [loweringCLM, raisingCLM]
   have hξ := Q.ξ_ofReal_ne_zero i
   have hℏ := ℏ_ofReal_ne_zero
+  ring_nf
+  rw [I_pow_three, inv_pow, sqrt_two_sq_ofReal]
   field_simp
-  rw [I_sq, sqrt_two_sq_ofReal]
-  ring
 
 TODO "Prove that the raising/lowering operators are adjoints of one another (tag as simp?)."
 
@@ -205,9 +197,9 @@ TODO "Prove that the raising/lowering operators are adjoints of one another (tag
 -/
 
 /-- The number operator `Nᵢ = aᵢ† aᵢ`. -/
-def number : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ) := Q.raising i ∘L Q.lowering i
+def numberCLM : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ) := Q.raisingCLM i ∘L Q.loweringCLM i
 
-lemma number_eq : Q.number i = Q.raising i ∘L Q.lowering i := rfl
+lemma numberCLM_eq : Q.numberCLM i = Q.raisingCLM i ∘L Q.loweringCLM i := rfl
 
 TODO "Prove that the number operators are symmetric/self-adjoint."
 
@@ -219,8 +211,8 @@ TODO "Prove that the number operators are symmetric/self-adjoint."
 
 /-- `[Nᵢ, aⱼ] = -δᵢⱼ aⱼ`. -/
 lemma number_commutation_lowering :
-    ⁅Q.number i, Q.lowering j⁆ = -(δ[i,j] • Q.lowering j) := by
-  rw [number_eq, leibniz_lie, lowering_commutation_lowering, raising_commutation_lowering,
+    ⁅Q.numberCLM i, Q.loweringCLM j⁆ = -(δ[i,j] • Q.loweringCLM j) := by
+  rw [numberCLM_eq, leibniz_lie, lowering_commutation_lowering, raising_commutation_lowering,
     comp_zero, zero_add, neg_comp, smul_comp, id_comp]
   rcases eq_or_ne i j with rfl | hne
   · rfl
@@ -228,16 +220,16 @@ lemma number_commutation_lowering :
 
 /-- `[Nᵢ, aⱼ†] = δᵢⱼ aⱼ†`. -/
 lemma number_commutation_raising :
-    ⁅Q.number i, Q.raising j⁆ = δ[i,j] • Q.raising j := by
-  rw [number_eq, leibniz_lie, lowering_commutation_raising, raising_commutation_raising,
+    ⁅Q.numberCLM i, Q.raisingCLM j⁆ = δ[i,j] • Q.raisingCLM j := by
+  rw [numberCLM_eq, leibniz_lie, lowering_commutation_raising, raising_commutation_raising,
     zero_comp, add_zero, comp_smul, comp_id]
   rcases eq_or_ne i j with rfl | hne
   · rfl
   · simp [eq_zero_of_ne hne]
 
 /-- `[Nᵢ, Nⱼ] = 0`. -/
-lemma number_commutation_number : ⁅Q.number i, Q.number j⁆ = 0 := by
-  simp only [number_eq]
+lemma number_commutation_number : ⁅Q.numberCLM i, Q.numberCLM j⁆ = 0 := by
+  simp only [numberCLM_eq]
   rw [leibniz_lie, lie_leibniz, lie_leibniz, lowering_commutation_lowering,
     lowering_commutation_raising, raising_commutation_lowering, raising_commutation_raising]
   rcases eq_or_ne i j with rfl | hne
@@ -248,10 +240,11 @@ lemma number_commutation_number : ⁅Q.number i, Q.number j⁆ = 0 := by
 
 /-- `aᵢ aᵢ† = Nᵢ + 𝟙`. -/
 lemma lowering_comp_raising :
-    Q.lowering i ∘L Q.raising i = Q.number i + ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ) := by
+    Q.loweringCLM i ∘L Q.raisingCLM i =
+      Q.numberCLM i + ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ) := by
   have h := Q.lowering_commutation_raising i i
   rw [eq_one_of_same, one_nsmul, Ring.lie_def, mul_def, mul_def] at h
-  rw [number_eq, add_comm]
+  rw [numberCLM_eq, add_comm]
   exact sub_eq_iff_eq_add.mp h
 
 /-!
@@ -269,8 +262,6 @@ TODO "Relate the 'number operator' Hamiltonian to the 'K + T' Hamiltonian
 
 TODO "Prove that the two Hamiltonians define the same quantum system."
 
-end HarmonicOscillator
-
-end QuantumMechanics
+end QuantumMechanics.HarmonicOscillator
 
 end
