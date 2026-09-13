@@ -267,11 +267,11 @@ lemma eigenstates_orthonormal : ⟪(Q.eigenstate n : Q.HS), Q.eigenstate n'⟫_�
 
 /-- `aᵢ† ψₙ = √(nᵢ + 1) ψₙ₊ₑᵢ`: the raising operator raises the `i`th quantum number by one. -/
 lemma raising_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
-    Q.raising i (Q.eigenfunction n) =
+    Q.raisingCLM i (Q.eigenfunction n) =
       ((Real.sqrt (n i + 1) : ℝ) : ℂ) • Q.eigenfunction (Function.update n i (n i + 1)) := by
   ext x
-  simp only [raising_eq, _root_.smul_apply, _root_.sub_apply, positionCLM_apply, momentumCLM_apply,
-    smul_eq_mul]
+  simp only [raisingCLM_eq, _root_.smul_apply, _root_.sub_apply, positionCLM_apply,
+    momentumCLM_apply, smul_eq_mul]
   rw [Q.deriv_eigenfunction_apply, Q.eigenfunction_update_apply,
     Q.eigenfunction_eq_prod_eigenFactor n x, ← Finset.mul_prod_erase univ _ (Finset.mem_univ i),
     Q.deriv_eigenFactor]
@@ -299,11 +299,11 @@ lemma raising_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
 /-- `aᵢ ψₙ = √nᵢ ψₙ₋ₑᵢ`: the lowering operator lowers the `i`th quantum number by one (and
   annihilates the eigenfunction when `nᵢ = 0`, since `√0 = 0`). -/
 lemma lowering_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
-    Q.lowering i (Q.eigenfunction n) =
+    Q.loweringCLM i (Q.eigenfunction n) =
       ((Real.sqrt (n i) : ℝ) : ℂ) • Q.eigenfunction (Function.update n i (n i - 1)) := by
   ext x
-  simp only [lowering_eq, _root_.smul_apply, _root_.add_apply, positionCLM_apply, momentumCLM_apply,
-    smul_eq_mul]
+  simp only [loweringCLM_eq, _root_.smul_apply, _root_.add_apply, positionCLM_apply,
+    momentumCLM_apply, smul_eq_mul]
   rw [Q.deriv_eigenfunction_apply, Q.eigenfunction_update_apply,
     Q.eigenfunction_eq_prod_eigenFactor n x, ← Finset.mul_prod_erase univ _ (Finset.mem_univ i),
     Q.deriv_eigenFactor]
@@ -327,14 +327,14 @@ lemma lowering_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
     + (-(((Q.ξ i : ℝ) : ℂ) * P * ((physHermite (n i - 1) (x i / Q.ξ i) : ℝ) : ℂ))) * hcc'
 
 /-- The ground state is annihilated by every lowering operator. -/
-lemma lowering_eigenfunction_zero (i : Fin d) : Q.lowering i (Q.eigenfunction 0) = 0 := by
+lemma lowering_eigenfunction_zero (i : Fin d) : Q.loweringCLM i (Q.eigenfunction 0) = 0 := by
   rw [lowering_eigenfunction]
   simp
 
 /-- `Nᵢ ψₙ = nᵢ ψₙ`: the eigenfunctions are eigenfunctions of the number operators. -/
 lemma number_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
-    Q.number i (Q.eigenfunction n) = ((n i : ℕ) : ℂ) • Q.eigenfunction n := by
-  rw [number_eq, ContinuousLinearMap.comp_apply, lowering_eigenfunction, map_smul,
+    Q.numberCLM i (Q.eigenfunction n) = ((n i : ℕ) : ℂ) • Q.eigenfunction n := by
+  rw [numberCLM_eq, ContinuousLinearMap.comp_apply, lowering_eigenfunction, map_smul,
     raising_eigenfunction, smul_smul, Function.update_self, Function.update_idem]
   rcases Nat.eq_zero_or_pos (n i) with h0 | hpos
   · simp [h0]
