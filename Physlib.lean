@@ -13,6 +13,7 @@ public import Physlib.ClassicalMechanics.HarmonicOscillator.Geometric.Basic
 public import Physlib.ClassicalMechanics.HarmonicOscillator.Geometric.KineticEnergy
 public import Physlib.ClassicalMechanics.HarmonicOscillator.Geometric.Trajectory
 public import Physlib.ClassicalMechanics.HarmonicOscillator.Solution
+public import Physlib.ClassicalMechanics.HarmonicOscillator.WithDim
 public import Physlib.ClassicalMechanics.Lagrangian.TotalDerivativeEquivalence
 public import Physlib.ClassicalMechanics.Mass.MassUnit
 public import Physlib.ClassicalMechanics.OrbitalMechanics.VisViva
@@ -325,6 +326,7 @@ public import Physlib.QFT.QED.AnomalyCancellation.Odd.Parameterization
 public import Physlib.QFT.QED.AnomalyCancellation.Permutations
 public import Physlib.QFT.QED.AnomalyCancellation.Sorts
 public import Physlib.QFT.QED.AnomalyCancellation.VectorLike
+public import Physlib.QuantumMechanics.Blackbody.PlancksLaw
 public import Physlib.QuantumMechanics.FiniteTarget
 public import Physlib.QuantumMechanics.FreeParticle.Basic
 public import Physlib.QuantumMechanics.HarmonicOscillator.Basic
@@ -469,6 +471,7 @@ public import Physlib.Relativity.Tensors.RealTensor.Units.Basic
 public import Physlib.Relativity.Tensors.RealTensor.Units.Pre
 public import Physlib.Relativity.Tensors.RealTensor.Vector.Basic
 public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.Basic
+public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.CausallyFollows
 public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.LightLike
 public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.TimeLike
 public import Physlib.Relativity.Tensors.RealTensor.Vector.MinkowskiProduct
@@ -570,6 +573,7 @@ public import Physlib.Units.PositiveRealUnit
 public import Physlib.Units.SIUnitChoices
 public import Physlib.Units.UnitDependent
 public import Physlib.Units.UnitSystem
+public import Physlib.Units.WithDim.Analysis
 public import Physlib.Units.WithDim.Area
 public import Physlib.Units.WithDim.Basic
 public import Physlib.Units.WithDim.Energy
