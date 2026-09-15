@@ -23,6 +23,7 @@ in `d` dimensions.
     kinetic, potential and Hamiltonian operators.
 - `LadderOperators.lean` : Definitions of the raising/lowering/number operators
     and their algebraic properties.
+- `NumberOperator.lean` : The number operators as unbounded operators, symmetry.
 
 ## ii. Key results
 
@@ -256,16 +257,57 @@ abbrev HS (_ : HarmonicOscillator d) : Type _ := SpaceDHilbertSpace d
 /-- The kinetic energy operator, `p²/2m`. -/
 def kineticOperator : Q.HS →ₗ.[ℂ] Q.HS := (2 * Q.m)⁻¹ • momentumSqOperator
 
+open SchwartzMap in
+/-- The kinetic operator on a Schwartz map, `(1/2m) ∑ᵢ pᵢ (pᵢ f)`. -/
+lemma kineticOperator_apply_schwartz (f : 𝓢(Space d, ℂ))
+    (h : (schwartzEquiv volume f : Q.HS) ∈ Q.kineticOperator.domain) :
+    Q.kineticOperator ⟨schwartzEquiv volume f, h⟩
+      = schwartzEquiv volume (((2 * Q.m)⁻¹ : ℝ) • ∑ i, 𝐩 i (𝐩 i f)) := by
+  have h1 : Q.kineticOperator ⟨schwartzEquiv volume f, h⟩ =
+      (2 * Q.m)⁻¹ • momentumSqOperator ⟨schwartzEquiv volume f, h⟩ :=
+    LinearPMap.smul_apply _ _ _
+  rw [h1]
+  erw [LinearPMap.sum_apply]
+  rw [RCLike.real_smul_eq_coe_smul (K := ℂ), RCLike.real_smul_eq_coe_smul (K := ℂ), map_smul,
+    map_sum, Submodule.coe_smul, Submodule.coe_sum]
+  congr 1
+  refine Finset.sum_congr rfl fun a _ => ?_
+  have hr : ∀ x : (𝓟 a).domain, 𝓟 a x ∈ (𝓟 a).domain := momentumOperator_range a
+  have key : ∀ H, ((𝓟 a).comp (𝓟 a) hr) ⟨(schwartzEquiv volume f : Q.HS), H⟩
+      = schwartzEquiv volume (𝐩 a (𝐩 a f)) := fun H => by
+    have H' : (schwartzEquiv volume f : Q.HS) ∈ (𝓟 a).domain := H
+    have e3 : (⟨𝓟 a ⟨(schwartzEquiv volume f : Q.HS), H'⟩, hr _⟩ : (𝓟 a).domain)
+        = ⟨(schwartzEquiv volume (𝐩 a f) : Q.HS), (schwartzEquiv volume (𝐩 a f)).2⟩ := by
+      apply Subtype.ext
+      show 𝓟 a (schwartzEquiv volume f) = (schwartzEquiv volume (𝐩 a f) : Q.HS)
+      rw [momentumOperator_apply, LinearEquiv.symm_apply_apply]
+    show 𝓟 a ⟨𝓟 a ⟨(schwartzEquiv volume f : Q.HS), H'⟩, hr _⟩ = _
+    rw [e3]
+    show 𝓟 a (schwartzEquiv volume (𝐩 a f)) = _
+    rw [momentumOperator_apply, LinearEquiv.symm_apply_apply]
+  exact key _
+
 /-!
 ### F.2. Potential energy
 -/
 
 section
 
-open MeasureTheory Complex
+open MeasureTheory Complex SchwartzMap SchwartzSubmodule
 
 /-- The potential operator which maps `ψ` to `Q.potentialFunction • ψ`. -/
 def potentialOperator : Q.HS →ₗ.[ℂ] Q.HS := 𝓜 volume (ofReal ∘ Q.potentialFunction)
+
+/-- The potential operator on a Schwartz map, almost everywhere `V f`. -/
+lemma potentialOperator_apply_schwartz (f : 𝓢(Space d, ℂ))
+    (h : (schwartzEquiv volume f : Q.HS) ∈ Q.potentialOperator.domain) :
+    ⇑(Q.potentialOperator ⟨schwartzEquiv volume f, h⟩) =ᵐ[volume]
+      fun x => (Q.potentialFunction x : ℂ) * f x := by
+  have h1 : ⇑(Q.potentialOperator ⟨schwartzEquiv volume f, h⟩) =ᵐ[volume]
+      (ofReal ∘ Q.potentialFunction) • ⇑(schwartzEquiv volume f : Q.HS) := mulOperator_apply_ae _
+  filter_upwards [h1, schwartzEquiv_coe_ae (μ := volume) f] with x hx1 hx2
+  rw [hx1]
+  simp [hx2]
 
 /-- The potential operators for the harmonic oscillator is self-adjoint. -/
 informal_lemma potentialOperator_isSelfAdjoint where

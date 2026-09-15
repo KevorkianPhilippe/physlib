@@ -18,12 +18,11 @@ the lowering (annihilation) operators `aᵢ = (xᵢ/ξᵢ + i ξᵢ pᵢ/ℏ)/�
 operators `aᵢ† = (xᵢ/ξᵢ - i ξᵢ pᵢ/ℏ)/√2` and the number operators `Nᵢ = aᵢ† aᵢ`, together with
 their commutation relations, which all follow from the canonical commutation relations
 `position_commutation_momentum`. The ladder operators are then lifted to unbounded operators on the
-Hilbert space with the Schwartz submodule as domain (like `momentumOperator`): `aᵢ†` is the formal
-adjoint of `aᵢ` and `Nᵢ` is symmetric. The Hamiltonian `H_N = ∑ᵢ ℏ ωᵢ (Nᵢ + ½)` commutes with
-the number operators, lowers and raises energies by `ℏ ωᵢ`, and coincides with the
-kinetic-plus-potential Hamiltonian of `Basic.lean` on Schwartz maps: as unbounded operators,
-`numberHamiltonian ≤ hamiltonian`. Whether the two define the same quantum system (essential
-self-adjointness) is still a TODO item.
+Hilbert space with the Schwartz submodule as domain (like `momentumOperator`), `aᵢ†` being the
+formal adjoint of `aᵢ` (the number operators as unbounded operators are in `NumberOperator.lean`).
+On Schwartz maps the Hamiltonian of `Basic.lean` acts as `∑ᵢ ℏ ωᵢ (Nᵢ + ½)`, which commutes with the
+number operators and lowers and raises energies by `ℏ ωᵢ`; in particular the Hamiltonian is
+symmetric on the Schwartz submodule.
 
 ## ii. Key results
 
@@ -35,12 +34,13 @@ self-adjointness) is still a TODO item.
   `number_commutation_raising`: `[Nᵢ, aⱼ] = -δᵢⱼ aⱼ`, `[Nᵢ, aⱼ†] = δᵢⱼ aⱼ†`.
 - `lowering_comp_raising`: `aᵢ aᵢ† = Nᵢ + 𝟙`.
 - `loweringOperator_isFormalAdjoint_raisingOperator`: `aᵢ†` is the formal adjoint of `aᵢ`;
-  `numberOperator_isSymmetric`, `numberHamiltonian_isSymmetric`.
-- `numberHamiltonianCLM_commutation_lowering`, `numberHamiltonianCLM_commutation_raising`,
-  `numberHamiltonianCLM_commutation_number`: `[H_N, aᵢ] = -ℏ ωᵢ aᵢ`, `[H_N, aᵢ†] = ℏ ωᵢ aᵢ†`,
-  `[H_N, Nᵢ] = 0`.
-- `numberHamiltonianCLM_apply`: `H_N ψ = (1/2m) ∑ᵢ pᵢ (pᵢ ψ) + V ψ` on Schwartz maps;
-  `numberHamiltonian_le_hamiltonian`: `numberHamiltonian ≤ hamiltonian` as unbounded operators.
+  `numberCLM_inner`: `⟪Nᵢ f, g⟫ = ⟪f, Nᵢ g⟫` for Schwartz maps.
+- `sum_number_commutation_lowering`, `sum_number_commutation_raising`,
+  `sum_number_commutation_number`: with `H_N = ∑ⱼ ℏ ωⱼ (Nⱼ + ½)`, `[H_N, aᵢ] = -ℏ ωᵢ aᵢ`,
+  `[H_N, aᵢ†] = ℏ ωᵢ aᵢ†`, `[H_N, Nᵢ] = 0`.
+- `sum_number_apply`: `H_N ψ = (1/2m) ∑ᵢ pᵢ (pᵢ ψ) + V ψ` on Schwartz maps;
+  `hamiltonian_apply_schwartz`: the Hamiltonian of `Basic.lean` acts on Schwartz maps as `H_N`;
+  `hamiltonian_inner_schwartz`: it is symmetric on the Schwartz submodule.
 
 ## iii. Table of contents
 
@@ -52,11 +52,10 @@ self-adjointness) is still a TODO item.
 - B. Number operators
   - B.1. Definition
   - B.2. Commutation relations
-  - B.3. The number operators as unbounded operators, symmetry
+  - B.3. Inner products
 - C. Hamiltonian
-  - C.1. The Hamiltonian in terms of the number operators
-  - C.2. Commutation relations
-  - C.3. Relation to the kinetic-plus-potential Hamiltonian
+  - C.1. Commutation relations with the ladder and number operators
+  - C.2. The Hamiltonian on Schwartz maps
 
 ## iv. References
 
@@ -315,19 +314,9 @@ lemma lowering_comp_raising :
 
 /-!
 
-### B.3. The number operators as unbounded operators, symmetry
+### B.3. Inner products
 
 -/
-
-/-- The number operator as an unbounded operator with domain the Schwartz submodule. -/
-def numberOperator : Q.HS →ₗ.[ℂ] Q.HS where
-  domain := SchwartzSubmodule d
-  toFun := (schwartzIncl volume).1 ∘ₗ (Q.numberCLM i).1 ∘ₗ (schwartzEquiv volume).symm.1
-
-lemma numberOperator_apply (ψ : SchwartzSubmodule d) :
-    Q.numberOperator i ψ =
-      schwartzEquiv volume (Q.numberCLM i ((schwartzEquiv volume).symm ψ)) :=
-  rfl
 
 /-- `⟪Nᵢ f, g⟫ = ⟪f, Nᵢ g⟫` for Schwartz maps `f`, `g`. -/
 lemma numberCLM_inner (f g : 𝓢(Space d, ℂ)) :
@@ -335,87 +324,56 @@ lemma numberCLM_inner (f g : 𝓢(Space d, ℂ)) :
       = ⟪(schwartzEquiv volume f : Q.HS), schwartzEquiv volume (Q.numberCLM i g)⟫_ℂ := by
   rw [numberCLM_eq, comp_apply, Q.raisingCLM_inner i, Q.loweringCLM_inner i, comp_apply]
 
-/-- The number operator is symmetric. -/
-lemma numberOperator_isSymmetric : (Q.numberOperator i).IsSymmetric := by
-  intro ψ φ
-  obtain ⟨f, rfl⟩ := (schwartzEquiv volume).surjective ψ
-  obtain ⟨g, rfl⟩ := (schwartzEquiv volume).surjective φ
-  simp only [numberOperator_apply, LinearEquiv.symm_apply_apply]
-  exact Q.numberCLM_inner i f g
-
-TODO "Prove that the number operators are essentially self-adjoint."
-
 /-!
 
 ## C. Hamiltonian
 
+On Schwartz maps the Hamiltonian of `Basic.lean` acts as `H_N = ∑ⱼ ℏ ωⱼ (Nⱼ + ½)`
+(`hamiltonian_apply_schwartz`); the lemmas below are stated for this sum.
+
 -/
 
 /-!
 
-### C.1. The Hamiltonian in terms of the number operators
+### C.1. Commutation relations with the ladder and number operators
 
 -/
 
-/-- The Hamiltonian in terms of the number operators, `H_N = ∑ᵢ ℏ ωᵢ (Nᵢ + ½)`, on Schwartz maps. -/
-def numberHamiltonianCLM : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ) :=
-  ∑ i, ((ℏ * Q.ω i : ℝ) : ℂ) • (Q.numberCLM i + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ))
-
-lemma numberHamiltonianCLM_eq : Q.numberHamiltonianCLM =
-    ∑ i, ((ℏ * Q.ω i : ℝ) : ℂ) •
-      (Q.numberCLM i + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)) :=
-  rfl
-
-/-- The Hamiltonian `H_N` as an unbounded operator with domain the Schwartz submodule. -/
-def numberHamiltonian : Q.HS →ₗ.[ℂ] Q.HS where
-  domain := SchwartzSubmodule d
-  toFun := (schwartzIncl volume).1 ∘ₗ (Q.numberHamiltonianCLM).1 ∘ₗ (schwartzEquiv volume).symm.1
-
-lemma numberHamiltonian_apply (ψ : SchwartzSubmodule d) :
-    Q.numberHamiltonian ψ =
-      schwartzEquiv volume (Q.numberHamiltonianCLM ((schwartzEquiv volume).symm ψ)) :=
-  rfl
-
-/-!
-
-### C.2. Commutation relations
-
--/
-
-/-- `[H_N, aᵢ] = -ℏ ωᵢ aᵢ`. -/
-lemma numberHamiltonianCLM_commutation_lowering :
-    ⁅Q.numberHamiltonianCLM, Q.loweringCLM i⁆ = -(((ℏ * Q.ω i : ℝ) : ℂ) • Q.loweringCLM i) := by
-  simp only [numberHamiltonianCLM_eq, sum_lie, smul_lie, add_lie, number_commutation_lowering,
-    id_commutation, smul_zero, add_zero, smul_neg]
+/-- `[∑ⱼ ℏ ωⱼ (Nⱼ + ½), aᵢ] = -ℏ ωᵢ aᵢ`. -/
+lemma sum_number_commutation_lowering :
+    ⁅∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
+      (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)), Q.loweringCLM i⁆ = -(((ℏ * Q.ω i : ℝ) : ℂ) • Q.loweringCLM i) := by
+  simp only [sum_lie, smul_lie, add_lie, number_commutation_lowering, id_commutation, smul_zero,
+    add_zero, smul_neg]
   rw [Finset.sum_eq_single i (fun b _ hb => by simp [eq_zero_of_ne hb]) (by simp)]
   simp [eq_one_of_same]
 
-/-- `[H_N, aᵢ†] = ℏ ωᵢ aᵢ†`. -/
-lemma numberHamiltonianCLM_commutation_raising :
-    ⁅Q.numberHamiltonianCLM, Q.raisingCLM i⁆ = ((ℏ * Q.ω i : ℝ) : ℂ) • Q.raisingCLM i := by
-  simp only [numberHamiltonianCLM_eq, sum_lie, smul_lie, add_lie, number_commutation_raising,
-    id_commutation, smul_zero, add_zero]
+/-- `[∑ⱼ ℏ ωⱼ (Nⱼ + ½), aᵢ†] = ℏ ωᵢ aᵢ†`. -/
+lemma sum_number_commutation_raising :
+    ⁅∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
+      (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)), Q.raisingCLM i⁆ = ((ℏ * Q.ω i : ℝ) : ℂ) • Q.raisingCLM i := by
+  simp only [sum_lie, smul_lie, add_lie, number_commutation_raising, id_commutation, smul_zero,
+    add_zero]
   rw [Finset.sum_eq_single i (fun b _ hb => by simp [eq_zero_of_ne hb]) (by simp)]
   simp [eq_one_of_same]
 
-/-- `[H_N, Nᵢ] = 0`. -/
-lemma numberHamiltonianCLM_commutation_number : ⁅Q.numberHamiltonianCLM, Q.numberCLM i⁆ = 0 := by
-  simp [numberHamiltonianCLM_eq, sum_lie, smul_lie, add_lie, number_commutation_number,
-    id_commutation]
+/-- `[∑ⱼ ℏ ωⱼ (Nⱼ + ½), Nᵢ] = 0`. -/
+lemma sum_number_commutation_number : ⁅∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
+      (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)), Q.numberCLM i⁆ = 0 := by
+  simp [sum_lie, smul_lie, add_lie, number_commutation_number, id_commutation]
 
 /-!
 
-### C.3. Relation to the kinetic-plus-potential Hamiltonian
+### C.2. The Hamiltonian on Schwartz maps
 
 -/
 
-/-- On Schwartz maps, `H_N ψ = (1/2m) ∑ᵢ pᵢ (pᵢ ψ) + V ψ`: the Hamiltonian in terms of the number
-  operators is the kinetic-plus-potential Hamiltonian. -/
-lemma numberHamiltonianCLM_apply (ψ : 𝓢(Space d, ℂ)) (x : Space d) :
-    Q.numberHamiltonianCLM ψ x =
+/-- On Schwartz maps, `∑ᵢ ℏ ωᵢ (Nᵢ + ½) ψ = (1/2m) ∑ᵢ pᵢ (pᵢ ψ) + V ψ`. -/
+lemma sum_number_apply (ψ : 𝓢(Space d, ℂ)) (x : Space d) :
+    (∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
+      (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ))) ψ x =
       ((2 * Q.m : ℝ) : ℂ)⁻¹ * ∑ i, 𝐩 i (𝐩 i ψ) x + (Q.potentialFunction x : ℂ) * ψ x := by
-  simp only [numberHamiltonianCLM_eq, FunLike.coe_sum, Finset.sum_apply, smul_apply, add_apply,
-    id_apply, smul_eq_mul]
+  simp only [FunLike.coe_sum, Finset.sum_apply, smul_apply, add_apply, id_apply, smul_eq_mul]
   rw [potentialFunction_apply, Finset.mul_sum, ofReal_sum, Finset.sum_mul, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun i _ => ?_
   have hccr := position_commutation_momentum_apply i ψ x
@@ -439,101 +397,52 @@ lemma numberHamiltonianCLM_apply (ψ : 𝓢(Space d, ℂ)) (x : Space d) :
     + (2 * ((Q.ω i : ℝ) : ℂ) * (ℏ : ℂ) ^ 2 * ψ x * ((Q.ξ i : ℝ) : ℂ) ^ 2 * ((Q.m : ℝ) : ℂ)
         - 2 * ((Q.ω i : ℝ) : ℂ) * ((Q.ξ i : ℝ) : ℂ) ^ 4 * 𝐩 i (𝐩 i ψ) x * ((Q.m : ℝ) : ℂ)) * I_sq
 
-/-- The kinetic operator on a Schwartz map, `(1/2m) ∑ᵢ pᵢ (pᵢ f)`. -/
-lemma kineticOperator_apply_schwartz (f : 𝓢(Space d, ℂ))
-    (h : (schwartzEquiv volume f : Q.HS) ∈ Q.kineticOperator.domain) :
-    Q.kineticOperator ⟨schwartzEquiv volume f, h⟩
-      = schwartzEquiv volume (((2 * Q.m)⁻¹ : ℝ) • ∑ i, 𝐩 i (𝐩 i f)) := by
-  have h1 : Q.kineticOperator ⟨schwartzEquiv volume f, h⟩ =
-      (2 * Q.m)⁻¹ • momentumSqOperator ⟨schwartzEquiv volume f, h⟩ :=
-    LinearPMap.smul_apply _ _ _
-  rw [h1]
-  erw [LinearPMap.sum_apply]
-  rw [RCLike.real_smul_eq_coe_smul (K := ℂ), RCLike.real_smul_eq_coe_smul (K := ℂ), map_smul,
-    map_sum, Submodule.coe_smul, Submodule.coe_sum]
-  congr 1
-  refine Finset.sum_congr rfl fun a _ => ?_
-  have hr : ∀ x : (𝓟 a).domain, 𝓟 a x ∈ (𝓟 a).domain := momentumOperator_range a
-  have key : ∀ H, ((𝓟 a).comp (𝓟 a) hr) ⟨(schwartzEquiv volume f : Q.HS), H⟩
-      = schwartzEquiv volume (𝐩 a (𝐩 a f)) := fun H => by
-    have H' : (schwartzEquiv volume f : Q.HS) ∈ (𝓟 a).domain := H
-    have e3 : (⟨𝓟 a ⟨(schwartzEquiv volume f : Q.HS), H'⟩, hr _⟩ : (𝓟 a).domain)
-        = ⟨(schwartzEquiv volume (𝐩 a f) : Q.HS), (schwartzEquiv volume (𝐩 a f)).2⟩ := by
-      apply Subtype.ext
-      show 𝓟 a (schwartzEquiv volume f) = (schwartzEquiv volume (𝐩 a f) : Q.HS)
-      rw [momentumOperator_apply, LinearEquiv.symm_apply_apply]
-    show 𝓟 a ⟨𝓟 a ⟨(schwartzEquiv volume f : Q.HS), H'⟩, hr _⟩ = _
-    rw [e3]
-    show 𝓟 a (schwartzEquiv volume (𝐩 a f)) = _
-    rw [momentumOperator_apply, LinearEquiv.symm_apply_apply]
-  exact key _
+/-- The Schwartz submodule is contained in the domain of the Hamiltonian. -/
+lemma schwartzSubmodule_le_hamiltonian_domain : SchwartzSubmodule d ≤ Q.hamiltonian.domain := by
+  rw [hamiltonain_eq, LinearPMap.add_domain, kineticOperator, LinearPMap.smul_domain,
+    momentumSqOperator_domain_eq]
+  exact le_inf le_rfl (mulOperator_domain_ge_of_hasTemperateGrowth
+    Q.potentialFunction_hasTemperateGrowth volume)
 
-/-- The potential operator on a Schwartz map, almost everywhere `V f`. -/
-lemma potentialOperator_apply_schwartz (f : 𝓢(Space d, ℂ))
-    (h : (schwartzEquiv volume f : Q.HS) ∈ Q.potentialOperator.domain) :
-    ⇑(Q.potentialOperator ⟨schwartzEquiv volume f, h⟩) =ᵐ[volume]
-      fun x => (Q.potentialFunction x : ℂ) * f x := by
-  have h1 : ⇑(Q.potentialOperator ⟨schwartzEquiv volume f, h⟩) =ᵐ[volume]
-      (ofReal ∘ Q.potentialFunction) • ⇑(schwartzEquiv volume f : Q.HS) := mulOperator_apply_ae _
-  filter_upwards [h1, schwartzEquiv_coe_ae (μ := volume) f] with x hx1 hx2
-  rw [hx1]
-  simp [hx2]
+/-- On a Schwartz map, the Hamiltonian `kineticOperator + potentialOperator` of `Basic.lean` acts as
+  `∑ᵢ ℏ ωᵢ (Nᵢ + ½)`. -/
+lemma hamiltonian_apply_schwartz (f : 𝓢(Space d, ℂ))
+    (h : (schwartzEquiv volume f : Q.HS) ∈ Q.hamiltonian.domain) :
+    Q.hamiltonian ⟨schwartzEquiv volume f, h⟩ = schwartzEquiv volume ((∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
+      (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ))) f) := by
+  have hk := (h : (schwartzEquiv volume f : Q.HS) ∈
+    Q.kineticOperator.domain ⊓ Q.potentialOperator.domain).1
+  have hp := (h : (schwartzEquiv volume f : Q.HS) ∈
+    Q.kineticOperator.domain ⊓ Q.potentialOperator.domain).2
+  have hadd : Q.hamiltonian ⟨schwartzEquiv volume f, h⟩ =
+      Q.kineticOperator ⟨schwartzEquiv volume f, hk⟩ +
+        Q.potentialOperator ⟨schwartzEquiv volume f, hp⟩ :=
+    LinearPMap.add_apply _ _ _
+  apply MeasureTheory.Lp.ext
+  rw [hadd, Q.kineticOperator_apply_schwartz]
+  have h1 := schwartzEquiv_coe_ae (μ := volume) (((2 * Q.m)⁻¹ : ℝ) • ∑ i, 𝐩 i (𝐩 i f))
+  have h2 := schwartzEquiv_coe_ae (μ := volume) ((∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
+      (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ))) f)
+  have h3 := MeasureTheory.Lp.coeFn_add
+    (schwartzEquiv volume (((2 * Q.m)⁻¹ : ℝ) • ∑ i, 𝐩 i (𝐩 i f)) : Q.HS)
+    (Q.potentialOperator ⟨schwartzEquiv volume f, hp⟩)
+  filter_upwards [h1, h2, h3, Q.potentialOperator_apply_schwartz f hp] with x hx1 hx2 hx3 hx4
+  rw [hx2, hx3, sum_number_apply, Pi.add_apply, hx1, hx4]
+  simp only [smul_apply, FunLike.coe_sum, Finset.sum_apply, Complex.real_smul,
+    Complex.ofReal_inv, Complex.ofReal_mul, Complex.ofReal_ofNat]
 
-/-- As unbounded operators, `H_N` (with the Schwartz submodule as domain) is contained in the
-  kinetic-plus-potential Hamiltonian. -/
-lemma numberHamiltonian_le_hamiltonian : Q.numberHamiltonian ≤ Q.hamiltonian := by
-  refine ⟨?_, ?_⟩
-  · show SchwartzSubmodule d ≤ _
-    rw [hamiltonain_eq, LinearPMap.add_domain, kineticOperator, LinearPMap.smul_domain,
-      momentumSqOperator_domain_eq]
-    exact le_inf le_rfl (mulOperator_domain_ge_of_hasTemperateGrowth
-      Q.potentialFunction_hasTemperateGrowth volume)
-  · intro ψ φ hψφ
-    obtain ⟨f, hf⟩ := (schwartzEquiv volume).surjective ψ
-    subst hf
-    have hk := (φ.2 : (φ : Q.HS) ∈ Q.kineticOperator.domain ⊓ Q.potentialOperator.domain).1
-    have hp := (φ.2 : (φ : Q.HS) ∈ Q.kineticOperator.domain ⊓ Q.potentialOperator.domain).2
-    have hadd : Q.hamiltonian φ = Q.kineticOperator ⟨φ, hk⟩ + Q.potentialOperator ⟨φ, hp⟩ :=
-      LinearPMap.add_apply _ _ φ
-    have hk' : (⟨(φ : Q.HS), hk⟩ : Q.kineticOperator.domain) =
-        ⟨schwartzEquiv volume f, hψφ ▸ hk⟩ :=
-      Subtype.ext hψφ.symm
-    have hp' : (⟨(φ : Q.HS), hp⟩ : Q.potentialOperator.domain) =
-        ⟨schwartzEquiv volume f, hψφ ▸ hp⟩ :=
-      Subtype.ext hψφ.symm
-    have hN : Q.numberHamiltonian (schwartzEquiv volume f) =
-        schwartzEquiv volume (Q.numberHamiltonianCLM f) := by
-      rw [numberHamiltonian_apply, LinearEquiv.symm_apply_apply]
-    apply MeasureTheory.Lp.ext
-    rw [hadd, hk', hp', Q.kineticOperator_apply_schwartz, hN]
-    have h1 := schwartzEquiv_coe_ae (μ := volume) (((2 * Q.m)⁻¹ : ℝ) • ∑ i, 𝐩 i (𝐩 i f))
-    have h2 := schwartzEquiv_coe_ae (μ := volume) (Q.numberHamiltonianCLM f)
-    have h3 := MeasureTheory.Lp.coeFn_add
-      (schwartzEquiv volume (((2 * Q.m)⁻¹ : ℝ) • ∑ i, 𝐩 i (𝐩 i f)) : Q.HS)
-      (Q.potentialOperator ⟨schwartzEquiv volume f, hψφ ▸ hp⟩)
-    filter_upwards [h1, h2, h3, Q.potentialOperator_apply_schwartz f _] with x hx1 hx2 hx3 hx4
-    rw [hx2, hx3, numberHamiltonianCLM_apply, Pi.add_apply, hx1, hx4]
-    simp only [smul_apply, FunLike.coe_sum, Finset.sum_apply, Complex.real_smul,
-      Complex.ofReal_inv, Complex.ofReal_mul, Complex.ofReal_ofNat]
-
-/-- `⟪H_N f, g⟫ = ⟪f, H_N g⟫` for Schwartz maps `f`, `g`. -/
-lemma numberHamiltonianCLM_inner (f g : 𝓢(Space d, ℂ)) :
-    ⟪(schwartzEquiv volume (Q.numberHamiltonianCLM f) : Q.HS), schwartzEquiv volume g⟫_ℂ
-      = ⟪(schwartzEquiv volume f : Q.HS), schwartzEquiv volume (Q.numberHamiltonianCLM g)⟫_ℂ := by
-  simp only [numberHamiltonianCLM_eq, FunLike.coe_sum, Finset.sum_apply, smul_apply, add_apply,
-    id_apply, map_sum, map_smul, map_add, Submodule.coe_sum, Submodule.coe_smul, Submodule.coe_add,
-    sum_inner, inner_sum, inner_smul_left, inner_smul_right, inner_add_left, inner_add_right,
-    Q.numberCLM_inner, Complex.conj_ofReal, map_inv₀, map_ofNat]
-
-/-- The Hamiltonian `H_N` is symmetric. -/
-lemma numberHamiltonian_isSymmetric : Q.numberHamiltonian.IsSymmetric := by
-  intro ψ φ
-  obtain ⟨f, rfl⟩ := (schwartzEquiv volume).surjective ψ
-  obtain ⟨g, rfl⟩ := (schwartzEquiv volume).surjective φ
-  simp only [numberHamiltonian_apply, LinearEquiv.symm_apply_apply]
-  exact Q.numberHamiltonianCLM_inner f g
-
-TODO "Prove that the two Hamiltonians define the same quantum system."
+/-- `⟪H f, g⟫ = ⟪f, H g⟫` for Schwartz maps `f`, `g`: the Hamiltonian is symmetric on the Schwartz
+  submodule. -/
+lemma hamiltonian_inner_schwartz (f g : 𝓢(Space d, ℂ))
+    (hf : (schwartzEquiv volume f : Q.HS) ∈ Q.hamiltonian.domain)
+    (hg : (schwartzEquiv volume g : Q.HS) ∈ Q.hamiltonian.domain) :
+    ⟪Q.hamiltonian ⟨schwartzEquiv volume f, hf⟩, (schwartzEquiv volume g : Q.HS)⟫_ℂ
+      = ⟪(schwartzEquiv volume f : Q.HS), Q.hamiltonian ⟨schwartzEquiv volume g, hg⟩⟫_ℂ := by
+  rw [hamiltonian_apply_schwartz, hamiltonian_apply_schwartz]
+  simp only [FunLike.coe_sum, Finset.sum_apply, smul_apply, add_apply, id_apply, map_sum, map_smul,
+    map_add, Submodule.coe_sum, Submodule.coe_smul, Submodule.coe_add, sum_inner, inner_sum,
+    inner_smul_left, inner_smul_right, inner_add_left, inner_add_right, Q.numberCLM_inner,
+    Complex.conj_ofReal, map_inv₀, map_ofNat]
 
 end QuantumMechanics.HarmonicOscillator
 
