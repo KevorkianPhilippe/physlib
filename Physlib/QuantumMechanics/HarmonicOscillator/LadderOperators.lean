@@ -342,7 +342,8 @@ On Schwartz maps the Hamiltonian of `Basic.lean` acts as `H_N = ∑ⱼ ℏ ωⱼ
 /-- `[∑ⱼ ℏ ωⱼ (Nⱼ + ½), aᵢ] = -ℏ ωᵢ aᵢ`. -/
 lemma sum_number_commutation_lowering :
     ⁅∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
-      (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)), Q.loweringCLM i⁆ = -(((ℏ * Q.ω i : ℝ) : ℂ) • Q.loweringCLM i) := by
+        (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)),
+      Q.loweringCLM i⁆ = -(((ℏ * Q.ω i : ℝ) : ℂ) • Q.loweringCLM i) := by
   simp only [sum_lie, smul_lie, add_lie, number_commutation_lowering, id_commutation, smul_zero,
     add_zero, smul_neg]
   rw [Finset.sum_eq_single i (fun b _ hb => by simp [eq_zero_of_ne hb]) (by simp)]
@@ -351,15 +352,18 @@ lemma sum_number_commutation_lowering :
 /-- `[∑ⱼ ℏ ωⱼ (Nⱼ + ½), aᵢ†] = ℏ ωᵢ aᵢ†`. -/
 lemma sum_number_commutation_raising :
     ⁅∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
-      (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)), Q.raisingCLM i⁆ = ((ℏ * Q.ω i : ℝ) : ℂ) • Q.raisingCLM i := by
+        (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)),
+      Q.raisingCLM i⁆ = ((ℏ * Q.ω i : ℝ) : ℂ) • Q.raisingCLM i := by
   simp only [sum_lie, smul_lie, add_lie, number_commutation_raising, id_commutation, smul_zero,
     add_zero]
   rw [Finset.sum_eq_single i (fun b _ hb => by simp [eq_zero_of_ne hb]) (by simp)]
   simp [eq_one_of_same]
 
 /-- `[∑ⱼ ℏ ωⱼ (Nⱼ + ½), Nᵢ] = 0`. -/
-lemma sum_number_commutation_number : ⁅∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
-      (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)), Q.numberCLM i⁆ = 0 := by
+lemma sum_number_commutation_number :
+    ⁅∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
+        (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)),
+      Q.numberCLM i⁆ = 0 := by
   simp [sum_lie, smul_lie, add_lie, number_commutation_number, id_commutation]
 
 /-!
@@ -408,8 +412,9 @@ lemma schwartzSubmodule_le_hamiltonian_domain : SchwartzSubmodule d ≤ Q.hamilt
   `∑ᵢ ℏ ωᵢ (Nᵢ + ½)`. -/
 lemma hamiltonian_apply_schwartz (f : 𝓢(Space d, ℂ))
     (h : (schwartzEquiv volume f : Q.HS) ∈ Q.hamiltonian.domain) :
-    Q.hamiltonian ⟨schwartzEquiv volume f, h⟩ = schwartzEquiv volume ((∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
-      (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ))) f) := by
+    Q.hamiltonian ⟨schwartzEquiv volume f, h⟩ = schwartzEquiv volume
+      ((∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
+        (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ))) f) := by
   have hk := (h : (schwartzEquiv volume f : Q.HS) ∈
     Q.kineticOperator.domain ⊓ Q.potentialOperator.domain).1
   have hp := (h : (schwartzEquiv volume f : Q.HS) ∈
@@ -421,7 +426,8 @@ lemma hamiltonian_apply_schwartz (f : 𝓢(Space d, ℂ))
   apply MeasureTheory.Lp.ext
   rw [hadd, Q.kineticOperator_apply_schwartz]
   have h1 := schwartzEquiv_coe_ae (μ := volume) (((2 * Q.m)⁻¹ : ℝ) • ∑ i, 𝐩 i (𝐩 i f))
-  have h2 := schwartzEquiv_coe_ae (μ := volume) ((∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
+  have h2 := schwartzEquiv_coe_ae (μ := volume)
+    ((∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
       (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ))) f)
   have h3 := MeasureTheory.Lp.coeFn_add
     (schwartzEquiv volume (((2 * Q.m)⁻¹ : ℝ) • ∑ i, 𝐩 i (𝐩 i f)) : Q.HS)
