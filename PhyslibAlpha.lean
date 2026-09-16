@@ -27,6 +27,7 @@ public import PhyslibAlpha.SpaceAndTime.Space.Surfaces.SphericalCylinder
 public import PhyslibAlpha.SpaceAndTime.Space.Surfaces.SolidCylinder
 public import PhyslibAlpha.SpaceAndTime.Space.Surfaces.SolidSphere
 public import PhyslibAlpha.SpaceAndTime.Space.Surfaces.SphericalShell
+public import PhyslibAlpha.ClassicalMechanics.MomentMap
 public import PhyslibAlpha.ClassicalMechanics.NortonDome.Basic
 public import PhyslibAlpha.ClassicalMechanics.NortonDome.Determinism
 public import PhyslibAlpha.ClassicalMechanics.NortonDome.NewtonianSystem
