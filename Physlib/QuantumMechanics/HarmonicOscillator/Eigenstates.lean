@@ -27,8 +27,8 @@ on the ground state with the raising operators and is labelled by `d` integer qu
 Their wavefunctions are given by products of (physicist's) Hermite polynomials multiplying
 the ground-state Gaussian. The ladder operators of `LadderOperators.lean` act on them by shifting
 one quantum number, `aᵢ† ψₙ = √(nᵢ + 1) ψₙ₊ₑᵢ` and `aᵢ ψₙ = √nᵢ ψₙ₋ₑᵢ`, so that `Nᵢ ψₙ = nᵢ ψₙ` and
-`H ψₙ = Eₙ ψₙ` with `Eₙ = ∑ᵢ ℏ ωᵢ (nᵢ + ½)`, both for the Hamiltonian in terms of the number
-operators and for the kinetic-plus-potential Hamiltonian of `Basic.lean`.
+`H ψₙ = Eₙ ψₙ` with `Eₙ = ∑ᵢ ℏ ωᵢ (nᵢ + ½)` for the Hamiltonian of `Basic.lean`, which acts on
+Schwartz maps as `∑ᵢ ℏ ωᵢ (Nᵢ + ½)` (`hamiltonian_apply_schwartz`).
 
 When the potential is isotropic another description of the energy eigenstates is possible;
 energy eigenspaces carry SO(d) representations and eigenfunctions can be written in terms of
@@ -39,7 +39,7 @@ hyperspherical harmonics. In such cases the energies only depend on the radial q
 - `raising_eigenfunction`, `lowering_eigenfunction`: `aᵢ† ψₙ = √(nᵢ + 1) ψₙ₊ₑᵢ`,
   `aᵢ ψₙ = √nᵢ ψₙ₋ₑᵢ`; `lowering_eigenfunction_zero`: `aᵢ ψ₀ = 0`.
 - `number_eigenfunction`: `Nᵢ ψₙ = nᵢ ψₙ`.
-- `numberHamiltonianCLM_eigenfunction`, `hamiltonian_eigenstate`: `H ψₙ = Eₙ ψₙ`.
+- `sum_number_eigenfunction`, `hamiltonian_eigenstate`: `H ψₙ = Eₙ ψₙ`.
 
 ## iii. Table of contents
 
@@ -350,10 +350,13 @@ lemma number_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
 
 -/
 
-/-- `H_N ψₙ = Eₙ ψₙ` for the Hamiltonian in terms of the number operators. -/
-lemma numberHamiltonianCLM_eigenfunction :
-    Q.numberHamiltonianCLM (Q.eigenfunction n) = (Q.eigenEnergy n : ℂ) • Q.eigenfunction n := by
-  simp only [numberHamiltonianCLM_eq, FunLike.coe_sum, Finset.sum_apply, _root_.smul_apply,
+/-- `∑ᵢ ℏ ωᵢ (Nᵢ + ½) ψₙ = Eₙ ψₙ`: the eigenvalue equation for the Hamiltonian written with the
+  number operators. -/
+lemma sum_number_eigenfunction :
+    (∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
+      (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ))) (Q.eigenfunction n) =
+      (Q.eigenEnergy n : ℂ) • Q.eigenfunction n := by
+  simp only [FunLike.coe_sum, Finset.sum_apply, _root_.smul_apply,
     _root_.add_apply, ContinuousLinearMap.id_apply, number_eigenfunction, eigenEnergy_eq]
   simp only [← add_smul, smul_smul, ← Finset.sum_smul, ofReal_sum]
   congr 1
@@ -361,18 +364,17 @@ lemma numberHamiltonianCLM_eigenfunction :
   push_cast
   ring
 
-/-- The eigenstates lie in the domain of the kinetic-plus-potential Hamiltonian. -/
+/-- The eigenstates lie in the domain of the Hamiltonian. -/
 lemma eigenstate_mem_hamiltonian_domain : (Q.eigenstate n : Q.HS) ∈ Q.hamiltonian.domain :=
-  Q.numberHamiltonian_le_hamiltonian.1 (Q.eigenstate n).2
+  Q.schwartzSubmodule_le_hamiltonian_domain (Q.eigenstate n).2
 
 /-- `H ψₙ = Eₙ ψₙ`: the time-independent Schrodinger equation for the eigenstates, with the
-  kinetic-plus-potential Hamiltonian of `Basic.lean`. -/
+  Hamiltonian `kineticOperator + potentialOperator` of `Basic.lean`. -/
 lemma hamiltonian_eigenstate (h : (Q.eigenstate n : Q.HS) ∈ Q.hamiltonian.domain) :
     Q.hamiltonian ⟨Q.eigenstate n, h⟩ = (Q.eigenEnergy n : ℂ) • (Q.eigenstate n : Q.HS) := by
-  have h1 := Q.numberHamiltonian_le_hamiltonian.2 (x := Q.eigenstate n) (y := ⟨Q.eigenstate n, h⟩)
-    rfl
-  rw [← h1, eigenstate_eq, numberHamiltonian_apply, LinearEquiv.symm_apply_apply,
-    numberHamiltonianCLM_eigenfunction, map_smul, Submodule.coe_smul]
+  have h1 := Q.hamiltonian_apply_schwartz (Q.eigenfunction n) h
+  rw [sum_number_eigenfunction, map_smul, Submodule.coe_smul] at h1
+  exact h1
 
 end HarmonicOscillator
 end QuantumMechanics
