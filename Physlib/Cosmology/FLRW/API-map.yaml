@@ -32,10 +32,10 @@ Overview: |
     Big-Bang bound. Distances.lean contains the comoving, proper and transverse
     comoving distances, the redshift, the Hubble-Lemaître law, the particle and
     event horizons, the lookback time, and the luminosity and angular-diameter
-    distances with their low-redshift coefficients. One further module,
-    ConformalTime.lean, contains only TODO items: conformal time and the
-    conformal Hubble factor. Cosmology/Basic.lean is a placeholder module doc
-    with no declarations.
+    distances with their low-redshift coefficients. ConformalTime.lean contains
+    conformal time, the conformal derivative, the conformal Hubble factor and the
+    Friedmann equations in conformal time. Cosmology/Basic.lean is a placeholder
+    module doc with no declarations.
 
 ParentAPIs:
   - Time (Physlib/SpaceAndTime/Time)
@@ -179,3 +179,11 @@ Requirements:
       flat case.
     done: true
     location: "Physlib/Cosmology/FLRW/Distances.lean (lookbackTime, deriv_redshift_self, deriv_deriv_redshift_self, luminosityDistance, angularDiameterDistance, luminosityDistance_eq, deriv_deriv_comovingDistance_self, comovingDistance_coeff_one, comovingDistance_coeff_two, luminosityDistance_coeff_two, angularDiameterDistance_coeff_two)"
+
+  - description: >
+      Conformal time η with ∂ₜ η = 1 / a, the conformal derivative a ∂ₜ f and
+      the conformal Hubble factor ℋ = a H are defined, and the two Friedmann
+      equations are stated in conformal time and related to their cosmic-time
+      forms.
+    done: true
+    location: "Physlib/Cosmology/FLRW/ConformalTime.lean (conformalTime, deriv_conformalTime, conformalTime_einsteinDeSitter, conformalDeriv, deriv_eq_conformalDeriv_mul, conformalHubble, conformalHubble_eq, ConformalFirstOrderFriedmann, ConformalSecondOrderFriedmann, conformalFirstOrderFriedmann_iff, conformalDeriv_conformalDeriv, conformalSecondOrderFriedmann_of)"
