@@ -199,30 +199,25 @@ lemma deriv_of_continuityEquation_barotropic {a ρ : Time → ℝ} {w c : ℝ} {
 
 -/
 
-/-- Under the barotropic continuity equation at all times, the curve `σ ↦ ρ ⟨σ⟩ a ⟨σ⟩^(3(1+w))`
-  has zero derivative. -/
-lemma hasDerivAt_mul_rpow_of_continuityEquation {a ρ : Time → ℝ} {w c : ℝ} (hc : c ≠ 0)
-    (hd1 : Differentiable ℝ a) (hdρ : Differentiable ℝ ρ) (hapos : ∀ s, 0 < a s)
-    (hC : ∀ s, ContinuityEquation a ρ (barotropicPressure w ρ c) c s) (τ : ℝ) :
-    HasDerivAt (fun σ : ℝ => ρ ⟨σ⟩ * a ⟨σ⟩ ^ (3 * (1 + w))) 0 τ := by
-  have hA := hasDerivAt_mk_of_differentiableAt (hd1 ⟨τ⟩)
-  have hR := hasDerivAt_mk_of_differentiableAt (hdρ ⟨τ⟩)
-  have hP := hA.rpow_const (p := 3 * (1 + w)) (Or.inl (hapos ⟨τ⟩).ne')
-  refine (hR.mul hP).congr_deriv ?_
-  rw [deriv_of_continuityEquation_barotropic hc (hC ⟨τ⟩), Real.rpow_sub_one (hapos ⟨τ⟩).ne']
-  unfold hubbleConstant
-  field_simp
-  ring
-
 /-- The density scaling law: under the barotropic continuity equation at all times, with `a`
-  and `ρ` differentiable and `a > 0`, `ρ t = ρ t₀ (a t / a t₀)^(-3(1+w))`. -/
+  and `ρ` differentiable and `a > 0`, `ρ t = ρ t₀ (a t / a t₀)^(-3(1+w))`. The proof shows that
+  `ρ a^(3(1+w))` has zero derivative along the time chart. -/
 lemma density_scaling {a ρ : Time → ℝ} {w c : ℝ} (hc : c ≠ 0) (hd1 : Differentiable ℝ a)
     (hdρ : Differentiable ℝ ρ) (hapos : ∀ s, 0 < a s)
     (hC : ∀ s, ContinuityEquation a ρ (barotropicPressure w ρ c) c s) (t t₀ : Time) :
     ρ t = ρ t₀ * (a t / a t₀) ^ (-(3 * (1 + w))) := by
-  have hconst := is_const_of_deriv_eq_zero
-    (fun τ => (hasDerivAt_mul_rpow_of_continuityEquation hc hd1 hdρ hapos hC τ).differentiableAt)
-    (fun τ => (hasDerivAt_mul_rpow_of_continuityEquation hc hd1 hdρ hapos hC τ).deriv)
+  have hderiv : ∀ τ : ℝ, HasDerivAt (fun σ : ℝ => ρ ⟨σ⟩ * a ⟨σ⟩ ^ (3 * (1 + w))) 0 τ := by
+    intro τ
+    have hA := hasDerivAt_mk_of_differentiableAt (hd1 ⟨τ⟩)
+    have hR := hasDerivAt_mk_of_differentiableAt (hdρ ⟨τ⟩)
+    have hP := hA.rpow_const (p := 3 * (1 + w)) (Or.inl (hapos ⟨τ⟩).ne')
+    refine (hR.mul hP).congr_deriv ?_
+    rw [deriv_of_continuityEquation_barotropic hc (hC ⟨τ⟩), Real.rpow_sub_one (hapos ⟨τ⟩).ne']
+    unfold hubbleConstant
+    field_simp
+    ring
+  have hconst := is_const_of_deriv_eq_zero (fun τ => (hderiv τ).differentiableAt)
+    (fun τ => (hderiv τ).deriv)
   obtain ⟨τ⟩ := t
   obtain ⟨τ₀⟩ := t₀
   have h := hconst τ τ₀
