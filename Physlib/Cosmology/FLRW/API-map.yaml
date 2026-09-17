@@ -30,10 +30,12 @@ Overview: |
     contains the energy conditions, the acceleration criterion, the deceleration
     parameter in terms of the density parameters, eternal expansion and the
     Big-Bang bound. Distances.lean contains the comoving, proper and transverse
-    comoving distances, the redshift, the Hubble-Lemaître law and the particle
-    and event horizons. One further module, ConformalTime.lean, contains only
-    TODO items: conformal time and the conformal Hubble factor.
-    Cosmology/Basic.lean is a placeholder module doc with no declarations.
+    comoving distances, the redshift, the Hubble-Lemaître law, the particle and
+    event horizons, the lookback time, and the luminosity and angular-diameter
+    distances with their low-redshift coefficients. One further module,
+    ConformalTime.lean, contains only TODO items: conformal time and the
+    conformal Hubble factor. Cosmology/Basic.lean is a placeholder module doc
+    with no declarations.
 
 ParentAPIs:
   - Time (Physlib/SpaceAndTime/Time)
@@ -167,3 +169,13 @@ Requirements:
       the particle horizon of the Einstein-de Sitter solution.
     done: true
     location: "Physlib/Cosmology/FLRW/Distances.lean (spatialGeometryOfCurvature, transverseComovingDistance, transverseComovingDistance_of_pos, transverseComovingDistance_zero, transverseComovingDistance_of_neg, particleHorizon, eventHorizon, particleHorizon_einsteinDeSitter)"
+
+  - description: >
+      The lookback time, the luminosity distance and the angular-diameter
+      distance are defined, with Etherington's relation between the last two,
+      and the API contains the low-redshift coefficients: ∂ₜ z = -H₀ and ∂ₜ ∂ₜ z
+      = H₀^2 (2 + q₀) at t₀, the first and second derivatives of χ with respect
+      to z at z = 0, and the second-order coefficients of d_L and d_A in the
+      flat case.
+    done: true
+    location: "Physlib/Cosmology/FLRW/Distances.lean (lookbackTime, deriv_redshift_self, deriv_deriv_redshift_self, luminosityDistance, angularDiameterDistance, luminosityDistance_eq, deriv_deriv_comovingDistance_self, comovingDistance_coeff_one, comovingDistance_coeff_two, luminosityDistance_coeff_two, angularDiameterDistance_coeff_two)"
