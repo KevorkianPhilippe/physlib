@@ -19,8 +19,12 @@ relation to the two Friedmann equations of `Physlib.Cosmology.FLRW.Basic`: the c
 equation follows from the first-order equation (holding at all times) and the second-order
 equation, and conversely the second-order equation follows from the first-order equation and
 the continuity equation whenever `∂ₜ a ≠ 0`. The three equations are therefore not
-independent. The equation of state, the density scaling laws and the perfect-fluid
-stress-energy tensor are still TODO items.
+independent, but not symmetrically so: where `∂ₜ a = 0` the first-order and the continuity
+equations leave `p` unconstrained, while the second-order equation still fixes
+`ρ + 3 p / c²` (the Einstein static universe of `Physlib.Cosmology.FLRW.Solutions`). The two
+Friedmann equations are the primitive pair, and the continuity equation is derived from them.
+The equation of state, the density scaling laws and the perfect-fluid stress-energy tensor
+are still TODO items.
 
 Time derivatives of curves `Time → ℝ` are computed through the bridge
 `Time.hasDerivAt_mk_of_differentiableAt` to Mathlib's `HasDerivAt` on `ℝ`.
@@ -155,6 +159,10 @@ lemma secondOrderFriedmann_of_continuityEquation {a ρ p : Time → ℝ} {k Λ G
 TODO "Define the perfect-fluid stress-energy tensor
   `T_{μν} = (ρ + P/c²) u_μ u_ν + P g_{μν}` for the FLRW metric."
 
+TODO "Derive the non-independence of the two Friedmann equations and the continuity equation
+  (`continuityEquation_of_friedmann`, `secondOrderFriedmann_of_continuityEquation`) from the
+  contracted Bianchi identity `∇_ν Gᵘᵛ = 0`, once the FLRW metric is defined."
+
 TODO "Define the linear (barotropic) equation of state `P = w ρ c²` and prove the
   density scaling law `ρ = ρ₀ a^(−3(1+w))` for constant `w`."
 
@@ -163,5 +171,12 @@ TODO "Specialize the density scaling law to dust (`w = 0`, `ρ ∝ a⁻³`), rad
 
 TODO "Prove that the cosmological constant acts as a `w = −1` perfect fluid with
   `ρ_Λ = Λ c² / (8 π G)` and `P_Λ = −ρ_Λ c²`."
+
+TODO "Relate `ContinuityEquation` to fluid dynamics: for the Hubble flow `u = H x` on `Space 3`
+  with homogeneous `ρ` and `p`, one has `∇ ⬝ u = 3 H` and `∇ ⬝ (ρ u) = 3 H ρ`, so that
+  `ContinuityEquation a ρ p c` is the fluid energy equation
+  `∂ₜ ρ + ∇ ⬝ (ρ u) + (p / c²) ∇ ⬝ u = 0` (Newtonian cosmology with pressure). This needs an
+  energy equation in `Physlib.FluidDynamics` first, which currently has only the mass equation
+  `FluidFlow.ClassicalContinuityEquation`, without the pressure work term."
 
 end Cosmology.FLRW.FriedmannEquation
