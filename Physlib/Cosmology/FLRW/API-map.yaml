@@ -29,10 +29,11 @@ Overview: |
     standard cosmological model and the age of the universe. Dynamics.lean
     contains the energy conditions, the acceleration criterion, the deceleration
     parameter in terms of the density parameters, eternal expansion and the
-    Big-Bang bound. Two further modules, ConformalTime.lean and Distances.lean,
-    contain only TODO items: conformal time and the conformal Hubble factor,
-    cosmological distances and redshift. Cosmology/Basic.lean is a placeholder
-    module doc with no declarations.
+    Big-Bang bound. Distances.lean contains the comoving, proper and transverse
+    comoving distances, the redshift, the Hubble-Lemaître law and the particle
+    and event horizons. One further module, ConformalTime.lean, contains only
+    TODO items: conformal time and the conformal Hubble factor.
+    Cosmology/Basic.lean is a placeholder module doc with no declarations.
 
 ParentAPIs:
   - Time (Physlib/SpaceAndTime/Time)
@@ -151,3 +152,18 @@ Requirements:
       factor is positive at all times.
     done: true
     location: "Physlib/Cosmology/FLRW/Dynamics.lean (deriv_ne_zero_of_friedmann, deriv_pos_of_friedmann, deriv_deriv_nonpos_of_friedmann, scaleFactor_nonpos_of_decelerating, exists_scaleFactor_eq_zero, deSitterScaleFactor_pos)"
+
+  - description: >
+      The comoving distance χ = c ∫ dt / a, the redshift 1 + z = a(t₀) / a(t)
+      and the proper distance are defined, with ∂ₜ χ = -c / a, ∂ₜ z = -(1 + z)
+      H, the Hubble-Lemaître law and the Hubble radius.
+    done: true
+    location: "Physlib/Cosmology/FLRW/Distances.lean (comovingDistance, deriv_comovingDistance, redshift, deriv_redshift, deriv_comovingDistance_eq_mul_deriv_redshift, properDistance, deriv_properDistance, hubbleRadius, deriv_properDistance_eq_iff)"
+
+  - description: >
+      The transverse comoving distance is defined through the spatial geometry
+      of a given curvature parameter, with its closed forms for positive, zero
+      and negative curvature, together with the particle and event horizons and
+      the particle horizon of the Einstein-de Sitter solution.
+    done: true
+    location: "Physlib/Cosmology/FLRW/Distances.lean (spatialGeometryOfCurvature, transverseComovingDistance, transverseComovingDistance_of_pos, transverseComovingDistance_zero, transverseComovingDistance_of_neg, particleHorizon, eventHorizon, particleHorizon_einsteinDeSitter)"
