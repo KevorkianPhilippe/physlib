@@ -20,13 +20,17 @@ relation to the two Friedmann equations of `Physlib.Cosmology.FLRW.Basic`: the c
 equation follows from the first-order equation (holding at all times) and the second-order
 equation, and conversely the second-order equation follows from the first-order equation and
 the continuity equation whenever `∂ₜ a ≠ 0`. The three equations are therefore not
-independent. For a barotropic equation of state `p = w ρ c²` with constant `w`, the continuity
-equation gives the density scaling law `ρ ∝ a^(-3(1+w))`, specialised to dust, radiation and
-vacuum energy; and the cosmological constant is equivalent to a `w = -1` fluid of density
+independent, but not symmetrically so: where `∂ₜ a = 0` the first-order and the continuity
+equations leave `p` unconstrained, while the second-order equation still fixes
+`ρ + 3 p / c²` (the Einstein static universe of `Physlib.Cosmology.FLRW.Solutions`). The two
+Friedmann equations are the primitive pair, and the continuity equation is derived from them.
+For a barotropic equation of state `p = w ρ c²` with constant `w`, the continuity equation
+gives the density scaling law `ρ ∝ a^(-3(1+w))`, specialised to dust, radiation and vacuum
+energy; and the cosmological constant is equivalent to a `w = -1` fluid of density
 `ρ_Λ = Λ c² / (8 π G)`. The perfect-fluid stress-energy tensor is still a TODO item.
 
 Time derivatives of curves `Time → ℝ` are computed through the bridge
-`Time.hasDerivAt_comp_toRealCLE_symm` to Mathlib's `HasDerivAt` on `ℝ`.
+`Time.hasDerivAt_mk_of_differentiableAt` to Mathlib's `HasDerivAt` on `ℝ`.
 
 ## ii. Key results
 
@@ -92,14 +96,14 @@ def ContinuityEquation (a ρ p : Time → ℝ) (c : ℝ) (t : Time) : Prop :=
 
 -/
 
-/-- Differentiating the first-order Friedmann equation, assumed at all times, at `⟨τ⟩`:
+/-- Differentiating the first-order Friedmann equation, assumed at all times, at `t`:
   `2 H (a''/a - H²) = (8 π G / 3) ρ' + 2 k c² H / a²`. -/
-lemma deriv_firstOrderFriedmann {a ρ : Time → ℝ} {k Λ G c τ : ℝ} (ha : a ⟨τ⟩ ≠ 0)
-    (hd1 : DifferentiableAt ℝ a ⟨τ⟩) (hd2 : DifferentiableAt ℝ (∂ₜ a) ⟨τ⟩)
-    (hdρ : DifferentiableAt ℝ ρ ⟨τ⟩) (hF1 : ∀ s, FirstOrderFriedmann a ρ k Λ G c s) :
-    2 * (∂ₜ a ⟨τ⟩ / a ⟨τ⟩) * (∂ₜ (∂ₜ a) ⟨τ⟩ / a ⟨τ⟩ - (∂ₜ a ⟨τ⟩ / a ⟨τ⟩) ^ 2)
-      = 8 * π * G / 3 * ∂ₜ ρ ⟨τ⟩
-        + 2 * k * c ^ 2 * (∂ₜ a ⟨τ⟩ / a ⟨τ⟩) / (a ⟨τ⟩) ^ 2 := by
+lemma deriv_firstOrderFriedmann {a ρ : Time → ℝ} {k Λ G c : ℝ} {t : Time} (ha : a t ≠ 0)
+    (hd1 : DifferentiableAt ℝ a t) (hd2 : DifferentiableAt ℝ (∂ₜ a) t)
+    (hdρ : DifferentiableAt ℝ ρ t) (hF1 : ∀ s, FirstOrderFriedmann a ρ k Λ G c s) :
+    2 * (∂ₜ a t / a t) * (∂ₜ (∂ₜ a) t / a t - (∂ₜ a t / a t) ^ 2)
+      = 8 * π * G / 3 * ∂ₜ ρ t + 2 * k * c ^ 2 * (∂ₜ a t / a t) / (a t) ^ 2 := by
+  obtain ⟨τ⟩ := t
   have hA := hasDerivAt_mk_of_differentiableAt hd1
   have hA' := hasDerivAt_mk_of_differentiableAt hd2
   have hR := hasDerivAt_mk_of_differentiableAt hdρ
@@ -124,22 +128,19 @@ lemma deriv_firstOrderFriedmann {a ρ : Time → ℝ} {k Λ G c τ : ℝ} (ha : 
   times, and the second-order Friedmann equation at `t`; `a` must be twice differentiable and
   `ρ` differentiable at `t`. -/
 lemma continuityEquation_of_friedmann {a ρ p : Time → ℝ} {k Λ G c : ℝ} {t : Time}
-    (hG : 0 < G) (ha : a t ≠ 0) (hd1 : DifferentiableAt ℝ a t)
+    (hG : G ≠ 0) (ha : a t ≠ 0) (hd1 : DifferentiableAt ℝ a t)
     (hd2 : DifferentiableAt ℝ (∂ₜ a) t)
     (hdρ : DifferentiableAt ℝ ρ t) (hF1 : ∀ s, FirstOrderFriedmann a ρ k Λ G c s)
     (hF2 : SecondOrderFriedmann a ρ p Λ G c t) :
     ContinuityEquation a ρ p c t := by
-  obtain ⟨τ⟩ := t
   have hd := deriv_firstOrderFriedmann ha hd1 hd2 hdρ hF1
-  have h1 := hF1 ⟨τ⟩
+  have h1 := hF1 t
   unfold FirstOrderFriedmann at h1
   unfold SecondOrderFriedmann at hF2
   unfold ContinuityEquation hubbleConstant
-  have hπ := Real.pi_pos
   have hG3 : 8 * π * G / 3 ≠ 0 := by positivity
   apply mul_left_cancel₀ hG3
-  linear_combination -hd + 2 * (∂ₜ a ⟨τ⟩ / a ⟨τ⟩) * hF2
-    - 2 * (∂ₜ a ⟨τ⟩ / a ⟨τ⟩) * h1
+  linear_combination -hd + 2 * (∂ₜ a t / a t) * hF2 - 2 * (∂ₜ a t / a t) * h1
 
 /-!
 
@@ -151,21 +152,20 @@ lemma continuityEquation_of_friedmann {a ρ p : Time → ℝ} {k Λ G c : ℝ} {
   equation, assumed at all times, and the continuity equation at `t`, provided `∂ₜ a t ≠ 0`.
   Together with `continuityEquation_of_friedmann`, the three equations are not independent. -/
 lemma secondOrderFriedmann_of_continuityEquation {a ρ p : Time → ℝ} {k Λ G c : ℝ}
-    {t : Time} (ha : a t ≠ 0) (hd1' : ∂ₜ a t ≠ 0) (hd1 : DifferentiableAt ℝ a t)
+    {t : Time} (ha : a t ≠ 0) (ha' : ∂ₜ a t ≠ 0) (hd1 : DifferentiableAt ℝ a t)
     (hd2 : DifferentiableAt ℝ (∂ₜ a) t) (hdρ : DifferentiableAt ℝ ρ t)
     (hF1 : ∀ s, FirstOrderFriedmann a ρ k Λ G c s) (hC : ContinuityEquation a ρ p c t) :
     SecondOrderFriedmann a ρ p Λ G c t := by
-  obtain ⟨τ⟩ := t
   have hd := deriv_firstOrderFriedmann ha hd1 hd2 hdρ hF1
-  have h1 := hF1 ⟨τ⟩
+  have h1 := hF1 t
   unfold FirstOrderFriedmann at h1
   unfold ContinuityEquation hubbleConstant at hC
   unfold SecondOrderFriedmann
-  have hH : 2 * (∂ₜ a ⟨τ⟩ / a ⟨τ⟩) ≠ 0 := by
-    have : ∂ₜ a ⟨τ⟩ / a ⟨τ⟩ ≠ 0 := div_ne_zero hd1' ha
+  have hH : 2 * (∂ₜ a t / a t) ≠ 0 := by
+    have : ∂ₜ a t / a t ≠ 0 := div_ne_zero ha' ha
     positivity
   apply mul_left_cancel₀ hH
-  linear_combination hd + 8 * π * G / 3 * hC + 2 * (∂ₜ a ⟨τ⟩ / a ⟨τ⟩) * h1
+  linear_combination hd + 8 * π * G / 3 * hC + 2 * (∂ₜ a t / a t) * h1
 
 /-!
 
@@ -346,5 +346,16 @@ lemma cosmologicalConstantPressure_eq_barotropic (Λ G c : ℝ) (t : Time) :
 
 TODO "Define the perfect-fluid stress-energy tensor
   `T_{μν} = (ρ + P/c²) u_μ u_ν + P g_{μν}` for the FLRW metric."
+
+TODO "Derive the non-independence of the two Friedmann equations and the continuity equation
+  (`continuityEquation_of_friedmann`, `secondOrderFriedmann_of_continuityEquation`) from the
+  contracted Bianchi identity `∇_ν Gᵘᵛ = 0`, once the FLRW metric is defined."
+
+TODO "Relate `ContinuityEquation` to fluid dynamics: for the Hubble flow `u = H x` on `Space 3`
+  with homogeneous `ρ` and `p`, one has `∇ ⬝ u = 3 H` and `∇ ⬝ (ρ u) = 3 H ρ`, so that
+  `ContinuityEquation a ρ p c` is the fluid energy equation
+  `∂ₜ ρ + ∇ ⬝ (ρ u) + (p / c²) ∇ ⬝ u = 0` (Newtonian cosmology with pressure). This needs an
+  energy equation in `Physlib.FluidDynamics` first, which currently has only the mass equation
+  `FluidFlow.ClassicalContinuityEquation`, without the pressure work term."
 
 end Cosmology.FLRW.FriedmannEquation
