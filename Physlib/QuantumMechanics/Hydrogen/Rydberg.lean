@@ -218,8 +218,8 @@ lemma rydbergFrequency_eq : H.rydbergFrequency = H.m * H.k ^ 2 / (4 * π * (ℏ 
 lemma rydbergFrequency_nonneg : 0 ≤ H.rydbergFrequency :=
   div_nonneg H.rydbergEnergy_nonneg h_nonneg
 
-/-- The Rydberg frequency is positive when `k ≠ 0`. -/
-@[simp]
+/-- The Rydberg frequency is positive when `k ≠ 0`. Not `@[simp]`: since `rydbergFrequency` is an
+abbreviation, `simp` already gets this from `rydbergEnergy_pos` and `h_pos`. -/
 lemma rydbergFrequency_pos (hk : H.k ≠ 0) : 0 < H.rydbergFrequency :=
   div_pos (H.rydbergEnergy_pos hk) h_pos
 
