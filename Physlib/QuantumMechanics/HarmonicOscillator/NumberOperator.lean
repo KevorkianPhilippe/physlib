@@ -12,11 +12,11 @@ public import Physlib.QuantumMechanics.HarmonicOscillator.LadderOperators
 
 ## i. Overview
 
-The number operators `Nᵢ = aᵢ† aᵢ` of the `d`-dimensional quantum harmonic oscillator, built from the
-ladder operators of `LadderOperators.lean` and acting on Schwartz maps: their commutation relations
-with the ladder operators and with each other, and the Hamiltonian of `Basic.lean`, which on
-Schwartz maps acts as `H_N = ∑ᵢ ℏ ωᵢ (Nᵢ + ½)`, commutes with the number operators and lowers and
-raises energies by `ℏ ωᵢ`. The number operators are then lifted to unbounded operators on the
+The number operators `Nᵢ = aᵢ† aᵢ` of the `d`-dimensional quantum harmonic oscillator, built from
+the ladder operators of `LadderOperators.lean` and acting on Schwartz maps: their commutation
+relations with the ladder operators and with each other, and the Hamiltonian of `Basic.lean`, which
+on Schwartz maps acts as `H_N = ∑ᵢ ℏ ωᵢ (Nᵢ + ½)`, commutes with the number operators and lowers
+and raises energies by `ℏ ωᵢ`. The number operators are then lifted to unbounded operators on the
 Hilbert space with the Schwartz submodule as domain (like `momentumOperator`), where they are
 symmetric, as is the Hamiltonian.
 
