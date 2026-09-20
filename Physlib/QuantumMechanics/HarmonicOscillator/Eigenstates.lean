@@ -10,7 +10,7 @@ public import Physlib.Mathematics.HasTemperateGrowth
 public import Physlib.Mathematics.KroneckerDelta.Basic
 public import Physlib.Mathematics.SpecialFunctions.PhysHermite
 public import Physlib.QuantumMechanics.HarmonicOscillator.Basic
-public import Physlib.QuantumMechanics.HarmonicOscillator.LadderOperators
+public import Physlib.QuantumMechanics.HarmonicOscillator.NumberOperator
 public import Physlib.Meta.Sorry
 /-!
 
