@@ -64,14 +64,14 @@ given by a closed formula.
 
 ## iv. References
 
-- J.-M. Souriau, Structure des systemes dynamiques, Dunod, Paris, 1970: chapter 11 (Groupes
-  dynamiques), pp. 104-117, for (11.7), (11.15)-(11.21) and (11.28); (6.24)-(6.25) and (10.12),
+- J.-M. Souriau, Structure des systemes dynamiques, Dunod, Paris, 1970: chapter 11,
+  pp. 104-117, for (11.7), (11.15)-(11.21) and (11.28); (6.24)-(6.25) and (10.12),
   (10.28)-(10.32) for the adjoint action and the affine symplectic group.
 
 ## References
 
 * J.-M. Souriau, *Structure des systèmes dynamiques*, Maîtrises de mathématiques, Dunod,
-  Paris, 1970, chapter 11 "Groupes dynamiques", pp. 104-117, and (6.24)-(6.25), (10.12). The
+  Paris, 1970, chapter 11, pp. 104-117, and (6.24)-(6.25), (10.12). The
   equation numbers refer to this edition. [ref: Souriau1970]
 
 -/
