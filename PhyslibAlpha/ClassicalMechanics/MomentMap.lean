@@ -70,14 +70,14 @@ field is `Z_{𝔤*}(ν) = ν ∘ Ad(Z)` (11.16).
 
 ## iv. References
 
-- J.-M. Souriau, Structure des systèmes dynamiques, Dunod, Paris, 1970, chapter 11 (Groupes
-  dynamiques), pp. 104-117; English translation: Structure of Dynamical Systems, Birkhäuser, 1997
+- J.-M. Souriau, Structure des systèmes dynamiques, Dunod, Paris, 1970, chapter 11,
+  pp. 104-117; English translation: Structure of Dynamical Systems, Birkhäuser, 1997
   (same equation numbers).
 
 ## References
 
 * J.-M. Souriau, *Structure des systèmes dynamiques*, Maîtrises de mathématiques, Dunod,
-  Paris, 1970, chapter 11 "Groupes dynamiques", pp. 104-117. The equation numbers (11.7),
+  Paris, 1970, chapter 11, pp. 104-117. The equation numbers (11.7),
   (11.8), (11.12), (11.17), (11.22), (11.27), (11.33) refer to this edition. [ref: Souriau1970]
 
 -/
