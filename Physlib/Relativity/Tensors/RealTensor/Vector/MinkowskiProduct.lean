@@ -38,13 +38,13 @@ open Tensor
 
 /-- The Minkowski product of Lorentz vectors in the +--- convention.. -/
 def minkowskiProductMap {d : ℕ} (p q : Vector d) : ℝ :=
-  {η' d | μ ν ⊗ p | μ ⊗ q | ν}ᵀ.toField
+  {η' d | μ ν ⊗ p | μ ⊗ q | ν}ᵀ.toScalar
 
 lemma minkowskiProductMap_toCoord {d : ℕ} (p q : Vector d) :
     minkowskiProductMap p q = p (Sum.inl 0) * q (Sum.inl 0) -
     ∑ i, p (Sum.inr i) * q (Sum.inr i) := by
   dsimp only [minkowskiProductMap, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue]
-  rw [toField_eq_repr, contrT_basis_repr_apply_eq_fin]
+  rw [toScalar_eq_repr, contrT_basis_repr_apply_eq_fin]
   conv_lhs =>
     enter [2, x]
     rw [prodT_basis_repr_apply, contrT_basis_repr_apply_eq_fin]
@@ -149,7 +149,7 @@ lemma minkowskiProduct_invariant {d : ℕ} (p q : Vector d) (Λ : LorentzGroup d
   rw [minkowskiProduct_apply, minkowskiProductMap, ← actionT_coMetric Λ]
   simp only [Tensorial.toTensor_smul]
   rw [prodT_equivariant, contrT_equivariant, prodT_equivariant, contrT_equivariant,
-    toField_equivariant]
+    toScalar_equivariant]
   rfl
 
 open InnerProductSpace in
@@ -183,6 +183,17 @@ lemma minkowskiProduct_add_self {d : ℕ} (u v : Vector d) :
   simp only [map_add, _root_.add_apply]
   rw [minkowskiProduct_symm v u]
   ring
+
+/-- `⟪μ • u, μ • u⟫ₘ = μ² ⟪u, u⟫ₘ`. -/
+lemma minkowskiProduct_smul_self {d : ℕ} (μ : ℝ) (u : Vector d) :
+    ⟪μ • u, μ • u⟫ₘ = μ ^ 2 * ⟪u, u⟫ₘ := by
+  simp only [map_smul, _root_.smul_apply, smul_eq_mul]
+  ring
+
+/-- `√⟪μ • u, μ • u⟫ₘ = μ √⟪u, u⟫ₘ` for `μ ≥ 0`. -/
+lemma sqrt_minkowskiProduct_smul_self {d : ℕ} {μ : ℝ} (hμ : 0 ≤ μ) (u : Vector d) :
+    √⟪μ • u, μ • u⟫ₘ = μ * √⟪u, u⟫ₘ := by
+  rw [minkowskiProduct_smul_self, Real.sqrt_mul (sq_nonneg μ), Real.sqrt_sq hμ]
 
 @[simp]
 lemma minkowskiProduct_basis_left {d : ℕ} (μ : Fin 1 ⊕ Fin d) (p : Vector d) :

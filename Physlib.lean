@@ -13,6 +13,7 @@ public import Physlib.ClassicalMechanics.HarmonicOscillator.Geometric.Basic
 public import Physlib.ClassicalMechanics.HarmonicOscillator.Geometric.KineticEnergy
 public import Physlib.ClassicalMechanics.HarmonicOscillator.Geometric.Trajectory
 public import Physlib.ClassicalMechanics.HarmonicOscillator.Solution
+public import Physlib.ClassicalMechanics.HarmonicOscillator.WithDim
 public import Physlib.ClassicalMechanics.Lagrangian.TotalDerivativeEquivalence
 public import Physlib.ClassicalMechanics.Mass.MassUnit
 public import Physlib.ClassicalMechanics.OrbitalMechanics.VisViva
@@ -149,7 +150,6 @@ public import Physlib.Mathematics.OneParameterSubgroups.Basic
 public import Physlib.Mathematics.OneParameterSubgroups.Unitary
 public import Physlib.Mathematics.OrthogonalMatrix
 public import Physlib.Mathematics.PiTensorProduct
-public import Physlib.Mathematics.RatComplexNum
 public import Physlib.Mathematics.Resolvent
 public import Physlib.Mathematics.SO3.Basic
 public import Physlib.Mathematics.SchurTriangulation
@@ -325,11 +325,13 @@ public import Physlib.QFT.QED.AnomalyCancellation.Odd.Parameterization
 public import Physlib.QFT.QED.AnomalyCancellation.Permutations
 public import Physlib.QFT.QED.AnomalyCancellation.Sorts
 public import Physlib.QFT.QED.AnomalyCancellation.VectorLike
+public import Physlib.QuantumMechanics.Blackbody.PlancksLaw
 public import Physlib.QuantumMechanics.FiniteTarget
 public import Physlib.QuantumMechanics.FreeParticle.Basic
 public import Physlib.QuantumMechanics.HarmonicOscillator.Basic
 public import Physlib.QuantumMechanics.HarmonicOscillator.Eigenstates
 public import Physlib.QuantumMechanics.HarmonicOscillator.LadderOperators
+public import Physlib.QuantumMechanics.HarmonicOscillator.NumberOperator
 public import Physlib.QuantumMechanics.HarmonicOscillator.OneDimension.Basic
 public import Physlib.QuantumMechanics.HarmonicOscillator.OneDimension.Completeness
 public import Physlib.QuantumMechanics.HarmonicOscillator.OneDimension.Eigenfunction
@@ -382,6 +384,7 @@ public import Physlib.QuantumMechanics.SpaceDQuantumSystem
 public import Physlib.Relativity.Bispinors.Basic
 public import Physlib.Relativity.CliffordAlgebra
 public import Physlib.Relativity.Fermions.Dirac.Basic
+public import Physlib.Relativity.Fermions.Dirac.GammaMatrices
 public import Physlib.Relativity.Fermions.Weyl.Contraction
 public import Physlib.Relativity.Fermions.Weyl.DualLeftHanded
 public import Physlib.Relativity.Fermions.Weyl.DualRightHanded
@@ -425,7 +428,7 @@ public import Physlib.Relativity.Tensors.ComplexTensor.Matrix.Pre
 public import Physlib.Relativity.Tensors.ComplexTensor.Metrics.Basic
 public import Physlib.Relativity.Tensors.ComplexTensor.Metrics.Lemmas
 public import Physlib.Relativity.Tensors.ComplexTensor.Metrics.Pre
-public import Physlib.Relativity.Tensors.ComplexTensor.OfRat
+public import Physlib.Relativity.Tensors.ComplexTensor.OfGaussianInt
 public import Physlib.Relativity.Tensors.ComplexTensor.Units.Basic
 public import Physlib.Relativity.Tensors.ComplexTensor.Units.Pre
 public import Physlib.Relativity.Tensors.ComplexTensor.Units.Symm
@@ -571,6 +574,7 @@ public import Physlib.Units.PositiveRealUnit
 public import Physlib.Units.SIUnitChoices
 public import Physlib.Units.UnitDependent
 public import Physlib.Units.UnitSystem
+public import Physlib.Units.WithDim.Analysis
 public import Physlib.Units.WithDim.Area
 public import Physlib.Units.WithDim.Basic
 public import Physlib.Units.WithDim.Energy
