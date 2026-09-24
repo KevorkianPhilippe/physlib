@@ -21,29 +21,44 @@ torsor `μ = {l, g, p, E}` (12.122)-(12.123): `l` is the angular momentum and `p
 (12.140), and `g = m R - p t` with `R` the centre of gravity (12.141). The Lagrange form `σ` of the
 system satisfies (12.134), `σ(Z_V(y))(Z'_V(y)) = μ[Z, Z'] + m f₀(Z)(Z')`, where
 `f₀(Z)(Z') = ⟨β, γ'⟩ - ⟨β', γ⟩` (12.130) and `m = Σ_j m_j` is the total mass (12.135). Souriau
-concludes (12.136) that the total mass characterises the cohomology class of the system, and that
-this class is never zero.
+remarks (12.136) that the total mass can be interpreted as characterising the corresponding
+cohomology class of the Galilean group, and that this class is never zero.
 
 This file proves these facts at the level of the Lie algebra for `N` free material points in
-`ℝ³ = Fin 3 → ℝ` (no forces: `F_j = 0`, hence `E_j = B_j = 0` in (12.44)-(12.45)). An element
+`ℝ³ = Fin 3 → ℝ` (no forces, `F_j = 0`; with the choice `B_j = 0` of (12.49), which (12.135)
+imposes on an isolated system, (12.44) gives `E_j = 0` and (12.45) reduces to (12.40)). An element
 `Z = (ω, β, γ, ε)` of the Galilean Lie algebra (12.74), (12.118) is a rotation `ω` (an axial
 vector), a change of velocity `β`, a space translation `γ` and a time translation `ε`; it acts on
 the evolution space, whose points are `y = (t, r_j, v_j)` (12.76), by the affine vector field
-(12.119). The bracket is Souriau's, `[Z, Z']_V = DZ'_V(Z_V) - DZ_V(Z'_V)` ((6.12 b), (11.22 a)),
-opposite to the usual commutator (`EvolutionSpace.vectorField_bracket`).
+(12.119). The bracket is Souriau's (6.12 b), `[Z, Z']_V = [Z_V, Z'_V]`, where the bracket of two
+vector fields is (2.45), here `DZ'_V(Z_V) - DZ_V(Z'_V)` (`EvolutionSpace.vectorField_bracket`);
+this is the usual Lie bracket of vector fields (Mathlib's `VectorField.lieBracket`). The matrices
+(12.74) are not formalised; on them this bracket reads `[Z, Z'] = Z'Z - ZZ'`, as in (11.22 a), the
+opposite of the usual matrix commutator.
 
 What is not formalised here:
 - the Galilean group itself, its action (12.73), (12.76) and its cocycle `θ₀` (12.126)-(12.128),
-  hence the passage from the algebra to the group used on p. 151 and in (12.136). The Galilean group
-  is `GalileanGroup` in `Physlib.SpaceAndTime.GalileanGroup.Basic`; this file works with its Lie
-  algebra in dimension `3`, in Souriau's parametrisation, and does not link the two;
+  hence the statement of p. 151 that `θ₀` is not a coboundary of the group (definition (11.19)),
+  used in (12.136). The algebra-level result of this file implies it, because the derivative of a
+  group coboundary `Δ(μ₀)` is `μ₀[Z, Z']` (p. 116, note (1)); this implication is not formalised.
+  Physlib has `GalileanGroup` in `Physlib.SpaceAndTime.GalileanGroup.Basic`, whose rotation part
+  ranges over the full orthogonal group; Souriau's group (12.73) takes `A ∈ SO(3)` and is
+  connected (p. 139). Both have the same Lie algebra, with which this file works in dimension `3`,
+  in Souriau's parametrisation; the file links it to neither group;
 - `GalileanAlgebra` has no vector space or `LieRing` structure here, only `Zero` and `Add`; the
   Jacobi identity is proved as an equation;
+- that the vector field (12.119), taken as printed, is the derivative (6.11) of the action (12.76);
+- the reading of (12.135) as the solution of the system (12.124), (12.134) for a general isolated
+  system (`B_j = 0`, `Σ_j E_j = 0`, `Σ_j r_j × E_j = 0`): for free points the explicit moment and
+  `m = Σ_j m_j` are verified, not derived; the uniqueness of `m` in (12.134) follows from
+  `lagrangeForm_vectorField` and `smul_cocycle_isCoboundary_iff` but is not stated;
 - the dimension `1` of (12.131), the second half of (12.136) (Hamilton's Lagrangian is not
   invariant), forces, the converse of (12.48), the invariance of `σ` (12.72), (12.76), and the
   uniqueness of the moment up to a constant (the constant in `E` is a choice);
-- the evolution space is only presymplectic (`EvolutionSpace.lagrangeForm_motion`), so the setting
-  of `PhyslibAlpha.ClassicalMechanics.MomentMap` is not used; the moment and the cocycle are
+- the evolution space is presymplectic, not symplectic (p. 148, (12.114));
+  `EvolutionSpace.lagrangeForm_motion` shows that `σ` is degenerate, and `σ` depends on the point
+  `y` through the velocities. The setting of `PhyslibAlpha.ClassicalMechanics.MomentMap` (a constant
+  non-degenerate form on a vector space) therefore does not apply; the moment and the cocycle are
   computed explicitly.
 
 ## ii. Key results
@@ -72,13 +87,15 @@ What is not formalised here:
 ## iv. References
 
 - J.-M. Souriau, Structure des systèmes dynamiques, Dunod, Paris, 1970: pp. 132-133
-  (12.40)-(12.48), pp. 139-140 (12.72)-(12.76), pp. 150-153 (12.118)-(12.141); p. 50 (6.12 b) and
-  p. 113 (11.22 a) for the bracket; p. 116, note (1), for the coboundaries of the algebra.
+  (12.40)-(12.49), pp. 139-140 (12.72)-(12.76), p. 148 (12.114), pp. 150-153 (12.118)-(12.141);
+  p. 27 (2.45), p. 50 (6.12 b) and p. 113 (11.22 a) for the bracket; p. 50 (6.13 b), p. 109
+  (11.16), p. 114 (11.24) and p. 116, note (1), for the coboundaries of the algebra.
 
 ## References
 
 * J.-M. Souriau, *Structure des systèmes dynamiques*, Maîtrises de mathématiques, Dunod,
-  Paris, 1970, chapter 12, pp. 132-153. The equation numbers refer to this edition.
+  Paris, 1970: chapter 12, pp. 132-153, and pp. 27, 50, 109, 113-116 for the conventions (2.45),
+  (6.12), (6.13), (11.16), (11.22), (11.24). The equation numbers refer to this edition.
   [ref: Souriau1970]
 
 -/
@@ -119,7 +136,7 @@ instance : Zero GalileanAlgebra := ⟨⟨0, 0, 0, 0⟩⟩
 instance : Add GalileanAlgebra := ⟨fun Z Z' => ⟨Z.ω + Z'.ω, Z.β + Z'.β, Z.γ + Z'.γ, Z.ε + Z'.ε⟩⟩
 
 /-- Souriau's bracket on the Galilean Lie algebra. It is the bracket of the vector fields (12.119)
-in the convention (6.12 b), (11.22 a), see `EvolutionSpace.vectorField_bracket`. -/
+in the convention (6.12 b), (2.45), see `EvolutionSpace.vectorField_bracket`. -/
 def bracket (Z Z' : GalileanAlgebra) : GalileanAlgebra :=
   ⟨Z'.ω ⨯₃ Z.ω, Z'.ω ⨯₃ Z.β - Z.ω ⨯₃ Z'.β,
     Z'.ω ⨯₃ Z.γ - Z.ω ⨯₃ Z'.γ + Z.ε • Z'.β - Z'.ε • Z.β, 0⟩
@@ -223,8 +240,9 @@ lemma cocycle_boost_translation :
   rw [cocycle]
   simp
 
-/-- `M f₀` is a coboundary of the algebra, `M f₀(Z)(Z') = μ₀[Z, Z']` for some torsor `μ₀`
-(p. 116, note (1)), if and only if `M = 0`. -/
+/-- `M f₀` is a coboundary of the algebra, `M f₀(Z)(Z') = μ₀[Z, Z']` for some torsor `μ₀` ((11.24)
+with `Z_{g*}(μ) = μ ∘ Ad(Z)` (11.16) and `Ad(Z)(Z') = [Z, Z']` (6.13 b); by p. 116, note (1), this
+is also the derivative of the group coboundary `Δ(μ₀)` of (11.19)), if and only if `M = 0`. -/
 lemma smul_cocycle_isCoboundary_iff (M : ℝ) :
     (∃ μ₀ : GalileanTorsor, ∀ Z Z' : GalileanAlgebra, M * cocycle Z Z' = μ₀.pair (bracket Z Z'))
       ↔ M = 0 := by
@@ -288,7 +306,7 @@ def vectorField (Z : GalileanAlgebra) (y : EvolutionSpace N) : EvolutionSpace N 
 def linearPart (Z : GalileanAlgebra) (w : EvolutionSpace N) : EvolutionSpace N :=
   ⟨0, fun j => Z.ω ⨯₃ w.r j + w.t • Z.β, fun j => Z.ω ⨯₃ w.v j⟩
 
-/-- Souriau's bracket is the bracket of the vector fields in the convention (6.12 b), (11.22 a):
+/-- Souriau's bracket is the bracket of the vector fields in the convention (6.12 b), (2.45):
 `[Z, Z']_V = DZ'_V(Z_V) - DZ_V(Z'_V)`. -/
 lemma vectorField_bracket (Z Z' : GalileanAlgebra) (y : EvolutionSpace N) :
     vectorField (bracket Z Z') y
@@ -329,7 +347,8 @@ lemma lagrangeForm_motion (m : Fin N → ℝ) (y δy : EvolutionSpace N) :
 
 -/
 
-/-- The moment of `N` free material points ((12.125) for one point, (12.135) for `N` points):
+/-- The moment of `N` free material points ((12.125) for one point of unit mass; (12.135) for `N`
+points, with `E_j = 0` in its last line and the additive constant of `E` chosen to be `0`):
 `l = Σ m_j r_j × v_j`, `g = Σ m_j (r_j - v_j t)`, `p = Σ m_j v_j`, `E = ½ Σ m_j ‖v_j‖²`. -/
 def moment (m : Fin N → ℝ) (y : EvolutionSpace N) : GalileanTorsor :=
   ⟨∑ j, m j • (y.r j ⨯₃ y.v j), ∑ j, m j • (y.r j - y.t • y.v j), ∑ j, m j • y.v j,
@@ -413,7 +432,8 @@ lemma moment_motion (m : Fin N → ℝ) (y : EvolutionSpace N) (s : ℝ) :
 /-- The total mass `m = Σ_j m_j` (12.135). -/
 def totalMass (m : Fin N → ℝ) : ℝ := ∑ j, m j
 
-/-- The centre of gravity `R = (Σ_j m_j r_j) / m` of (12.141). -/
+/-- The centre of gravity `R = (Σ_j m_j r_j) / m`, named in (12.141) (the formula is the usual one,
+not printed there); for `m = 0` the value is `0`, by the convention `0⁻¹ = 0`. -/
 def centerOfMass (m : Fin N → ℝ) (y : EvolutionSpace N) : ℝ³ :=
   (totalMass m)⁻¹ • ∑ j, m j • y.r j
 
@@ -445,8 +465,9 @@ lemma moment_g (m : Fin N → ℝ) (hM : totalMass m ≠ 0) (y : EvolutionSpace 
   congr! with i
   field_simp [hM]
 
-/-- (12.141) for free material points: along a free motion the centre of gravity moves uniformly
-with velocity `p / m`. -/
+/-- Along a free motion the centre of gravity moves uniformly with velocity `p / m` (p. 153, after
+(12.141)). Souriau deduces this for any isolated system from the constancy of `g` and `p`; here it
+is proved directly from the free motion. For `m = 0` both sides are `0`. -/
 lemma centerOfMass_motion (m : Fin N → ℝ) (y : EvolutionSpace N) (s : ℝ) :
     centerOfMass m (motion y s) = centerOfMass m y + s • ((totalMass m)⁻¹ • (moment m y).p) := by
   simp [centerOfMass, motion, smul_smul]
