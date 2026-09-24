@@ -30,26 +30,35 @@ For `N` free material points, the file defines the action of the group on the ev
 the torsors (11.15). It proves that the group preserves the Lagrange form (12.76), that the
 adjoint action satisfies (6.25), and that the moment of the free points is equivariant up to the
 total mass times Souriau's cocycle `θ₀(a) = {c × b, c - b e, b, ½ ‖b‖²}` (12.126)-(12.127).
-`θ₀` is a 1-cocycle (12.128) and is not a coboundary (p. 151), so the class of the system is not
-zero for a non-zero total mass (12.136); its derivative at the identity is the 2-cocycle `f₀` of
-`GalileanMass` (12.130).
+`θ₀` is a 1-cocycle (12.128) and is not a coboundary, on Souriau's group (`det R = 1`) as on the
+whole group (p. 151), so the class of the system is not zero for a non-zero total mass (12.136);
+its derivative at the identity is the 2-cocycle `f₀` of `GalileanMass` (12.130).
 
 The rotation part of `GalileanGroup` ranges over `O(3)`, whereas Souriau's (12.73) takes it in
-`SO(3)`. The results hold on the whole group once the rotation vector `ω`, an axial vector, is
-transformed with the factor `det R` (conjugation of `j(ω)`, `orthogonal_mulVec_cross`); for a
-rotation (`det R = 1`) all the formulas are Souriau's.
+`SO(3)`. The rotation vector `ω`, an axial vector, is then transformed with the factor `det R`
+(`orthogonal_mulVec_cross`). The identities proved for all `a` ((12.76), (12.77), (6.25), (11.15),
+(12.126)-(12.128)) restrict to Souriau's group `properGalileanGroup`, where `det R = 1` and the
+factor disappears. A negative statement does not restrict: a cocycle that is not a coboundary of
+the larger group could be one of the smaller, so the statements of p. 151 and (12.136) are also
+proved on `properGalileanGroup`. The adjoint and coadjoint actions in components are not printed
+in chapter 12; they are computed here from (6.24), (6.28) and (11.15).
 
 The cohomology vocabulary is Mathlib's: `θ₀` is a `groupCohomology.IsCocycle₁` for the coadjoint
 action, which is (11.19 ♡), and "the class is not zero" is `¬ groupCohomology.IsCoboundary₁`,
 which is (11.19 ◇). As in `PhyslibAlpha.ClassicalMechanics.MomentMapCohomology`, Souriau's
-requirement that a cocycle be differentiable is not part of these definitions.
+requirement that a cocycle be differentiable is not part of these definitions. This does not
+weaken the non-coboundary statements: a coboundary `a ↦ a • μ₀ - μ₀` of (11.19 ◇) is polynomial in
+the entries of `a`, hence differentiable.
 
 What is not formalised here:
 - the identification of the law of `GalileanGroup` with the product of the matrices (12.73) (it
   was checked numerically outside Lean);
-- the identification of the adjoint action in components with the conjugation `a Z a⁻¹` of the
-  matrices (12.73), (12.74) (6.24); it is characterised instead by (6.25), `vectorField_smul`,
+- the identification of the adjoint action in components with the conjugation `a Z a⁻¹` (6.28) of
+  the matrices (12.73), (12.74); it is characterised instead by (6.25), `vectorField_smul`,
   together with the injectivity of `Z ↦ Z_V` for `N ≥ 1`, `vectorField_injective`;
+- that the vector field `Z_V` (12.119), taken as printed in `GalileanMass`, is the derivative at
+  the identity of the action in the direction `Z` (6.11); the characterisation of the adjoint
+  action by (6.25) rests on this printed formula;
 - the Lie group structure (12.75) and any manifold: the derivative (12.130) is taken along curves;
 - that `θ₀` is a symplectic cocycle (11.30), the dimension `1` of (12.131), forces, and the second
   half of (12.136) (Hamilton's Lagrangian is not invariant);
@@ -62,10 +71,13 @@ What is not formalised here:
 - `EvolutionSpace.vectorField_smul`: (6.25), `(a • Z)_V(a • y) = D(a_V)(y)(Z_V(y))`.
 - `GalileanTorsor.coadjoint_pair`: (11.15), `(a • μ)(Z) = μ(a⁻¹ • Z)`.
 - `EvolutionSpace.moment_smul_sub`: (12.126)-(12.127), `μ(a • y) - a • μ(y) = m θ₀(a)`.
-- `isCocycle₁_massCocycle`: (12.128).
-- `isCoboundary₁_smul_massCocycle_iff`, `not_isCoboundary₁_massCocycle`: `M θ₀` is a coboundary
-  if and only if `M = 0`.
-- `EvolutionSpace.not_isCoboundary₁_moment_smul_sub`: (12.136) at the level of the group.
+- `isCocycle₁_massCocycle`: (12.128); `isCocycle₁_massCocycle_proper` on Souriau's group.
+- `isCoboundary₁_smul_massCocycle_proper_iff`, `not_isCoboundary₁_massCocycle_proper`: p. 151 on
+  Souriau's group `properGalileanGroup`, `M θ₀` is a coboundary if and only if `M = 0`;
+  `isCoboundary₁_smul_massCocycle_iff`, `not_isCoboundary₁_massCocycle`: the same on the whole
+  group.
+- `EvolutionSpace.not_isCoboundary₁_moment_smul_sub_proper`: (12.136) at the level of Souriau's
+  group; `EvolutionSpace.not_isCoboundary₁_moment_smul_sub` on the whole group.
 - `hasDerivAt_massCocycle`: (12.130), `f₀ = D(θ₀)(e)`.
 
 ## iii. Table of contents
@@ -80,8 +92,9 @@ What is not formalised here:
 ## iv. References
 
 - J.-M. Souriau, Structure des systèmes dynamiques, Dunod, Paris, 1970: pp. 139-140
-  (12.73)-(12.77), p. 151 (12.126)-(12.130), pp. 152-153 (12.135)-(12.136); pp. 52-53
-  (6.24)-(6.25); p. 108 (11.15), p. 111 (the derivative of a cocycle), p. 112 (11.19).
+  (12.73)-(12.77), p. 151 (12.126)-(12.130), pp. 152-153 (12.132)-(12.136); pp. 52-53 (6.24),
+  (6.25), (6.28); p. 108 (11.15), p. 109 (11.17), p. 111 (the order of the arguments of the
+  derivative of a cocycle), p. 112 (11.19), p. 113 (11.22 b).
 
 ## References
 
@@ -305,10 +318,12 @@ end EvolutionSpace
 
 namespace GalileanAlgebra
 
-/-- The adjoint action (6.24) of the Galilean group on its Lie algebra, the conjugation
-`Z ↦ a Z a⁻¹` of the matrices (12.73), (12.74) written in components: with
+/-- The adjoint action (6.24) of the Galilean group on its Lie algebra, in components: with
 `ω* = det R • R ω`, `a • (ω, β, γ, ε) = (ω*, R β - ω* × b, R γ + ε b - e R β - ω* × (c - e b), ε)`.
-The factor `det R` is `1` for a rotation; it makes `ω` an axial vector under reflections. -/
+It is the conjugation `Z ↦ a Z a⁻¹` (6.28) of the matrices (12.73), (12.74) with `R` taken in
+`O(3)`; this identification is not proved here, the action is characterised by (6.25)
+(`EvolutionSpace.vectorField_smul`). The factor `det R` is `1` for a rotation; it makes `ω` an
+axial vector under reflections. -/
 instance : SMul (GalileanGroup 3) GalileanAlgebra :=
   ⟨fun a Z => ⟨a.rotation.1.det • (a.rotation.1 *ᵥ Z.ω),
     a.rotation.1 *ᵥ Z.β - (a.rotation.1.det • (a.rotation.1 *ᵥ Z.ω)) ⨯₃ WithLp.ofLp a.velocity,
@@ -526,17 +541,23 @@ lemma coadjoint_pair (a : GalileanGroup 3) (μ : GalileanTorsor) (Z : GalileanAl
     Matrix.head_cons, Matrix.tail_cons]
   ring
 
-/-- The coadjoint action is a linear action of the Galilean group on the torsors. -/
+/-- The coadjoint action is an action of the Galilean group on the torsors. -/
 instance : MulAction (GalileanGroup 3) GalileanTorsor where
   one_smul μ := ext_pair fun Z => by rw [coadjoint_pair, inv_one, one_smul]
   mul_smul a a' μ := ext_pair fun Z => by
     rw [coadjoint_pair, coadjoint_pair, coadjoint_pair, _root_.mul_inv_rev, mul_smul]
 
-/-- The coadjoint action is linear. -/
+/-- The coadjoint action is additive; it is linear by `coadjoint_smul_real`. -/
 instance : DistribMulAction (GalileanGroup 3) GalileanTorsor where
   smul_zero a := ext_pair fun Z => by rw [coadjoint_pair, pair_zero, pair_zero]
   smul_add a μ ν := ext_pair fun Z => by
     rw [coadjoint_pair, pair_add, pair_add, coadjoint_pair, coadjoint_pair]
+
+/-- The coadjoint action commutes with the real scalar multiplication: it is a linear
+representation, as in (11.14)-(11.15). -/
+lemma coadjoint_smul_real (a : GalileanGroup 3) (k : ℝ) (μ : GalileanTorsor) :
+    a • (k • μ) = k • (a • μ) :=
+  ext_pair fun Z => by rw [coadjoint_pair, pair_smul, pair_smul, coadjoint_pair]
 
 end GalileanTorsor
 
@@ -560,8 +581,9 @@ lemma massCocycle_one : massCocycle 1 = 0 := by
   rw [GalileanTorsor.pair_zero]
   simp [massCocycle, GalileanTorsor.pair]
 
-/-- (12.128): `θ₀` is a 1-cocycle of the Galilean group for the coadjoint action,
-`θ₀(a a') = a • θ₀(a') + θ₀(a)`. -/
+/-- (12.128): `θ₀` satisfies the cocycle identity (11.19 ♡) for the coadjoint action,
+`θ₀(a a') = a • θ₀(a') + θ₀(a)` (`groupCohomology.IsCocycle₁`). The differentiability also
+required by (11.19) is not part of this statement. -/
 lemma isCocycle₁_massCocycle : groupCohomology.IsCocycle₁ massCocycle := by
   intro a a'
   refine GalileanTorsor.ext_pair fun Z => ?_
@@ -599,40 +621,94 @@ lemma isCocycle₁_massCocycle : groupCohomology.IsCocycle₁ massCocycle := by
     Matrix.head_cons, Matrix.tail_cons]
   ring
 
-/-- `M θ₀` is a coboundary, `M θ₀(a) = a • μ₀ - μ₀` for some torsor `μ₀` (11.19), if and only if
-`M = 0`: the classes `M [θ₀]` are pairwise distinct. -/
+/-- The witness of p. 151: if `a • μ₀ - μ₀ = M θ₀(a)` for the pure boost `a = (1, e₁, 0, 0)`,
+then `M = 0`. This boost has `R = 1`, so it lies in Souriau's group `properGalileanGroup`. -/
+lemma eq_zero_of_smul_massCocycle_boost (M : ℝ) (μ₀ : GalileanTorsor)
+    (h : (⟨1, WithLp.toLp 2 ![1, 0, 0], 0, 0⟩ : GalileanGroup 3) • μ₀ - μ₀
+      = M • massCocycle ⟨1, WithLp.toLp 2 ![1, 0, 0], 0, 0⟩) : M = 0 := by
+  have hZ : (⟨1, WithLp.toLp 2 ![1, 0, 0], 0, 0⟩ : GalileanGroup 3)⁻¹ •
+      (⟨0, 0, ![1, 0, 0], 0⟩ : GalileanAlgebra) = ⟨0, 0, ![1, 0, 0], 0⟩ := by
+    rw [GalileanAlgebra.inv_smul_eq]
+    apply GalileanAlgebra.ext <;> simp [Time.zero_val]
+  have hθ : (massCocycle ⟨1, WithLp.toLp 2 ![1, 0, 0], 0, 0⟩).pair ⟨0, 0, ![1, 0, 0], 0⟩ = 1 := by
+    simp [massCocycle, GalileanTorsor.pair, Time.zero_val]
+  have h1 := congrArg (fun μ => μ.pair ⟨0, 0, ![1, 0, 0], 0⟩) h
+  simp only [GalileanTorsor.pair_sub, GalileanTorsor.coadjoint_pair, hZ, sub_self,
+    GalileanTorsor.pair_smul, hθ, mul_one] at h1
+  exact h1.symm
+
+/-- `M θ₀` is a coboundary of Physlib's Galilean group (rotations in `O(3)`),
+`M θ₀(a) = a • μ₀ - μ₀` for some torsor `μ₀` (11.19 ◇), if and only if `M = 0`. For Souriau's
+group (12.73) see `isCoboundary₁_smul_massCocycle_proper_iff`, which this lemma does not
+imply. -/
 lemma isCoboundary₁_smul_massCocycle_iff (M : ℝ) :
     groupCohomology.IsCoboundary₁ (fun a : GalileanGroup 3 => M • massCocycle a) ↔ M = 0 := by
   constructor
   · rintro ⟨μ₀, h⟩
-    have hZ : (⟨1, WithLp.toLp 2 ![1, 0, 0], 0, 0⟩ : GalileanGroup 3)⁻¹ •
-        (⟨0, 0, ![1, 0, 0], 0⟩ : GalileanAlgebra) = ⟨0, 0, ![1, 0, 0], 0⟩ := by
-      rw [GalileanAlgebra.inv_smul_eq]
-      apply GalileanAlgebra.ext <;> simp [Time.zero_val]
-    have hθ : (massCocycle ⟨1, WithLp.toLp 2 ![1, 0, 0], 0, 0⟩).pair ⟨0, 0, ![1, 0, 0], 0⟩ = 1 := by
-      simp [massCocycle, GalileanTorsor.pair, Time.zero_val]
-    have h1 := congrArg (fun μ => μ.pair ⟨0, 0, ![1, 0, 0], 0⟩)
-      (h ⟨1, WithLp.toLp 2 ![1, 0, 0], 0, 0⟩)
-    simp only [GalileanTorsor.pair_sub, GalileanTorsor.coadjoint_pair, hZ, sub_self,
-      GalileanTorsor.pair_smul, hθ, mul_one] at h1
-    exact h1.symm
+    exact eq_zero_of_smul_massCocycle_boost M μ₀ (h _)
   · rintro rfl
     exact ⟨0, fun a => by simp⟩
 
-/-- `θ₀` is not a coboundary (p. 151): it defines a non-zero cohomology class of the Galilean
-group. -/
+/-- `θ₀` is not a coboundary of Physlib's Galilean group (rotations in `O(3)`). Souriau's
+statement (p. 151) is on his group (12.73) and is `not_isCoboundary₁_massCocycle_proper`; it is
+not implied by this one. -/
 lemma not_isCoboundary₁_massCocycle : ¬ groupCohomology.IsCoboundary₁ massCocycle := by
   intro h
   refine one_ne_zero ((isCoboundary₁_smul_massCocycle_iff 1).mp ?_)
+  simpa using h
+
+/-- Souriau's Galilean group (12.73): the elements of `GalileanGroup 3` whose rotation part has
+determinant `1`, that is `R ∈ SO(3)`. -/
+def properGalileanGroup : Subgroup (GalileanGroup 3) where
+  carrier := {a | a.rotation.1.det = 1}
+  mul_mem' {a b} ha hb := by
+    change a.rotation.1.det = 1 at ha
+    change b.rotation.1.det = 1 at hb
+    change (a.rotation.1 * b.rotation.1).det = 1
+    rw [Matrix.det_mul, ha, hb, mul_one]
+  one_mem' := by
+    change (1 : GalileanGroup 3).rotation.1.det = 1
+    simp
+  inv_mem' {a} ha := by
+    change a.rotation.1.det = 1 at ha
+    change (a.rotation⁻¹).1.det = 1
+    rw [orthogonal_det_inv, ha]
+
+/-- (12.128) on Souriau's group (12.73): the restriction of `θ₀` to `properGalileanGroup` satisfies
+the cocycle identity (11.19 ♡). -/
+lemma isCocycle₁_massCocycle_proper :
+    groupCohomology.IsCocycle₁ (fun a : properGalileanGroup => massCocycle a) :=
+  fun a a' => isCocycle₁_massCocycle a a'
+
+/-- p. 151 on Souriau's group (12.73): `M θ₀` is a coboundary of `properGalileanGroup`,
+`M θ₀(a) = a • μ₀ - μ₀` for some torsor `μ₀` (11.19 ◇), if and only if `M = 0`. -/
+lemma isCoboundary₁_smul_massCocycle_proper_iff (M : ℝ) :
+    groupCohomology.IsCoboundary₁ (fun a : properGalileanGroup => M • massCocycle a) ↔
+      M = 0 := by
+  constructor
+  · rintro ⟨μ₀, h⟩
+    refine eq_zero_of_smul_massCocycle_boost M μ₀
+      (h ⟨⟨1, WithLp.toLp 2 ![1, 0, 0], 0, 0⟩, ?_⟩)
+    change (1 : GalileanGroup 3).rotation.1.det = 1
+    simp
+  · rintro rfl
+    exact ⟨0, fun a => by simp⟩
+
+/-- p. 151 on Souriau's group (12.73): `θ₀` is not a coboundary of `properGalileanGroup`, so it
+defines a non-zero cohomology class of Souriau's Galilean group. -/
+lemma not_isCoboundary₁_massCocycle_proper :
+    ¬ groupCohomology.IsCoboundary₁ (fun a : properGalileanGroup => massCocycle a) := by
+  intro h
+  refine one_ne_zero ((isCoboundary₁_smul_massCocycle_proper_iff 1).mp ?_)
   simpa using h
 
 namespace EvolutionSpace
 
 variable {N : ℕ}
 
-/-- (12.126)-(12.127) with `m = Σ_j m_j` (12.135): the moment of free material points is
-equivariant up to the total mass times `θ₀`, `μ(a • y) - a • μ(y) = m θ₀(a)`, independently of
-`y`. -/
+/-- (12.126)-(12.127) for `N` points: with the moment of `GalileanMass` (additive constant zero)
+and `m = Σ_j m_j` (12.135), `μ(a • y) - a • μ(y) = m θ₀(a)`, independently of `y`. Souriau
+prints (12.126) for one point of unit mass; for `N` points this is (12.132) with `μ₀ = 0`. -/
 lemma moment_smul_sub (m : Fin N → ℝ) (a : GalileanGroup 3) (y : EvolutionSpace N) :
     moment m (a • y) - a • moment m y = totalMass m • massCocycle a := by
   refine GalileanTorsor.ext_pair fun Z => ?_
@@ -656,14 +732,27 @@ lemma moment_smul_sub (m : Fin N → ℝ) (a : GalileanGroup 3) (y : EvolutionSp
     Matrix.head_cons, Matrix.tail_cons]
   ring
 
-/-- (12.136) at the level of the group: for a non-zero total mass, the cocycle
-`a ↦ μ(a • y) - a • μ(y)` of the system is not a coboundary. -/
+/-- (12.132) and (12.136) at the level of the group, on Physlib's Galilean group (rotations in
+`O(3)`): for a non-zero total mass, the cocycle `a ↦ μ(a • y) - a • μ(y)` of the system is not a
+coboundary. For Souriau's group (12.73) see `not_isCoboundary₁_moment_smul_sub_proper`, which this
+lemma does not imply. -/
 lemma not_isCoboundary₁_moment_smul_sub (m : Fin N → ℝ) (hM : totalMass m ≠ 0)
     (y : EvolutionSpace N) :
     ¬ groupCohomology.IsCoboundary₁
       (fun a : GalileanGroup 3 => moment m (a • y) - a • moment m y) := by
   simp_rw [moment_smul_sub]
   rw [isCoboundary₁_smul_massCocycle_iff]
+  exact hM
+
+/-- (12.132) and (12.136) at the level of the group, on Souriau's group (12.73): for a non-zero
+total mass, the cocycle `a ↦ μ(a • y) - a • μ(y)` of the system, restricted to
+`properGalileanGroup`, is not a coboundary. -/
+lemma not_isCoboundary₁_moment_smul_sub_proper (m : Fin N → ℝ) (hM : totalMass m ≠ 0)
+    (y : EvolutionSpace N) :
+    ¬ groupCohomology.IsCoboundary₁
+      (fun a : properGalileanGroup => moment m (a • y) - a • moment m y) := by
+  simp_rw [Subgroup.smul_def, moment_smul_sub]
+  rw [isCoboundary₁_smul_massCocycle_proper_iff]
   exact hM
 
 end EvolutionSpace
