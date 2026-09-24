@@ -13,35 +13,45 @@ public import Mathlib.Algebra.Lie.Cochain
 
 ## i. Overview
 
-Souriau states (12.131), p. 152, that the space of symplectic cohomology of the Galilean group
-has dimension `1`: every symplectic cocycle is `θ(a) = a • μ₀ - μ₀ + m θ₀(a)` (12.132), with
-derivative `f(Z)(Z') = μ₀[Z, Z'] + m f₀(Z)(Z')` at the identity (12.133), and the number `m`
-locates the class. He does not carry out the computation, which he calls long but elementary, and
-refers to V. Bargmann (Ann. Math. 59, 1954). This file carries it out at the level of the Lie
-algebra, where the derivative `f` of a symplectic cocycle is an antisymmetric bilinear form
-satisfying the cyclic identity (11.33) (p. 116; (11.30), (11.32)).
+Souriau states (12.131), p. 152, that the space of symplectic cohomology ((11.31), p. 115) of the
+Galilean group has dimension `1`: every symplectic cocycle is `θ(a) = a • μ₀ - μ₀ + m θ₀(a)`
+(12.132), with derivative `f(Z)(Z') = μ₀[Z, Z'] + m f₀(Z)(Z')` at the identity (12.133), and the
+number `m` locates the class. He does not carry out the computation, which he calls long but
+elementary, and refers to V. Bargmann (Ann. Math. 59, 1954). This file carries it out at the level
+of the Lie algebra, where the derivative `f` of a symplectic cocycle is an antisymmetric bilinear
+form satisfying the cyclic identity (11.33) (p. 116; (11.30), (11.32)).
 
 In Mathlib's vocabulary (`LieModule.Cohomology`), such an `f` is a 2-cocycle of the Lie algebra
 with coefficients in the trivial module `ℝ` (`mem_twoCocycle_iff_of_trivial` is (11.33) for an
-alternating form), and the coboundaries `d₁₂ φ (Z, Z') = -φ([Z, Z'])` are Souriau's `μ₀[Z, Z']`
-(p. 116, note (1); (11.24), p. 114) up to the sign of `μ₀`. The file gives the Galilean Lie algebra
+alternating form), and the coboundaries `d₁₂ φ (Z, Z') = -φ([Z, Z'])` are Souriau's coboundaries of
+the algebra, `δ(μ₀)(Z)(Z') = μ₀[Z, Z']` ((11.24), p. 114, with (11.16), p. 109, and (6.13 b), p. 50;
+by p. 116, note (1), this is also the derivative of the group coboundary `Δ(μ₀)`), up to the sign
+of `μ₀`. The file gives the Galilean Lie algebra
 of `PhyslibAlpha.ClassicalMechanics.GalileanMass` its real vector space and Lie algebra structures
 (the bracket is Souriau's), and proves that every real 2-cocycle is a coboundary plus a multiple
 of `f₀`, the multiple being its mass `c(B e₁)(T e₁)` (a change of velocity and a space translation
-along the same axis). The mass is a surjective linear map whose kernel is the coboundaries, so
-the 2-cocycles modulo the coboundaries are isomorphic to `ℝ`: this is (12.131) at the level of
-the algebra.
+along the same axis). The mass is a surjective linear map whose kernel is the coboundaries;
+hence, by the first isomorphism theorem (not stated here), the 2-cocycles modulo the coboundaries
+are isomorphic to `ℝ`, which is (12.131) at the level of the algebra.
 
 The computation is organised by blocks (rotations `R`, changes of velocity `B`, space
 translations `T`, time translation `H`): no term between two space translations, two changes of
 velocity, the time translation and a space translation, a rotation and the time translation; an
 isotropic term `⟨β, γ⟩ m` between a change of velocity and a space translation; the remaining
-blocks are read off a torsor `μ₀ = {l, g, p, E}`. This organisation is the file's own.
+blocks are read off the components `l`, `g`, `p` of a torsor `μ₀`; its component `E` does not
+enter, since no bracket has a time component, and is taken to be `0`. This organisation is the
+file's own.
 
 What is not formalised here:
 - the level of the group, (12.131)-(12.132) as printed: the passage from a group cocycle to its
-  derivative ((11.22 b), (11.32)) and back, which uses the connectedness of the group (p. 139,
-  (11.22 c)) and differentiability;
+  derivative ((11.22 b), (11.32)); its injectivity (11.22 c), which uses the connectedness of the
+  group (p. 139); and the fact that `μ₀[Z, Z'] + m f₀` is the derivative of the group cocycle
+  `Δ(μ₀) + m θ₀` ((11.19), (12.127)), which is how every algebra cocycle found here comes from the
+  group;
+- the identification of the mass with the total mass `Σ_j m_j` of (12.135), (12.136): for `N` free
+  points the cocycle of the system is `totalMass m • f₀`
+  (`EvolutionSpace.lagrangeForm_vectorField`), whose mass is `totalMass m`, but this is not stated
+  here;
 - the quotient itself: Mathlib's `LieModule.Cohomology` does not yet define coboundaries or
   cohomology, and the statement is given as `ker_massOf` and `massOf_surjective`; the dimension `9`
   of the coboundaries is not stated;
@@ -55,8 +65,10 @@ What is not formalised here:
 - `GalileanAlgebra.twoCocycle_eq_d₁₂_add_smul`: (12.133) at the level of the algebra, every real
   2-cocycle is a coboundary plus its mass times `f₀`.
 - `GalileanAlgebra.mem_twoCoboundary_iff`, `GalileanAlgebra.ker_massOf`,
-  `GalileanAlgebra.massOf_surjective`: (12.131) at the level of the algebra, the 2-cocycles modulo
-  the coboundaries are isomorphic to `ℝ` by the mass.
+  `GalileanAlgebra.massOf_surjective`: the mass is a surjective linear form on the real 2-cocycles
+  whose kernel is the coboundaries. By the first isomorphism theorem, which is not stated here, the
+  2-cocycles modulo the coboundaries are isomorphic to `ℝ`; this is (12.131) at the level of the
+  algebra.
 - `GalileanAlgebra.massTwoCocycle_not_mem_twoCoboundary`: `f₀` is not a coboundary.
 
 ## iii. Table of contents
@@ -70,14 +82,15 @@ What is not formalised here:
 ## iv. References
 
 - J.-M. Souriau, Structure des systèmes dynamiques, Dunod, Paris, 1970: p. 152 (12.131)-(12.133);
-  p. 151 (12.129)-(12.130); p. 113 (11.22), p. 114 (11.24), p. 115 (11.30), p. 116 (11.32)-(11.33)
-  and note (1); p. 139 for the connectedness of the group.
+  p. 151 (12.129)-(12.130); pp. 112-113 (11.22), p. 114 (11.24), p. 115 (11.30)-(11.31), p. 116
+  (11.32)-(11.33) and note (1); p. 109 (11.16) and p. 50 (6.13 b) for the coboundaries of the
+  algebra; p. 139 for the connectedness of the group.
 
 ## References
 
 * J.-M. Souriau, *Structure des systèmes dynamiques*, Maîtrises de mathématiques, Dunod,
-  Paris, 1970: chapter 12, pp. 139-152, and pp. 113-116 for (11.22)-(11.33). The equation numbers
-  refer to this edition. [ref: Souriau1970]
+  Paris, 1970: chapter 12, pp. 139-152, pp. 112-116 for (11.22)-(11.33), p. 109 for (11.16) and
+  p. 50 for (6.13). The equation numbers refer to this edition. [ref: Souriau1970]
 
 -/
 
@@ -724,8 +737,9 @@ lemma massOf_massTwoCocycle : massOf massTwoCocycle = 1 := by
   exact cocycle_boost_translation
 
 /-- (12.133) at the level of the algebra: every real 2-cocycle `c` of the Galilean Lie algebra is a
-coboundary `d₁₂ φ` plus its mass times `f₀`. With Souriau's coboundaries `μ₀[Z, Z']` (p. 116,
-note (1)), `φ = -μ₀`; Mathlib's `d₁₂` for trivial coefficients is `d₁₂ φ (Z, Z') = -φ([Z, Z'])`. -/
+coboundary `d₁₂ φ` plus its mass times `f₀`. With Souriau's coboundaries of the algebra
+`δ(μ₀)(Z)(Z') = μ₀[Z, Z']` ((11.24), (11.16), (6.13 b); p. 116, note (1)), `φ = -μ₀`; Mathlib's
+`d₁₂` for trivial coefficients is `d₁₂ φ (Z, Z') = -φ([Z, Z'])`. -/
 lemma twoCocycle_eq_d₁₂_add_smul (c : twoCocycle ℝ GalileanAlgebra Coeff) :
     ∃ φ : oneCochain ℝ GalileanAlgebra Coeff,
       c.1 = d₁₂ ℝ GalileanAlgebra Coeff φ + massOf c • massTwoCochain := by
