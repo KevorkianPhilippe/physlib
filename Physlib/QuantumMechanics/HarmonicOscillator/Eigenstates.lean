@@ -11,6 +11,7 @@ public import Physlib.Mathematics.KroneckerDelta.Basic
 public import Physlib.Mathematics.SpecialFunctions.PhysHermite
 public import Physlib.QuantumMechanics.HarmonicOscillator.Basic
 public import Physlib.QuantumMechanics.HarmonicOscillator.NumberOperator
+public import Physlib.QuantumMechanics.HarmonicOscillator.OneDimension.Eigenfunction
 public import Physlib.Meta.Sorry
 /-!
 
@@ -161,29 +162,42 @@ lemma eigenfunction_apply :
     smulLeftCLM_apply_apply (by fun_prop)]
   simp [div_eq_mul_inv, prod_mul_distrib, exp_neg, norm_sq_eq, mul_sum, mul_comm, exp_sum]
 
-/-- The `j`th one-dimensional factor of `Q.eigenfunction n`,
-  `y ↦ c(n)ⱼ Hₙⱼ(y / ξⱼ) exp(-½ (y / ξⱼ)²)`. -/
-def eigenFactor (j : Fin d) (y : ℝ) : ℂ :=
-  (Q.eigenCoeff n j : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ) *
-    cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2)
+/-- The one-dimensional harmonic oscillator of mass `m` and angular frequency `ωⱼ`, along the
+  `j`th axis. `Q.eigenfunction n` is the product over `j` of the `nⱼ`th eigenfunctions of these
+  oscillators (`eigenfunction_eq_prod_oneDim`). -/
+def oneDim (j : Fin d) : OneDimension.HarmonicOscillator where
+  m := Q.m
+  ω := Q.ω j
+  hω := Q.hω j
+  hm := Q.hm
 
-lemma eigenFactor_eq (j : Fin d) (y : ℝ) : Q.eigenFactor n j y =
-    (Q.eigenCoeff n j : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ) *
-      cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2) := rfl
+/-- The length scale of `Q.oneDim j` is `ξⱼ`. -/
+lemma oneDim_ξ (j : Fin d) : (Q.oneDim j).ξ = Q.ξ j := by
+  rw [ξ_eq]
+  show √(ℏ / (Q.m * Q.ω j)) = _
+  rw [Real.sqrt_div' _ (mul_nonneg Q.hm.le (Q.hω j).le), Real.sqrt_mul Q.hm.le]
 
-/-- The eigenfunction is the product of its one-dimensional factors. -/
-lemma eigenfunction_eq_prod_eigenFactor : Q.eigenfunction n x = ∏ j, Q.eigenFactor n j (x j) := by
+/-- The `nⱼ`th eigenfunction of `Q.oneDim j` is `y ↦ c(n)ⱼ Hₙⱼ(y / ξⱼ) exp(-½ (y / ξⱼ)²)`. -/
+lemma oneDim_eigenfunction_apply (j : Fin d) (y : ℝ) :
+    (Q.oneDim j).eigenfunction (n j) y =
+      (Q.eigenCoeff n j : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ) *
+        cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2) := by
+  have hs : √(2 ^ n j * (n j)! * √π * Q.ξ j) = √(2 ^ n j * (n j)!) * √(√π * Q.ξ j) := by
+    rw [mul_assoc (2 ^ n j * (n j)! : ℝ), Real.sqrt_mul (by positivity)]
+  rw [OneDimension.HarmonicOscillator.eigenfunction_eq, Q.oneDim_ξ, eigenCoeff_eq, hs]
+  push_cast
+  ring_nf
+
+/-- The eigenfunction is the product of the eigenfunctions of the one-dimensional oscillators. -/
+lemma eigenfunction_eq_prod_oneDim :
+    Q.eigenfunction n x = ∏ j, (Q.oneDim j).eigenfunction (n j) (x j) := by
   rw [eigenfunction_apply]
-  rfl
+  exact Finset.prod_congr rfl fun j _ => (Q.oneDim_eigenfunction_apply n j (x j)).symm
 
-lemma eigenFactor_differentiable (j : Fin d) : Differentiable ℝ (Q.eigenFactor n j) := by
-  unfold eigenFactor
-  fun_prop
-
-/-- The derivative of the `j`th factor, `c(n)ⱼ ((2 nⱼ/ξⱼ) Hₙⱼ₋₁(y/ξⱼ) - (y/ξⱼ²) Hₙⱼ(y/ξⱼ))
-  exp(-½ (y/ξⱼ)²)`. -/
-lemma deriv_eigenFactor (j : Fin d) (y : ℝ) :
-    _root_.deriv (Q.eigenFactor n j) y
+/-- The derivative of the `nⱼ`th eigenfunction of `Q.oneDim j`,
+  `c(n)ⱼ ((2 nⱼ/ξⱼ) Hₙⱼ₋₁(y/ξⱼ) - (y/ξⱼ²) Hₙⱼ(y/ξⱼ)) exp(-½ (y/ξⱼ)²)`. -/
+lemma deriv_oneDim_eigenfunction (j : Fin d) (y : ℝ) :
+    _root_.deriv ((Q.oneDim j).eigenfunction (n j)) y
       = (Q.eigenCoeff n j : ℂ) *
         (((2 * n j / Q.ξ j : ℝ) : ℂ) * (physHermite (n j - 1) (y / Q.ξ j) : ℂ)
           - ((y / Q.ξ j ^ 2 : ℝ) : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ)) *
@@ -208,7 +222,9 @@ lemma deriv_eigenFactor (j : Fin d) (y : ℝ) :
     push_cast
     ring
   have := (hH.const_mul (Q.eigenCoeff n j : ℂ)).mul hE
-  unfold eigenFactor
+  rw [show (Q.oneDim j).eigenfunction (n j) = fun y : ℝ => (Q.eigenCoeff n j : ℂ) *
+      (physHermite (n j) (y / Q.ξ j) : ℂ) * cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2) from
+    funext (Q.oneDim_eigenfunction_apply n j)]
   rw [show (fun y : ℝ => (Q.eigenCoeff n j : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ)
         * cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2))
       = (fun y : ℝ => (Q.eigenCoeff n j : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ)) *
@@ -216,31 +232,26 @@ lemma deriv_eigenFactor (j : Fin d) (y : ℝ) :
   push_cast
   ring
 
-/-- Changing the `i`th quantum number does not change the other factors. -/
-lemma eigenFactor_update_of_ne {i j : Fin d} (hj : j ≠ i) (k : ℕ) :
-    Q.eigenFactor (Function.update n i k) j = Q.eigenFactor n j := by
-  funext y
-  simp only [eigenFactor, eigenCoeff_eq]
-  rw [Function.update_of_ne hj]
-
 /-- The eigenfunction with the `i`th quantum number changed to `k`, factor `i` set apart. -/
 lemma eigenfunction_update_apply (i : Fin d) (k : ℕ) :
     Q.eigenfunction (Function.update n i k) x =
-      Q.eigenFactor (Function.update n i k) i (x i) *
-        ∏ j ∈ univ.erase i, Q.eigenFactor n j (x j) := by
-  rw [eigenfunction_eq_prod_eigenFactor, ← Finset.mul_prod_erase univ _ (Finset.mem_univ i)]
+      (Q.oneDim i).eigenfunction (Function.update n i k i) (x i) *
+        ∏ j ∈ univ.erase i, (Q.oneDim j).eigenfunction (n j) (x j) := by
+  rw [eigenfunction_eq_prod_oneDim, ← Finset.mul_prod_erase univ _ (Finset.mem_univ i)]
   congr 1
   exact Finset.prod_congr rfl fun j hj => by
-    rw [Q.eigenFactor_update_of_ne n (Finset.ne_of_mem_erase hj)]
+    rw [Function.update_of_ne (Finset.ne_of_mem_erase hj)]
 
 /-- The `i`th spatial derivative of the eigenfunction, factor `i` differentiated. -/
 lemma deriv_eigenfunction_apply (i : Fin d) :
     ∂[i] (Q.eigenfunction n) x =
-      _root_.deriv (Q.eigenFactor n i) (x i) * ∏ j ∈ univ.erase i, Q.eigenFactor n j (x j) := by
-  have h : (⇑(Q.eigenfunction n) : Space d → ℂ) = fun x => ∏ j, Q.eigenFactor n j (x j) := by
+      _root_.deriv ((Q.oneDim i).eigenfunction (n i)) (x i) *
+        ∏ j ∈ univ.erase i, (Q.oneDim j).eigenfunction (n j) (x j) := by
+  have h : (⇑(Q.eigenfunction n) : Space d → ℂ) =
+      fun x => ∏ j, (Q.oneDim j).eigenfunction (n j) (x j) := by
     funext x
-    exact Q.eigenfunction_eq_prod_eigenFactor n x
-  rw [h, Space.deriv_prod_coord _ (Q.eigenFactor_differentiable n)]
+    exact Q.eigenfunction_eq_prod_oneDim n x
+  rw [h, Space.deriv_prod_coord _ fun j y => (Q.oneDim j).eigenfunction_differentiableAt y (n j)]
 
 /-!
 ### A.3. Eigenstates
@@ -273,10 +284,12 @@ lemma raising_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
   simp only [raisingCLM_eq, _root_.smul_apply, _root_.sub_apply, positionCLM_apply,
     momentumCLM_apply, smul_eq_mul]
   rw [Q.deriv_eigenfunction_apply, Q.eigenfunction_update_apply,
-    Q.eigenfunction_eq_prod_eigenFactor n x, ← Finset.mul_prod_erase univ _ (Finset.mem_univ i),
-    Q.deriv_eigenFactor]
-  set P : ℂ := ∏ j ∈ univ.erase i, Q.eigenFactor n j (x j) with hP
-  simp only [eigenFactor, Function.update_self]
+    Q.eigenfunction_eq_prod_oneDim n x, ← Finset.mul_prod_erase univ _ (Finset.mem_univ i),
+    Q.deriv_oneDim_eigenfunction]
+  set P : ℂ := ∏ j ∈ univ.erase i, (Q.oneDim j).eigenfunction (n j) (x j) with hP
+  rw [Q.oneDim_eigenfunction_apply (Function.update n i (n i + 1)) i,
+    Q.oneDim_eigenfunction_apply n i]
+  simp only [Function.update_self]
   have hcc := congrArg (Complex.ofReal) (Q.eigenCoeff_update_succ i n)
   have hHc := congrArg (Complex.ofReal) (physHermite_succ_apply' (n i) (x i / Q.ξ i))
   push_cast at hcc hHc ⊢
@@ -305,10 +318,12 @@ lemma lowering_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
   simp only [loweringCLM_eq, _root_.smul_apply, _root_.add_apply, positionCLM_apply,
     momentumCLM_apply, smul_eq_mul]
   rw [Q.deriv_eigenfunction_apply, Q.eigenfunction_update_apply,
-    Q.eigenfunction_eq_prod_eigenFactor n x, ← Finset.mul_prod_erase univ _ (Finset.mem_univ i),
-    Q.deriv_eigenFactor]
-  set P : ℂ := ∏ j ∈ univ.erase i, Q.eigenFactor n j (x j) with hP
-  simp only [eigenFactor, Function.update_self]
+    Q.eigenfunction_eq_prod_oneDim n x, ← Finset.mul_prod_erase univ _ (Finset.mem_univ i),
+    Q.deriv_oneDim_eigenfunction]
+  set P : ℂ := ∏ j ∈ univ.erase i, (Q.oneDim j).eigenfunction (n j) (x j) with hP
+  rw [Q.oneDim_eigenfunction_apply (Function.update n i (n i - 1)) i,
+    Q.oneDim_eigenfunction_apply n i]
+  simp only [Function.update_self]
   have hcc := congrArg (Complex.ofReal) (Q.eigenCoeff_update_pred i n)
   push_cast at hcc ⊢
   have hξ := Q.ξ_ofReal_ne_zero i
