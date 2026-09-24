@@ -26,14 +26,14 @@ the parameter controlling its depth is a positive integer.
 - `potential` is the Pöschl-Teller potential `-(ℏ² κ² N (N + 1)) / (2 m cosh² (κ x))`, of depth
   `depth = ℏ² κ² N (N + 1) / (2 m)`; it is negative, bounded below by `-depth`, even, of temperate
   growth (`potential_hasTemperateGrowth`) and continuous.
-- `kineticCLM`, `potentialCLM` and `hamiltonianCLM` are the kinetic, potential and Hamiltonian
-  operators on Schwartz space, with their pointwise formulas; `kineticOperator`,
-  `potentialOperator` and `hamiltonianOperator` are the unbounded versions, and
-  `potentialOperator_isSelfAdjoint` holds.
+- `toSpaceDQuantumSystem` realises the Pöschl-Teller system as a `SpaceDQuantumSystem` of
+  dimension `1`; its kinetic, potential and Hamiltonian operators are the generic ones of
+  `SpaceDQuantumSystem`, for which this file gives the pointwise formulas in dimension one
+  (`toSpaceDQuantumSystem_kineticCLM_apply`, `toSpaceDQuantumSystem_hamiltonianCLM_apply`) and the
+  self-adjointness of the potential operator
+  (`toSpaceDQuantumSystem_potentialOperator_isSelfAdjoint`).
 - `creationCLM_apply`, `annihilationCLM_apply` give the pointwise action of the ladder operators;
   their sum and difference are `(2 / √(2m)) 𝐩` and `(2 i ℏ κ / √(2m)) tanh (κ X)`.
-- `toSpaceDQuantumSystem` realises the Pöschl-Teller system as a `SpaceDQuantumSystem` of
-  dimension `1`, with the same Hamiltonian.
 
 ## iii. Table of contents
 
@@ -41,15 +41,12 @@ the parameter controlling its depth is a positive integer.
   - A.1. Definition and depth
   - A.2. Sign, bounds and parity
   - A.3. Regularity
-- B. Hilbert space
+- B. As a quantum system
 - C. Operators
-  - C.1. Kinetic energy
-  - C.2. Potential energy
-  - C.3. Hamiltonian
-  - C.4. Creation and annihilation operators
-    - C.4.1. On Schwartz functions
-    - C.4.2. As unbounded operators
-- D. As a quantum system
+  - C.1. Kinetic energy, potential energy and Hamiltonian
+  - C.2. Creation and annihilation operators
+    - C.2.1. On Schwartz functions
+    - C.2.2. As unbounded operators
 
 ## iv. References
 
@@ -178,8 +175,18 @@ lemma potential_continuous : Continuous Q.potential :=
   Q.potential_hasTemperateGrowth.1.continuous
 
 /-!
-## B. Hilbert space
+## B. As a quantum system
 -/
+
+/-- The Pöschl-Teller system as a `SpaceDQuantumSystem` of dimension `1`. Its kinetic, potential
+  and Hamiltonian operators are those of `SpaceDQuantumSystem`. -/
+abbrev toSpaceDQuantumSystem : SpaceDQuantumSystem := ⟨1, Q.m, Q.m_pos, Q.potential⟩
+
+lemma toSpaceDQuantumSystem_d : Q.toSpaceDQuantumSystem.d = 1 := rfl
+
+lemma toSpaceDQuantumSystem_m : Q.toSpaceDQuantumSystem.m = Q.m := rfl
+
+lemma toSpaceDQuantumSystem_potential : Q.toSpaceDQuantumSystem.potential = Q.potential := rfl
 
 /-- The Hilbert space for the Pöschl-Teller system is `SpaceDHilbertSpace 1`. -/
 @[nolint unusedArguments]
@@ -190,82 +197,46 @@ abbrev HS (_ : PoschlTeller) : Type _ := SpaceDHilbertSpace 1
 -/
 
 /-!
-### C.1. Kinetic energy
+### C.1. Kinetic energy, potential energy and Hamiltonian
 -/
-
-/-- The kinetic operator `(2m)⁻¹𝐩²` as a continuous linear map on Schwartz space. -/
-def kineticCLM : 𝓢(Space 1, ℂ) →L[ℂ] 𝓢(Space 1, ℂ) := (2 * Q.m)⁻¹ • (𝐩 ⬝ᵥ 𝐩)
-
-lemma kineticCLM_eq : Q.kineticCLM = (2 * Q.m)⁻¹ • (𝐩 ⬝ᵥ 𝐩) := rfl
 
 /-- In dimension one the kinetic operator is `(2m)⁻¹ 𝐩 0 ∘ 𝐩 0`. -/
-lemma kineticCLM_apply (ψ : 𝓢(Space 1, ℂ)) :
-    Q.kineticCLM ψ = (2 * Q.m)⁻¹ • momentumCLM 0 (momentumCLM 0 ψ) := by
-  simp [kineticCLM, dotProduct, ContinuousLinearMap.mul_def]
-
-/-- The kinetic operator as an unbounded operator with domain `SchwartzSubmodule 1`. -/
-def kineticOperator : Q.HS →ₗ.[ℂ] Q.HS := ofReal (2 * Q.m)⁻¹ • momentumSqOperator
-
-lemma kineticOperator_eq : Q.kineticOperator = ofReal (2 * Q.m)⁻¹ • momentumSqOperator := rfl
-
-/-!
-### C.2. Potential energy
--/
-
-/-- The potential operator as a continuous linear map on Schwartz space. -/
-def potentialCLM : 𝓢(Space 1, ℂ) →L[ℂ] 𝓢(Space 1, ℂ) := smulLeftCLM ℂ (ofReal ∘ Q.potential)
-
-lemma potentialCLM_eq : Q.potentialCLM = smulLeftCLM ℂ (ofReal ∘ Q.potential) := rfl
+lemma toSpaceDQuantumSystem_kineticCLM_apply (ψ : 𝓢(Space 1, ℂ)) :
+    Q.toSpaceDQuantumSystem.kineticCLM ψ = (2 * Q.m)⁻¹ • momentumCLM 0 (momentumCLM 0 ψ) := by
+  simp [SpaceDQuantumSystem.kineticCLM, dotProduct, ContinuousLinearMap.mul_def]
 
 /-- The potential operator acts by pointwise multiplication by the potential. -/
-lemma potentialCLM_apply (ψ : 𝓢(Space 1, ℂ)) (x : Space 1) :
-    Q.potentialCLM ψ x = Q.potential x • ψ x := by
-  rw [potentialCLM, smulLeftCLM_apply_apply Q.ofReal_comp_potential_hasTemperateGrowth]
-  simp [Function.comp]
-
-/-- The potential operator as a self-adjoint, unbounded multiplication operator. -/
-def potentialOperator : Q.HS →ₗ.[ℂ] Q.HS := 𝓜 volume (ofReal ∘ Q.potential)
-
-lemma potentialOperator_eq : Q.potentialOperator = 𝓜 volume (ofReal ∘ Q.potential) := rfl
+lemma toSpaceDQuantumSystem_potentialCLM_apply (ψ : 𝓢(Space 1, ℂ)) (x : Space 1) :
+    Q.toSpaceDQuantumSystem.potentialCLM ψ x = Q.potential x • ψ x :=
+  SpaceDQuantumSystem.potentialCLM_apply_apply (Q := Q.toSpaceDQuantumSystem)
+    Q.potential_hasTemperateGrowth ψ x
 
 /-- The potential operator is self-adjoint. -/
-lemma potentialOperator_isSelfAdjoint : IsSelfAdjoint Q.potentialOperator :=
-  mulOperator_isSelfAdjoint_ofReal
-    (Complex.measurable_ofReal.comp_aemeasurable
-      Q.potential_continuous.aemeasurable).aestronglyMeasurable (by ext; simp)
+lemma toSpaceDQuantumSystem_potentialOperator_isSelfAdjoint :
+    IsSelfAdjoint Q.toSpaceDQuantumSystem.potentialOperator :=
+  SpaceDQuantumSystem.potentialOperator_isSelfAdjoint (Q := Q.toSpaceDQuantumSystem)
+    Q.potential_continuous.aestronglyMeasurable
 
 /-- Schwartz functions lie in the domain of the potential operator. -/
-lemma schwartzSubmodule_le_potentialOperator_domain :
-    SchwartzSubmodule 1 ≤ Q.potentialOperator.domain :=
-  mulOperator_domain_ge_of_hasTemperateGrowth Q.ofReal_comp_potential_hasTemperateGrowth volume
-
-/-!
-### C.3. Hamiltonian
--/
-
-/-- The Hamiltonian `(2m)⁻¹𝐩² + V` as a continuous linear map on Schwartz space. -/
-def hamiltonianCLM : 𝓢(Space 1, ℂ) →L[ℂ] 𝓢(Space 1, ℂ) := Q.kineticCLM + Q.potentialCLM
-
-lemma hamiltonianCLM_eq : Q.hamiltonianCLM = Q.kineticCLM + Q.potentialCLM := rfl
+lemma toSpaceDQuantumSystem_potentialOperator_domain_ge :
+    SchwartzSubmodule 1 ≤ Q.toSpaceDQuantumSystem.potentialOperator.domain :=
+  SpaceDQuantumSystem.potentialOperator_domain_ge (Q := Q.toSpaceDQuantumSystem)
+    Q.potential_hasTemperateGrowth
 
 /-- The pointwise action of the Hamiltonian on a Schwartz function. -/
-lemma hamiltonianCLM_apply (ψ : 𝓢(Space 1, ℂ)) (x : Space 1) :
-    Q.hamiltonianCLM ψ x =
+lemma toSpaceDQuantumSystem_hamiltonianCLM_apply (ψ : 𝓢(Space 1, ℂ)) (x : Space 1) :
+    Q.toSpaceDQuantumSystem.hamiltonianCLM ψ x =
       (2 * Q.m)⁻¹ • momentumCLM 0 (momentumCLM 0 ψ) x + Q.potential x • ψ x := by
-  simp [hamiltonianCLM, _root_.add_apply, Q.kineticCLM_apply, Q.potentialCLM_apply]
-
-/-- The Hamiltonian as an unbounded operator. -/
-def hamiltonianOperator : Q.HS →ₗ.[ℂ] Q.HS := Q.kineticOperator + Q.potentialOperator
-
-lemma hamiltonianOperator_eq : Q.hamiltonianOperator = Q.kineticOperator + Q.potentialOperator :=
+  rw [SpaceDQuantumSystem.hamiltonianCLM_eq, _root_.add_apply, _root_.add_apply,
+    Q.toSpaceDQuantumSystem_kineticCLM_apply, Q.toSpaceDQuantumSystem_potentialCLM_apply]
   rfl
 
 /-!
-### C.4. Creation and annihilation operators
+### C.2. Creation and annihilation operators
 -/
 
 /-!
-#### C.4.1. On Schwartz functions
+#### C.2.1. On Schwartz functions
 -/
 
 /-- Pointwise multiplication of Schwartz maps by `tanh(κx)`. -/
@@ -319,7 +290,7 @@ lemma creationCLM_sub_annihilationCLM :
   ring_nf
 
 /-!
-#### C.4.2. As unbounded operators
+#### C.2.2. As unbounded operators
 -/
 
 /-- The unbounded operator defined by pointwise multiplication by `tanh(κx)`. -/
@@ -332,25 +303,6 @@ def creationOperator : Q.HS →ₗ.[ℂ] Q.HS :=
 /-- The annihilation unbounded operator, `1/√(2m) (P - iℏκ tanh(κX))` -/
 def annihilationOperator : Q.HS →ₗ.[ℂ] Q.HS :=
   (1 / sqrt (2 * Q.m)) • momentumOperator 0 + (-I * ℏ * Q.κ / sqrt (2 * Q.m)) • Q.tanhOperator
-
-/-!
-## D. As a quantum system
--/
-
-/-- The Pöschl-Teller system as a `SpaceDQuantumSystem` of dimension `1`. -/
-def toSpaceDQuantumSystem : SpaceDQuantumSystem := ⟨1, Q.m, Q.m_pos, Q.potential⟩
-
-lemma toSpaceDQuantumSystem_d : Q.toSpaceDQuantumSystem.d = 1 := rfl
-
-lemma toSpaceDQuantumSystem_potential : Q.toSpaceDQuantumSystem.potential = Q.potential := rfl
-
-/-- The Hamiltonian of the generic system is the one defined above. -/
-lemma toSpaceDQuantumSystem_hamiltonianCLM :
-    Q.toSpaceDQuantumSystem.hamiltonianCLM = Q.hamiltonianCLM := rfl
-
-/-- The unbounded Hamiltonian of the generic system is the one defined above. -/
-lemma toSpaceDQuantumSystem_hamiltonianOperator :
-    Q.toSpaceDQuantumSystem.hamiltonianOperator = Q.hamiltonianOperator := rfl
 
 end PoschlTeller
 end QuantumMechanics
