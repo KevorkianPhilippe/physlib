@@ -57,9 +57,9 @@ What is not formalised here:
   uniqueness of the moment up to a constant (the constant in `E` is a choice);
 - the evolution space is presymplectic, not symplectic (p. 148, (12.114));
   `EvolutionSpace.lagrangeForm_motion` shows that `σ` is degenerate, and `σ` depends on the point
-  `y` through the velocities. The setting of `PhyslibAlpha.ClassicalMechanics.MomentMap` (a constant
-  non-degenerate form on a vector space) therefore does not apply; the moment and the cocycle are
-  computed explicitly.
+  `y` through the velocities. The setting of `PhyslibAlpha.ClassicalMechanics.MomentMap.Basic`
+  (a constant non-degenerate form on a vector space) therefore does not apply; the moment and the
+  cocycle are computed explicitly.
 
 ## ii. Key results
 
