@@ -26,13 +26,13 @@ with coefficients in the trivial module `ℝ` (`mem_twoCocycle_iff_of_trivial` i
 alternating form), and the coboundaries `d₁₂ φ (Z, Z') = -φ([Z, Z'])` are Souriau's coboundaries of
 the algebra, `δ(μ₀)(Z)(Z') = μ₀[Z, Z']` ((11.24), p. 114, with (11.16), p. 109, and (6.13 b), p. 50;
 by p. 116, note (1), this is also the derivative of the group coboundary `Δ(μ₀)`), up to the sign
-of `μ₀`. The file gives the Galilean Lie algebra
-of `PhyslibAlpha.ClassicalMechanics.GalileanMass` its real vector space and Lie algebra structures
-(the bracket is Souriau's), and proves that every real 2-cocycle is a coboundary plus a multiple
-of `f₀`, the multiple being its mass `c(B e₁)(T e₁)` (a change of velocity and a space translation
-along the same axis). The mass is a surjective linear map whose kernel is the coboundaries;
-hence, by the first isomorphism theorem (not stated here), the 2-cocycles modulo the coboundaries
-are isomorphic to `ℝ`, which is (12.131) at the level of the algebra.
+of `μ₀`. The file gives the Galilean Lie algebra of
+`PhyslibAlpha.ClassicalMechanics.MomentMap.GalileanMass` its real vector space and Lie algebra
+structures (the bracket is Souriau's), and proves that every real 2-cocycle is a coboundary plus a
+multiple of `f₀`, the multiple being its mass `c(B e₁)(T e₁)` (a change of velocity and a space
+translation along the same axis). The mass is a surjective linear map whose kernel is the
+coboundaries; hence, by the first isomorphism theorem (not stated here), the 2-cocycles modulo the
+coboundaries are isomorphic to `ℝ`, which is (12.131) at the level of the algebra.
 
 The computation is organised by blocks (rotations `R`, changes of velocity `B`, space
 translations `T`, time translation `H`): no term between two space translations, two changes of

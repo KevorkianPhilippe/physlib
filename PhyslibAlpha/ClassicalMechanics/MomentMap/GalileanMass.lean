@@ -46,17 +46,17 @@ What is not formalised here:
   connected (p. 139). Both have the same Lie algebra, with which this file works in dimension `3`,
   in Souriau's parametrisation; the file links it to neither group;
 - `GalileanAlgebra` has no vector space or `LieRing` structure here, only `Zero` and `Add` (they are
-  given in `PhyslibAlpha.ClassicalMechanics.GalileanAlgebraCohomology`); the Jacobi identity is
-  proved as an equation;
+  given in `PhyslibAlpha.ClassicalMechanics.MomentMap.GalileanAlgebraCohomology`); the Jacobi
+  identity is proved as an equation;
 - that the vector field (12.119), taken as printed, is the derivative (6.11) of the action (12.76);
 - the reading of (12.135) as the solution of the system (12.124), (12.134) for a general isolated
   system (`B_j = 0`, `Σ_j E_j = 0`, `Σ_j r_j × E_j = 0`): for free points the explicit moment and
   `m = Σ_j m_j` are verified, not derived; the uniqueness of `m` in (12.134) follows from
   `lagrangeForm_vectorField` and `smul_cocycle_isCoboundary_iff` but is not stated;
 - the dimension `1` of (12.131) (at the level of the algebra, see
-  `PhyslibAlpha.ClassicalMechanics.GalileanAlgebraCohomology`), the second half of (12.136)
-  (Hamilton's Lagrangian is not invariant), forces, the converse of (12.48), the invariance of
-  `σ` (12.72), (12.76), and the uniqueness of the moment up to a constant (the constant in `E` is
+  `PhyslibAlpha.ClassicalMechanics.MomentMap.GalileanAlgebraCohomology`), the second half of
+  (12.136) (Hamilton's Lagrangian is not invariant), forces, the converse of (12.48), the invariance
+  of `σ` (12.72), (12.76), and the uniqueness of the moment up to a constant (the constant in `E` is
   a choice);
 - the evolution space is presymplectic, not symplectic (p. 148, (12.114));
   `EvolutionSpace.lagrangeForm_motion` shows that `σ` is degenerate, and `σ` depends on the point

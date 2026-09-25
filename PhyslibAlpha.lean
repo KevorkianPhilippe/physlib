@@ -27,9 +27,9 @@ public import PhyslibAlpha.SpaceAndTime.Space.Surfaces.SphericalCylinder
 public import PhyslibAlpha.SpaceAndTime.Space.Surfaces.SolidCylinder
 public import PhyslibAlpha.SpaceAndTime.Space.Surfaces.SolidSphere
 public import PhyslibAlpha.SpaceAndTime.Space.Surfaces.SphericalShell
-public import PhyslibAlpha.ClassicalMechanics.GalileanAlgebraCohomology
 public import PhyslibAlpha.ClassicalMechanics.MomentMap.Basic
 public import PhyslibAlpha.ClassicalMechanics.MomentMap.Cohomology
+public import PhyslibAlpha.ClassicalMechanics.MomentMap.GalileanAlgebraCohomology
 public import PhyslibAlpha.ClassicalMechanics.MomentMap.GalileanMass
 public import PhyslibAlpha.ClassicalMechanics.NortonDome.Basic
 public import PhyslibAlpha.ClassicalMechanics.NortonDome.Determinism
