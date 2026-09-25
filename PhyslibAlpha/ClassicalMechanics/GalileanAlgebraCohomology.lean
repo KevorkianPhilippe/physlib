@@ -5,7 +5,7 @@ Authors: Philippe Kevorkian
 -/
 module
 
-public import PhyslibAlpha.ClassicalMechanics.GalileanMass
+public import PhyslibAlpha.ClassicalMechanics.MomentMap.GalileanMass
 public import Mathlib.Algebra.Lie.Cochain
 /-!
 
