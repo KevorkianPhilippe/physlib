@@ -18,9 +18,9 @@ public import Mathlib.Analysis.Calculus.Deriv.Prod
 
 ## i. Overview
 
-This file is the group level of `PhyslibAlpha.ClassicalMechanics.GalileanMass`, which treats
-chapter 12 of Souriau's Structure des systèmes dynamiques (Dunod 1970) at the level of the Lie
-algebra. The group is Physlib's `GalileanGroup 3` (`Physlib.SpaceAndTime.GalileanGroup.Basic`),
+This file is the group level of `PhyslibAlpha.ClassicalMechanics.MomentMap.GalileanMass`, which
+treats chapter 12 of Souriau's Structure des systèmes dynamiques (Dunod 1970) at the level of the
+Lie algebra. The group is Physlib's `GalileanGroup 3` (`Physlib.SpaceAndTime.GalileanGroup.Basic`),
 `a = (R, b, c, e)` (rotation, velocity, space translation, time translation), whose action
 `(t, x) ↦ (t + e, R x + b t + c)` is Souriau's (12.76); `EvolutionSpace.smul_time_position` shows
 that the action on the evolution space below is that action on each material point.
@@ -45,7 +45,7 @@ in chapter 12; they are computed here from (6.24), (6.28) and (11.15).
 
 The cohomology vocabulary is Mathlib's: `θ₀` is a `groupCohomology.IsCocycle₁` for the coadjoint
 action, which is (11.19 ♡), and "the class is not zero" is `¬ groupCohomology.IsCoboundary₁`,
-which is (11.19 ◇). As in `PhyslibAlpha.ClassicalMechanics.MomentMapCohomology`, Souriau's
+which is (11.19 ◇). As in `PhyslibAlpha.ClassicalMechanics.MomentMap.Cohomology`, Souriau's
 requirement that a cocycle be differentiable is not part of these definitions. This does not
 weaken the non-coboundary statements: a coboundary `a ↦ a • μ₀ - μ₀` of (11.19 ◇) is polynomial in
 the entries of `a`, hence differentiable.
