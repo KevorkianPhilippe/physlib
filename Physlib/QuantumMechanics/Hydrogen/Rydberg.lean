@@ -29,10 +29,11 @@ the Hamiltonian.
 - `energyLevel` defines the Bohr levels `E_n = -Ry / (n + (d - 1) / 2) ^ 2`; `energyLevel_nonpos`
   and `energyLevel_neg` bound them above, `energyLevel_strictMono` and `energyLevel_monotone`
   order them. Each definition comes with a lemma `_eq` giving its defining formula.
-- `transitionFrequency_eq` is the Rydberg formula
-  `ν = R_ν (1 / L n₁ ^ 2 - 1 / L n₂ ^ 2)` with `R_ν = Ry / h`, whose closed form
-  `R_ν = m k ^ 2 / (4 π ℏ ^ 3)` is `rydbergFrequency_eq`; `wavelength_inv` is the wavenumber
-  form `1 / λ = (R_ν / c) (1 / L n₁ ^ 2 - 1 / L n₂ ^ 2)` for a speed of light `c`.
+- `transitionFrequency_eq` is the Rydberg formula `ν = R_ν (1 / L n₁ ^ 2 - 1 / L n₂ ^ 2)`, where
+  the Rydberg frequency `R_ν = Ry / h` is the frequency of a photon carrying the Rydberg energy
+  (`rydbergFrequency_eq` writes it as `m k ^ 2 / (4 π ℏ ^ 3)`); `wavelength_inv` is the
+  wavenumber form `1 / λ = (R_ν / c) (1 / L n₁ ^ 2 - 1 / L n₂ ^ 2)` for the speed of light `c`.
+  For `n₂ < n₁` the frequency and the wavelength are negative, and describe an absorption.
 - `tendsto_transitionFrequency` gives the series limit `ν → R_ν / L n₁ ^ 2`.
 - `lymanFrequency`, `balmerFrequency` and `paschenFrequency` name the three classical series;
   `balmerFrequency_lt_lymanFrequency` shows that for `2 ≤ d ≤ 5` every Balmer line lies below
@@ -101,12 +102,16 @@ lemma rydbergEnergy_nonneg : 0 ≤ H.rydbergEnergy :=
 lemma rydbergEnergy_pos (hk : H.k ≠ 0) : 0 < H.rydbergEnergy :=
   div_pos (mul_pos H.m_pos (pow_two_pos_of_ne_zero hk)) (mul_pos two_pos (pow_pos ℏ_pos 2))
 
+/-- The Rydberg energy vanishes when `k = 0`. -/
+@[simp]
+lemma rydbergEnergy_eq_zero (hk : H.k = 0) : H.rydbergEnergy = 0 := by
+  simp [rydbergEnergy_eq, hk]
+
 /-- The level index is non-negative when `d ≠ 0`. -/
 @[simp]
 lemma levelIndex_nonneg [NeZero H.d] (n : ℕ) : 0 ≤ H.levelIndex n := by
   have hd : (1 : ℝ) ≤ H.d := by
     exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne H.d)
-  have hn : (0 : ℝ) ≤ n := n.cast_nonneg
   rw [levelIndex_eq]
   linarith
 
@@ -114,7 +119,6 @@ lemma levelIndex_nonneg [NeZero H.d] (n : ℕ) : 0 ≤ H.levelIndex n := by
 @[simp]
 lemma levelIndex_pos (hd : 2 ≤ H.d) (n : ℕ) : 0 < H.levelIndex n := by
   have hd' : (2 : ℝ) ≤ H.d := by exact_mod_cast hd
-  have hn : (0 : ℝ) ≤ n := n.cast_nonneg
   rw [levelIndex_eq]
   linarith
 
@@ -131,14 +135,17 @@ lemma levelIndex_monotone : Monotone H.levelIndex := H.levelIndex_strictMono.mon
 /-- The Bohr levels are non-positive. -/
 @[simp]
 lemma energyLevel_nonpos (n : ℕ) : H.energyLevel n ≤ 0 := by
-  rw [energyLevel_eq, neg_div, neg_nonpos]
-  exact div_nonneg H.rydbergEnergy_nonneg (sq_nonneg _)
+  simp [energyLevel_eq, neg_div, div_nonneg, sq_nonneg]
 
 /-- The Bohr levels are negative when `2 ≤ d` and `k ≠ 0`. -/
 @[simp]
 lemma energyLevel_neg (hd : 2 ≤ H.d) (hk : H.k ≠ 0) (n : ℕ) : H.energyLevel n < 0 := by
-  rw [energyLevel_eq, neg_div, neg_lt_zero]
-  exact div_pos (H.rydbergEnergy_pos hk) (pow_pos (H.levelIndex_pos hd n) 2)
+  simp [energyLevel_eq, neg_div, hd, hk]
+
+/-- The Bohr levels vanish when `k = 0`. -/
+@[simp]
+lemma energyLevel_eq_zero (hk : H.k = 0) (n : ℕ) : H.energyLevel n = 0 := by
+  simp [energyLevel_eq, hk]
 
 /-- The Bohr levels are strictly increasing when `2 ≤ d` and `k ≠ 0`. -/
 lemma energyLevel_strictMono (hd : 2 ≤ H.d) (hk : H.k ≠ 0) : StrictMono H.energyLevel := by
@@ -152,11 +159,7 @@ one on `d`: for `d = 1` the level index of `n = 0` vanishes, so that `E_0 = 0` b
 `x / 0 = 0` while every other level is negative. -/
 lemma energyLevel_monotone (hd : 2 ≤ H.d) : Monotone H.energyLevel := by
   by_cases hk : H.k = 0
-  · have h0 : H.rydbergEnergy = 0 := by
-      rw [rydbergEnergy_eq, hk]
-      ring
-    intro n₁ n₂ _
-    simp [energyLevel_eq, h0]
+  · exact fun _ _ _ => by simp [hk]
   · exact (H.energyLevel_strictMono hd hk).monotone
 
 /-!
@@ -164,9 +167,14 @@ lemma energyLevel_monotone (hd : 2 ≤ H.d) : Monotone H.energyLevel := by
 ## B. Transitions and the Rydberg formula
 
 A transition from the level `n₂` down to the level `n₁` emits a photon of energy
-`E_{n₂} - E_{n₁}`, frequency `ν = (E_{n₂} - E_{n₁}) / h` and wavelength `λ = c / ν`, where the
-speed of light `c` is taken as a parameter. The Rydberg formula expresses these through the
-Rydberg frequency `R_ν = Ry / h = m k ^ 2 / (4 π ℏ ^ 3)`.
+`E_{n₂} - E_{n₁}`, frequency `ν = (E_{n₂} - E_{n₁}) / h` and wavelength `λ = c / ν`, with `c` the
+speed of light. The Rydberg formula expresses these through the Rydberg frequency `R_ν = Ry / h`,
+the frequency of a photon carrying the Rydberg energy.
+
+The same definitions are used for any pair of levels. When `2 ≤ d` and `k ≠ 0` and `n₂ < n₁`,
+the level `n₂` lies below `n₁`: the transition from `n₂` to `n₁` goes up and absorbs a photon, and
+the frequency and the wavelength defined here are then negative, their absolute values being
+those of the absorbed photon. For `n₁ = n₂` there is no photon and the frequency is `0`.
 
 -/
 
@@ -177,20 +185,37 @@ def transitionEnergy (n₁ n₂ : ℕ) : ℝ := H.energyLevel n₂ - H.energyLev
 lemma transitionEnergy_eq_sub (n₁ n₂ : ℕ) :
     H.transitionEnergy n₁ n₂ = H.energyLevel n₂ - H.energyLevel n₁ := rfl
 
-/-- The frequency `(E_{n₂} - E_{n₁}) / h` of the photon emitted in the transition from `n₂`
-to `n₁`. -/
+/-- The frequency `(E_{n₂} - E_{n₁}) / h` of the transition from `n₂` to `n₁`. When `2 ≤ d` and
+`k ≠ 0`, it is positive for `n₁ < n₂` (`transitionFrequency_pos`): the transition emits a photon
+of this frequency. For `n₂ < n₁` it is negative (`transitionFrequency_neg`): the transition goes
+up in energy and absorbs a photon, whose frequency is the absolute value `(E_{n₁} - E_{n₂}) / h`
+(`transitionFrequency_swap`). For `n₁ = n₂` it is `0` (`transitionFrequency_self`). -/
 def transitionFrequency (n₁ n₂ : ℕ) : ℝ := H.transitionEnergy n₁ n₂ / (h : ℝ)
 
 /-- The defining formula of the transition frequency. -/
 lemma transitionFrequency_eq_div (n₁ n₂ : ℕ) :
     H.transitionFrequency n₁ n₂ = H.transitionEnergy n₁ n₂ / (h : ℝ) := rfl
 
-/-- The Rydberg frequency `R_ν = Ry / h`; in closed form `m k ^ 2 / (4 π ℏ ^ 3)`, see
-`rydbergFrequency_eq`. -/
+/-- Exchanging the two levels changes the sign of the transition frequency. -/
+lemma transitionFrequency_swap (n₁ n₂ : ℕ) :
+    H.transitionFrequency n₂ n₁ = -H.transitionFrequency n₁ n₂ := by
+  rw [transitionFrequency_eq_div, transitionFrequency_eq_div, transitionEnergy_eq_sub,
+    transitionEnergy_eq_sub, ← neg_div, neg_sub]
+
+/-- The transition frequency between a level and itself is `0`. -/
+@[simp]
+lemma transitionFrequency_self (n : ℕ) : H.transitionFrequency n n = 0 := by
+  simp [transitionFrequency_eq_div, transitionEnergy_eq_sub]
+
+/-- The Rydberg frequency `R_ν = Ry / h`, the frequency of a photon whose energy is the Rydberg
+energy. -/
 abbrev rydbergFrequency : ℝ := H.rydbergEnergy / (h : ℝ)
 
-/-- The wavelength `c / ν` of the photon emitted in the transition from `n₂` to `n₁`, for a
-speed of light `c`. -/
+/-- The wavelength `c / ν` of the photon emitted in the transition from `n₂` to `n₁`, with `c` the
+speed of light. When `2 ≤ d` and `k ≠ 0` and `n₂ < n₁`, the frequency is negative and so is this
+wavelength; its absolute value is the wavelength of the photon absorbed in the transition from
+`n₂` up to `n₁`. For `n₁ = n₂` there is no photon: the frequency is `0` and the value `c / 0 = 0`
+is a junk value, not a wavelength. -/
 def wavelength (c : SpeedOfLight) (n₁ n₂ : ℕ) : ℝ := c / H.transitionFrequency n₁ n₂
 
 /-- The defining formula of the wavelength. -/
@@ -198,20 +223,18 @@ lemma wavelength_eq_div (c : SpeedOfLight) (n₁ n₂ : ℕ) :
     H.wavelength c n₁ n₂ = c / H.transitionFrequency n₁ n₂ := rfl
 
 /-- The Rydberg formula for the transition energy,
-`E_{n₂} - E_{n₁} = Ry (1 / L n₁ ^ 2 - 1 / L n₂ ^ 2)`; an identity valid for every `d`. -/
+`E_{n₂} - E_{n₁} = Ry (1 / L n₁ ^ 2 - 1 / L n₂ ^ 2)`. -/
 lemma transitionEnergy_eq (n₁ n₂ : ℕ) :
     H.transitionEnergy n₁ n₂ =
       H.rydbergEnergy * (1 / H.levelIndex n₁ ^ 2 - 1 / H.levelIndex n₂ ^ 2) := by
   rw [transitionEnergy_eq_sub, energyLevel_eq, energyLevel_eq]
   ring
 
-/-- The Rydberg frequency in closed form, `R_ν = m k ^ 2 / (4 π ℏ ^ 3)`, with `h = 2 π ℏ`. -/
+/-- The Rydberg frequency in terms of the mass, the coupling constant and `ℏ`,
+`R_ν = m k ^ 2 / (4 π ℏ ^ 3)`, using `h = 2 π ℏ`. -/
 lemma rydbergFrequency_eq : H.rydbergFrequency = H.m * H.k ^ 2 / (4 * π * (ℏ : ℝ) ^ 3) := by
-  show H.rydbergEnergy / (h : ℝ) = _
-  rw [rydbergEnergy_eq, show (h : ℝ) = 2 * π * (ℏ : ℝ) from rfl]
-  have hpi : π ≠ 0 := pi_ne_zero
-  field_simp
-  ring
+  rw [rydbergFrequency, rydbergEnergy_eq, h_eq_two_pi_hbar]
+  field
 
 /-- The Rydberg frequency is non-negative. -/
 @[simp]
@@ -222,6 +245,11 @@ lemma rydbergFrequency_nonneg : 0 ≤ H.rydbergFrequency :=
 abbreviation, `simp` already gets this from `rydbergEnergy_pos` and `h_pos`. -/
 lemma rydbergFrequency_pos (hk : H.k ≠ 0) : 0 < H.rydbergFrequency :=
   div_pos (H.rydbergEnergy_pos hk) h_pos
+
+/-- The Rydberg frequency vanishes when `k = 0`. -/
+@[simp]
+lemma rydbergFrequency_eq_zero (hk : H.k = 0) : H.rydbergFrequency = 0 := by
+  simp [hk]
 
 /-- The Rydberg formula for the frequency, `ν = R_ν (1 / L n₁ ^ 2 - 1 / L n₂ ^ 2)`. -/
 lemma transitionFrequency_eq (n₁ n₂ : ℕ) :
@@ -237,6 +265,13 @@ lemma transitionFrequency_eq (n₁ n₂ : ℕ) :
 lemma transitionFrequency_pos (hd : 2 ≤ H.d) (hk : H.k ≠ 0) {n₁ n₂ : ℕ} (hn : n₁ < n₂) :
     0 < H.transitionFrequency n₁ n₂ :=
   div_pos (sub_pos.mpr (H.energyLevel_strictMono hd hk hn)) h_pos
+
+/-- The frequency of a transition from `n₂` up to `n₁`, with `n₂ < n₁`, is negative when `2 ≤ d`
+and `k ≠ 0`: the transition absorbs a photon. -/
+lemma transitionFrequency_neg (hd : 2 ≤ H.d) (hk : H.k ≠ 0) {n₁ n₂ : ℕ} (hn : n₂ < n₁) :
+    H.transitionFrequency n₁ n₂ < 0 := by
+  rw [H.transitionFrequency_swap n₂ n₁, neg_lt_zero]
+  exact H.transitionFrequency_pos hd hk hn
 
 /-- The Rydberg formula for the wavenumber,
 `1 / λ = (R_ν / c) (1 / L n₁ ^ 2 - 1 / L n₂ ^ 2)`. -/
@@ -264,11 +299,7 @@ index of `n = 0` vanishes and `1 / L 0 ^ 2 = 0` by the convention `x / 0 = 0`. -
 lemma transitionFrequency_monotone (hd : 2 ≤ H.d) (n₁ : ℕ) :
     Monotone (H.transitionFrequency n₁) := by
   by_cases hk : H.k = 0
-  · have h0 : H.rydbergFrequency = 0 := by
-      rw [rydbergFrequency_eq, hk]
-      ring
-    intro n₂ n₃ _
-    simp [H.transitionFrequency_eq, h0]
+  · exact fun _ _ _ => by simp [H.transitionFrequency_eq, hk]
   · exact (H.transitionFrequency_strictMono hd hk n₁).monotone
 
 /-- The series limit: as the upper level goes to infinity, the transition frequency to the
