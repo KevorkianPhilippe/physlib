@@ -5,7 +5,7 @@ Authors: Philippe Kevorkian
 -/
 module
 
-public import PhyslibAlpha.ClassicalMechanics.GalileanMass
+public import PhyslibAlpha.ClassicalMechanics.MomentMap.GalileanMass
 public import Physlib.SpaceAndTime.GalileanGroup.Basic
 public import Mathlib.RepresentationTheory.Homological.GroupCohomology.LowDegree
 public import Mathlib.Algebra.Group.TransferInstance
