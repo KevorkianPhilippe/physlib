@@ -26,18 +26,23 @@ the Hamiltonian.
 
 ## ii. Key results
 
-- `energyLevel` defines the Bohr levels `E_n = -Ry / (n + (d - 1) / 2) ^ 2`; `energyLevel_nonpos`
-  and `energyLevel_neg` bound them above, `energyLevel_strictMono` and `energyLevel_monotone`
-  order them. Each definition comes with a lemma `_eq` giving its defining formula.
-- `transitionFrequency_eq` is the Rydberg formula `ν = R_ν (1 / L n₁ ^ 2 - 1 / L n₂ ^ 2)`, where
-  the Rydberg frequency `R_ν = Ry / h` is the frequency of a photon carrying the Rydberg energy
-  (`rydbergFrequency_eq` writes it as `m k ^ 2 / (4 π ℏ ^ 3)`); `wavelength_inv` is the
-  wavenumber form `1 / λ = (R_ν / c) (1 / L n₁ ^ 2 - 1 / L n₂ ^ 2)` for the speed of light `c`.
-  For `n₂ < n₁` the frequency and the wavelength are negative, and describe an absorption.
-- `tendsto_transitionFrequency` gives the series limit `ν → R_ν / L n₁ ^ 2`.
-- `lymanFrequency`, `balmerFrequency` and `paschenFrequency` name the three classical series;
-  `balmerFrequency_lt_lymanFrequency` shows that for `2 ≤ d ≤ 5` every Balmer line lies below
-  every Lyman line, which fails for `6 ≤ d`.
+Definitions:
+- `rydbergEnergy` : the Rydberg energy `Ry = m k ^ 2 / (2 ℏ ^ 2)`.
+- `levelIndex` : the effective principal quantum number `L n = n + (d - 1) / 2`.
+- `energyLevel` : the Bohr levels `E_n = -Ry / L n ^ 2`.
+- `transitionFrequency` : the frequency `ν = (E_{n₂} - E_{n₁}) / h` of the photon emitted in
+    the transition from `n₂` to `n₁`, and `wavelength` its wavelength `c / ν`.
+- `rydbergFrequency` : the Rydberg frequency `R_ν = Ry / h`.
+- `lymanFrequency`, `balmerFrequency`, `paschenFrequency` : the three classical series.
+
+Lemmas:
+- `energyLevel_strictMono` : the Bohr levels increase strictly with `n` when `2 ≤ d`
+    and `k ≠ 0`.
+- `transitionFrequency_eq` : the Rydberg formula `ν = R_ν (1 / L n₁ ^ 2 - 1 / L n₂ ^ 2)`.
+- `wavelength_inv` : its wavenumber form `1 / λ = (R_ν / c) (1 / L n₁ ^ 2 - 1 / L n₂ ^ 2)`.
+- `tendsto_transitionFrequency` : the series limit `ν → R_ν / L n₁ ^ 2` as `n₂ → ∞`.
+- `balmerFrequency_lt_lymanFrequency` : for `2 ≤ d ≤ 5`, every Balmer line lies below every
+    Lyman line.
 
 ## iii. Table of contents
 
@@ -154,8 +159,8 @@ lemma energyLevel_strictMono (hd : 2 ≤ H.d) (hk : H.k ≠ 0) : StrictMono H.en
   exact div_lt_div_of_pos_left (H.rydbergEnergy_pos hk) (pow_pos (H.levelIndex_pos hd n₁) 2)
     (pow_lt_pow_left₀ (H.levelIndex_strictMono hn) (H.levelIndex_pos hd n₁).le two_ne_zero)
 
-/-- The Bohr levels are monotone when `2 ≤ d`. The hypothesis on `k` can be dropped, but not the
-one on `d`: for `d = 1` the level index of `n = 0` vanishes, so that `E_0 = 0` by the convention
+/-- The Bohr levels are monotone when `2 ≤ d`. The hypothesis on `d` cannot be dropped:
+for `d = 1` the level index of `n = 0` vanishes, so that `E_0 = 0` by the convention
 `x / 0 = 0` while every other level is negative. -/
 lemma energyLevel_monotone (hd : 2 ≤ H.d) : Monotone H.energyLevel := by
   by_cases hk : H.k = 0
