@@ -146,9 +146,9 @@ Requirements:
     location: "Physlib/Cosmology/FLRW/Dynamics.lean (NullEnergyCondition, WeakEnergyCondition, StrongEnergyCondition, DominantEnergyCondition, deriv_deriv_pos_iff, deriv_deriv_pos_iff_lambda, decelerationParameter_eq_sum, decelerationParameter_lambdaCDM)"
 
   - description: >
-      Eternal expansion for k ≤ 0, Λ ≥ 0 and positive density, and the Big-Bang
-      bound: a decelerating universe expanding at t₀ with a t₀ > 0 has a zero of
-      its scale factor at most 1 / H₀ in the past, whereas the de Sitter scale
-      factor is positive at all times.
+      The API contains eternal expansion for k ≤ 0, Λ ≥ 0 and positive density,
+      and the Big-Bang bound: a decelerating universe expanding at t₀ with
+      a t₀ > 0 has a zero of its scale factor at most 1 / H₀ in the past,
+      whereas the de Sitter scale factor is positive at all times.
     done: true
     location: "Physlib/Cosmology/FLRW/Dynamics.lean (deriv_ne_zero_of_friedmann, deriv_pos_of_friedmann, deriv_deriv_nonpos_of_friedmann, scaleFactor_nonpos_of_decelerating, exists_scaleFactor_eq_zero, deSitterScaleFactor_pos)"
