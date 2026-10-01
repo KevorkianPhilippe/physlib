@@ -174,7 +174,7 @@ noncomputable def transverseComovingDistance (K χ : ℝ) : ℝ :=
 lemma transverseComovingDistance_of_pos {K : ℝ} (hK : 0 < K) (χ : ℝ) :
     transverseComovingDistance K χ = 1 / √K * Real.sin (√K * χ) := by
   unfold transverseComovingDistance spatialGeometryOfCurvature
-  rw [dif_pos hK]
+  rw [dite_eq_left hK]
   simp only [SpatialGeometry.S]
   have hs : √K ≠ 0 := (Real.sqrt_pos.mpr hK).ne'
   rw [show χ / -(1 / √K) = -(√K * χ) by field_simp, Real.sin_neg]
@@ -183,14 +183,14 @@ lemma transverseComovingDistance_of_pos {K : ℝ} (hK : 0 < K) (χ : ℝ) :
 /-- For `K = 0`, `r(χ) = χ`. -/
 lemma transverseComovingDistance_zero (χ : ℝ) : transverseComovingDistance 0 χ = χ := by
   unfold transverseComovingDistance spatialGeometryOfCurvature
-  rw [dif_neg (lt_irrefl 0), dif_neg (lt_irrefl 0)]
+  rw [dite_eq_right (lt_irrefl 0), dite_eq_right (lt_irrefl 0)]
   simp only [SpatialGeometry.S]
 
 /-- For `K < 0`, `r(χ) = (1 / √(-K)) sinh (√(-K) χ)`. -/
 lemma transverseComovingDistance_of_neg {K : ℝ} (hK : K < 0) (χ : ℝ) :
     transverseComovingDistance K χ = 1 / √(-K) * Real.sinh (√(-K) * χ) := by
   unfold transverseComovingDistance spatialGeometryOfCurvature
-  rw [dif_neg (not_lt.mpr hK.le), dif_pos hK]
+  rw [dite_eq_right (not_lt.mpr hK.le), dite_eq_left hK]
   simp only [SpatialGeometry.S]
   have hs : √(-K) ≠ 0 := (Real.sqrt_pos.mpr (neg_pos.mpr hK)).ne'
   rw [show χ / (1 / √(-K)) = √(-K) * χ by field_simp]
