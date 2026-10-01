@@ -112,10 +112,11 @@ Requirements:
     location: "Physlib/Cosmology/FLRW/MatterContent.lean (barotropicPressure, deriv_of_continuityEquation_barotropic, density_scaling, continuityEquation_of_scaling, density_scaling_dust, density_scaling_radiation, density_scaling_vacuum)"
 
   - description: >
-      The cosmological constant as a fluid: the density ρ_Λ = Λ c^2 / (8πG) and
-      the pressure p_Λ = -ρ_Λ c^2 are defined, each Friedmann equation with Λ is
-      equivalent to the same equation without Λ for the fluid ρ + ρ_Λ, p + p_Λ,
-      and p_Λ is the w = -1 barotropic pressure of ρ_Λ.
+      The API contains the cosmological constant as a fluid: the density
+      ρ_Λ = Λ c^2 / (8πG) and the pressure p_Λ = -ρ_Λ c^2 are defined, each
+      Friedmann equation with Λ is equivalent to the same equation without Λ for
+      the fluid ρ + ρ_Λ, p + p_Λ, and p_Λ is the w = -1 barotropic pressure of
+      ρ_Λ.
     done: true
     location: "Physlib/Cosmology/FLRW/MatterContent.lean (cosmologicalConstantDensity, cosmologicalConstantPressure, firstOrderFriedmann_iff_lambdaFluid, secondOrderFriedmann_iff_lambdaFluid, cosmologicalConstantPressure_eq_barotropic)"
 

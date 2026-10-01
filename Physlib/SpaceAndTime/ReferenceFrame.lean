@@ -5,10 +5,9 @@ Authors: Raunak Chhatwal
 -/
 module
 
-public import Mathlib.LinearAlgebra.AffineSpace.Basis
-public import Mathlib.Topology.Algebra.Module.TransferInstance
 public import Physlib.SpaceAndTime.Space.Basic
 public import Physlib.SpaceAndTime.Time.Basic
+public import Mathlib.Topology.Homeomorph.TransferInstance
 /-!
 # Reference frames
 
@@ -155,7 +154,8 @@ def componentEquiv : frame.Vector ≃ (Fin d → ℝ) :=
 
 instance : AddCommGroup frame.Vector := componentEquiv.addCommGroup
 
-instance : Module ℝ frame.Vector := componentEquiv.module ℝ
+instance : Module ℝ frame.Vector :=
+  AddEquiv.module ℝ { componentEquiv with map_add' _ _ := rfl }
 
 /-- Scalar multiplication by a positive real. -/
 instance : SMul {x : ℝ // 0 < x} frame.Vector where

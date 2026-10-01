@@ -6,9 +6,8 @@ Authors: Joseph Tooby-Smith
 module
 
 public import Physlib.Relativity.Fermions.Weyl.LeftHanded
-public import Physlib.Relativity.Fermions.Weyl.RightHanded
-public import Physlib.Relativity.Fermions.Weyl.DualLeftHanded
 public import Physlib.Relativity.Fermions.Weyl.DualRightHanded
+public import Mathlib.RepresentationTheory.Intertwining
 /-!
 
 # Dirac fermions
@@ -63,7 +62,7 @@ def decomposeEquiv : Dirac ≃ LeftHandedWeyl × DualRightHandedWeyl where
 
 instance : AddCommGroup Dirac := Equiv.addCommGroup decomposeEquiv
 
-instance : Module ℂ Dirac := Equiv.module ℂ decomposeEquiv
+instance : Module ℂ Dirac := AddEquiv.module ℂ { decomposeEquiv with map_add' _ _ := rfl }
 
 @[simp]
 lemma left_add (d₁ d₂ : Dirac) : (d₁ + d₂).left = d₁.left + d₂.left := rfl
