@@ -8,7 +8,7 @@ public import Mathlib.Data.Matrix.PEquiv
 public import Mathlib.Probability.Distributions.Poisson.Basic
 public import Mathlib.Analysis.Normed.Lp.lpSpace
 public import Physlib.Meta.TODO.Basic
-public import Mathlib
+public import Mathlib.Analysis.Matrix.Order
 /-!
 # Stinespring dilation
 -/
@@ -38,8 +38,8 @@ lemma krausApply.posSemidef {R : Type*} [Ring R] [PartialOrder R] [StarRing R]
     (krausApply K ρ).PosSemidef :=
   posSemidef_sum _ fun _ _ => hρ.mul_mul_conjTranspose_same _
 
-/-- Quantum channel. -/
-def QuantumChannel {R : Type*} [Mul R] [One R] [Star R] [AddCommMonoid R]
+/-- A Kraus family defines a quantum channel: its Kraus operators satisfy `∑ Kᵢᴴ Kᵢ = 1`. -/
+def IsKrausChannel {R : Type*} [Mul R] [One R] [Star R] [AddCommMonoid R]
     {q r : Type*} [Fintype q] [Fintype r] [DecidableEq q]
     (K : r → Matrix q q R) :=
   ∑ i, (K i)ᴴ * K i = 1
@@ -157,7 +157,7 @@ lemma stinespringOrtho {R : Type*} [RCLike R]
       simp_rw [RCLike.conj_mul]
       norm_cast
       exact EuclideanSpace.norm_sq_eq (WithLp.toLp 2 fun i ↦ α i j)
-    · rw [if_neg g₀]
+    · rw [ite_eq_right g₀]
       have : (1 : Matrix m m R) i j = 0 := by
         exact one_apply_ne' fun a ↦ g₀ (id (Eq.symm a))
       rw [this] at h₁
@@ -716,7 +716,7 @@ lemma krausCompletion_isometry_of_TNI {R : Type*} [RCLike R] {m r : ℕ}
     intro x i c
     rw [hS]
     unfold krausCompletion
-    rw [dif_pos (by exact i.isLt)]
+    rw [dite_eq_left (by exact i.isLt)]
     congr 1
   -- The last block of the completion is `W`.
   have hlast : ∀ (x : Fin m) (c : Fin m),
@@ -724,7 +724,7 @@ lemma krausCompletion_isometry_of_TNI {R : Type*} [RCLike R] {m r : ℕ}
     intro x c
     rw [hW, hS]
     unfold krausCompletion
-    rw [dif_neg (by simp)]
+    rw [dite_eq_right (by simp)]
   -- `Cᴴ * C = Sᴴ * S + Wᴴ * W` by splitting the row sum into the first `r` blocks and the last.
   have key : (krausCompletion K)ᴴ * krausCompletion K = Sᴴ * S + Wᴴ * W := by
     ext a b
@@ -794,11 +794,11 @@ lemma trace_tr₂ {R : Type*} [RCLike R] {m n : ℕ}
 operations to channels. -/
 def krausCompletionChannelMap {R : Type*} [RCLike R] {q r : ℕ}
     {K : Fin r → Matrix (Fin q) (Fin q) R} (hK : QuantumOperation K) :
-    {K : Fin (r+1) → Matrix (Fin q) (Fin q) R | QuantumChannel K} := by
+    {K : Fin (r+1) → Matrix (Fin q) (Fin q) R | IsKrausChannel K} := by
   constructor
   swap
   · exact fun i x => krausCompletion K (x, i)
-  · unfold QuantumChannel
+  · unfold IsKrausChannel
     rw [← krausCompletion_isometry_of_TNI hK]
     ext x y
     rw [mul_apply, Fintype.sum_prod_type, Finset.sum_comm, Matrix.sum_apply]
@@ -811,7 +811,7 @@ lemma CPTP_of_CPTNI {R : Type*} [RCLike R]
     {K : Fin r → Matrix (Fin q) (Fin q) R}
     (hq : QuantumOperation K) :
     ∃ K' : Fin (r+1) → Matrix (Fin q) (Fin q) R,
-    QuantumChannel K' ∧
+    IsKrausChannel K' ∧
     ∀ i, ∀ H : i ≠ Fin.last r, K' i = K ⟨i.1, Fin.val_lt_last H⟩ := by
   use (fun i x => krausCompletion K (x, i))
   constructor
