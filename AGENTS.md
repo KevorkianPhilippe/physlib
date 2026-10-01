@@ -56,6 +56,8 @@ When a long proof cannot be split, make sure it contains comments.
 - Check that `lake build` works (run `lake exe cache get` first).
 - Check that `lake exe lint_all` passes.
 - Check `./scripts/lint-style.sh`, but **commit your changes first**; this linter reads committed state.
+- Check that `lake exe auxillary_script_test` passes (needs `Physlib`, `QuantumInfo` and
+  `PhyslibAlpha` built).
 - If edited a `PhyslibAlpha` file, check the following:
   - `lake exe runPhyslibAlphaLinters`
   - `lake exe noAlphaImports`
