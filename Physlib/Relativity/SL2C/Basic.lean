@@ -8,6 +8,7 @@ module
 public import Physlib.Relativity.SL2C.SelfAdjoint
 public import Mathlib.Analysis.Complex.Polynomial.Basic
 public import Physlib.Relativity.LorentzGroup.Restricted.Basic
+public import Physlib.Mathematics.SchurTriangulation
 /-!
 # The group SL(2, ℂ) and it's relation to the Lorentz group
 
@@ -216,7 +217,7 @@ lemma toLorentzGroup_eq_trace (M : SL(2,ℂ)) (i j : Fin 1 ⊕ Fin 3) :
     Module.Basis.coe_mk, AddSubmonoidClass.coe_finsetSum, selfAdjoint.val_smul,
     Matrix.mul_sum, Matrix.trace_sum, Matrix.mul_smul, Matrix.trace_smul,
     PauliMatrix.trace_pauliSelfAdjoint'_mul, smul_ite, smul_zero, Finset.sum_ite_eq,
-    Finset.mem_univ, if_true] at h
+    Finset.mem_univ, ite_true] at h
   rw [h, real_smul]
   ring
 

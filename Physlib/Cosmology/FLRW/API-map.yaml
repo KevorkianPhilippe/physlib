@@ -115,10 +115,11 @@ Requirements:
     location: "Physlib/Cosmology/FLRW/MatterContent.lean (barotropicPressure, deriv_of_continuityEquation_barotropic, density_scaling, continuityEquation_of_scaling, density_scaling_dust, density_scaling_radiation, density_scaling_vacuum)"
 
   - description: >
-      The cosmological constant as a fluid: the density ρ_Λ = Λ c^2 / (8πG) and
-      the pressure p_Λ = -ρ_Λ c^2 are defined, each Friedmann equation with Λ is
-      equivalent to the same equation without Λ for the fluid ρ + ρ_Λ, p + p_Λ,
-      and p_Λ is the w = -1 barotropic pressure of ρ_Λ.
+      The API contains the cosmological constant as a fluid: the density
+      ρ_Λ = Λ c^2 / (8πG) and the pressure p_Λ = -ρ_Λ c^2 are defined, each
+      Friedmann equation with Λ is equivalent to the same equation without Λ for
+      the fluid ρ + ρ_Λ, p + p_Λ, and p_Λ is the w = -1 barotropic pressure of
+      ρ_Λ.
     done: true
     location: "Physlib/Cosmology/FLRW/MatterContent.lean (cosmologicalConstantDensity, cosmologicalConstantPressure, firstOrderFriedmann_iff_lambdaFluid, secondOrderFriedmann_iff_lambdaFluid, cosmologicalConstantPressure_eq_barotropic)"
 
@@ -148,10 +149,10 @@ Requirements:
     location: "Physlib/Cosmology/FLRW/Dynamics.lean (NullEnergyCondition, WeakEnergyCondition, StrongEnergyCondition, DominantEnergyCondition, deriv_deriv_pos_iff, deriv_deriv_pos_iff_lambda, decelerationParameter_eq_sum, decelerationParameter_lambdaCDM)"
 
   - description: >
-      Eternal expansion for k ≤ 0, Λ ≥ 0 and positive density, and the Big-Bang
-      bound: a decelerating universe expanding at t₀ with a t₀ > 0 has a zero of
-      its scale factor at most 1 / H₀ in the past, whereas the de Sitter scale
-      factor is positive at all times.
+      The API contains eternal expansion for k ≤ 0, Λ ≥ 0 and positive density,
+      and the Big-Bang bound: a decelerating universe expanding at t₀ with
+      a t₀ > 0 has a zero of its scale factor at most 1 / H₀ in the past,
+      whereas the de Sitter scale factor is positive at all times.
     done: true
     location: "Physlib/Cosmology/FLRW/Dynamics.lean (deriv_ne_zero_of_friedmann, deriv_pos_of_friedmann, deriv_deriv_nonpos_of_friedmann, scaleFactor_nonpos_of_decelerating, exists_scaleFactor_eq_zero, deSitterScaleFactor_pos)"
 
