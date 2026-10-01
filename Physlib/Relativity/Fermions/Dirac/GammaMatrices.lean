@@ -6,6 +6,7 @@ Authors: Zhuoran Li
 module
 
 public import Physlib.Relativity.Fermions.Dirac.Basic
+public import Physlib.Relativity.Tensors.RealTensor.Vector.MinkowskiProduct
 /-!
 # Gamma endomorphisms of Dirac fermions
 
@@ -177,7 +178,7 @@ theorem gamma_anticomm (μ ν : Fin 1 ⊕ Fin 3) :
   rw [mul_comm (minkowskiMatrix ν ν), ← smul_add, gammaMatrix_anticomm]
   rw [smul_smul, ← Complex.coe_smul]
   fin_cases μ <;> fin_cases ν <;>
-    norm_num [minkowskiMatrix.off_diag_zero] <;> simp [minkowskiMatrix.off_diag_zero]
+    norm_num [minkowskiMatrix.off_diag_zero]
 
 /-- A gamma endomorphism squares to the corresponding diagonal metric sign. -/
 lemma gamma_mul_self (μ : Fin 1 ⊕ Fin 3) :
