@@ -6,10 +6,12 @@ Authors: Tom Ole Diem
 module
 
 public import PhyslibAlpha.ProbabilisticTheory.State.Separation
-public import PhyslibAlpha.ProbabilisticTheory.Effect.Convex
+public import Physlib.ProbabilisticTheory.Effect.Convex
 
 /-!
 # The state–effect pairing
+
+The state–effect pairing is affine, takes values in [0, 1], and separates states and effects.
 
 ## i. Overview
 
@@ -37,6 +39,10 @@ another.
 - A. State–effect evaluation
 - B. Effects separate states
 - C. States separate effects
+
+## iv. References
+
+* None.
 
 -/
 
