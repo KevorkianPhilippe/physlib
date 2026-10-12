@@ -54,12 +54,14 @@ public import Physlib.CondensedMatter.Thermoelectric.Basic
 public import Physlib.CondensedMatter.TightBindingChain.Basic
 public import Physlib.CondensedMatter.Topology.Basic
 public import Physlib.Cosmology.Basic
+public import Physlib.Cosmology.FLRW.Age
 public import Physlib.Cosmology.FLRW.Basic
 public import Physlib.Cosmology.FLRW.ConformalTime
 public import Physlib.Cosmology.FLRW.DensityParameters
 public import Physlib.Cosmology.FLRW.Distances
 public import Physlib.Cosmology.FLRW.Dynamics
 public import Physlib.Cosmology.FLRW.MatterContent
+public import Physlib.Cosmology.FLRW.ReducedHubble
 public import Physlib.Cosmology.FLRW.Solutions
 public import Physlib.Electromagnetism.Basic
 public import Physlib.Electromagnetism.Charge.ChargeUnit
