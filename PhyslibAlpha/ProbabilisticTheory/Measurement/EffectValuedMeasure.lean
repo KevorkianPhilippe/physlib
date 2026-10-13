@@ -6,11 +6,13 @@ Authors: Tom Ole Diem
 module
 
 public import Mathlib.MeasureTheory.MeasurableSpace.Defs
-public import PhyslibAlpha.ProbabilisticTheory.Effect.Complement
+public import Physlib.ProbabilisticTheory.Effect.Complement
 public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 
 /-!
 # Effect-valued measures
+
+Effect-valued measures: countably additive assignments of effects to events.
 
 ## i. Overview
 
@@ -38,6 +40,10 @@ adding up to `1`, one for each outcome.
 - C. Finite-outcome effect-valued measures
 - D. Finite additivity and atomic reconstruction
 - E. Relabeling outcomes
+
+## iv. References
+
+* None.
 
 -/
 
