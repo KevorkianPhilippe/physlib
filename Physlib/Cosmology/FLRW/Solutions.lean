@@ -33,6 +33,8 @@ coordinate `t.val`. Its time derivative `∂ₜ a` is computed through the bridg
 - `hubbleConstant_deSitterScaleFactor`: its Hubble parameter is the constant `σ √(Λ/3) c`
   (for any `σ`, `Λ`, `c`).
 - `decelerationParameter_deSitterScaleFactor`: its deceleration parameter is `q = -1`.
+- `FriedmannSolution.deSitter`: the de Sitter solution as a `FriedmannSolution` defined at all
+  times.
 - `hubbleConstant_powerLaw`, `decelerationParameter_powerLaw`, `powerLaw_firstOrderFriedmann`,
   `powerLaw_secondOrderFriedmann`: the flat power-law solutions `a = (t / t₀) ^ n`, stated
   inline, have Hubble parameter `n / t` and deceleration parameter `(1 - n) / n`, and solve the
@@ -49,7 +51,8 @@ coordinate `t.val`. Its time derivative `∂ₜ a` is computed through the bridg
 
 - `milneScaleFactor_firstOrderFriedmann`, `milneScaleFactor_secondOrderFriedmann`: the Milne
   scale factor `a = c t` solves the empty (`ρ = 0`, `p = 0`, `Λ = 0`) Friedmann equations with
-  `k = -1`; `q = 0`.
+  `k = -1`; `q = 0`. `FriedmannSolution.milne`: the Milne solution as a `FriedmannSolution` on
+  the interval `t > 0`, with the saddle geometry of curvature parameter `-1`.
 - `einsteinStatic_density`, `einsteinStatic_curvature`: if `∂ₜ a = ∂ₜ ∂ₜ a = 0` at `t` and the
   Friedmann equations hold there with `p = 0`, then `ρ = Λ c² / (4 π G)` and
   `k c² / a² = 4 π G ρ`, so that `k > 0` when `ρ > 0` (`einsteinStatic_curvature_pos`).
@@ -63,6 +66,7 @@ Bang is at the origin `t.val = 0` of the time chart.
   - A.1. The scale factor and its derivatives
   - A.2. The Friedmann equations
   - A.3. The Hubble and deceleration parameters
+  - A.4. The de Sitter solution as a solution of the Friedmann equations
 - B. The spatially flat power-law solutions
   - B.1. Derivatives of the power-law scale factor
   - B.2. The Hubble and deceleration parameters
@@ -198,6 +202,34 @@ lemma decelerationParameter_deSitterScaleFactor {a₀ σ Λ c : ℝ} (hΛ : 0 < 
   have hσ0 : σ ≠ 0 := by
     rcases hσ with rfl | rfl <;> norm_num
   field_simp
+
+/-!
+
+### A.4. The de Sitter solution as a solution of the Friedmann equations
+
+-/
+
+/-- The de Sitter solution as a `FriedmannSolution` defined at all times: the scale factor
+  `deSitterScaleFactor a₀ σ Λ c` with `a₀ > 0`, the flat spatial geometry and an empty cosmic
+  fluid, for `Λ > 0`. -/
+noncomputable def _root_.Cosmology.FriedmannSolution.deSitter {a₀ σ Λ : ℝ} (G c : ℝ)
+    (hΛ : 0 < Λ) (ha₀ : 0 < a₀) (hσ : σ = 1 ∨ σ = -1) : FriedmannSolution Λ G c where
+  I := Set.univ
+  isOpen_I := isOpen_univ
+  ordConnected_I := Set.ordConnected_univ
+  a := deSitterScaleFactor a₀ σ Λ c
+  a_pos _ _ := mul_pos ha₀ (Real.exp_pos _)
+  differentiableOn_a := by
+    unfold deSitterScaleFactor
+    fun_prop
+  differentiableOn_deriv_a := by
+    rw [deriv_deSitterScaleFactor]
+    fun_prop
+  geometry := .Flat
+  ρ := fun _ => 0
+  p := fun _ => 0
+  firstOrder t _ := deSitterScaleFactor_firstOrderFriedmann hΛ ha₀.ne' hσ t
+  secondOrder t _ := deSitterScaleFactor_secondOrderFriedmann hΛ ha₀.ne' hσ t
 
 /-!
 
@@ -471,6 +503,33 @@ lemma decelerationParameter_milneScaleFactor (c : ℝ) (t : Time) :
   unfold decelerationParameter
   rw [deriv_deriv_milneScaleFactor, deriv_milneScaleFactor]
   simp
+
+/-- The Milne solution as a `FriedmannSolution` on the interval `I = {t | 0 < t.val}`, after the
+  Big Bang at `t.val = 0`: the scale factor `milneScaleFactor c` with `c > 0`, the saddle
+  geometry `Saddle 1` of curvature parameter `-1` and an empty cosmic fluid, with `Λ = 0`. -/
+noncomputable def _root_.Cosmology.FriedmannSolution.milne (G : ℝ) {c : ℝ} (hc : 0 < c) :
+    FriedmannSolution 0 G c where
+  I := {t | 0 < t.val}
+  isOpen_I := isOpen_lt continuous_const Time.val_differentiable.continuous
+  ordConnected_I := ⟨fun x hx _ _ z hz =>
+    lt_of_lt_of_le (show 0 < x.val from hx) ((Time.le_def x z).mp hz.1)⟩
+  a := milneScaleFactor c
+  a_pos _ ht := mul_pos hc ht
+  differentiableOn_a := by
+    unfold milneScaleFactor
+    fun_prop
+  differentiableOn_deriv_a := by
+    rw [deriv_milneScaleFactor]
+    fun_prop
+  geometry := .Saddle 1 one_pos
+  ρ := fun _ => 0
+  p := fun _ => 0
+  firstOrder t ht := by
+    have h : (SpatialGeometry.Saddle 1 one_pos).curvature = -1 := by
+      simp [SpatialGeometry.curvature]
+    rw [h]
+    exact milneScaleFactor_firstOrderFriedmann hc ht
+  secondOrder t _ := milneScaleFactor_secondOrderFriedmann t
 
 /-!
 

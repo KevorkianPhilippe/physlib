@@ -14,7 +14,9 @@ public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 
 # The Friedmann-Lemaître-Robertson-Walker metric
 
-Parts of this file is currently informal or semiformal.
+The spatial geometry of an FLRW model and its curvature parameter, the structures `FLRW`,
+`CosmicFluid` and `FriedmannSolution`, the first- and second-order Friedmann equations, and the
+Hubble and deceleration parameters.
 
 -/
 
@@ -87,28 +89,85 @@ lemma limit_S_sphere(r : ℝ) :
   exact ((tendsto_sin_rx_over_x r).comp hg).congr fun k => by
     simp only [Function.comp_apply, mul_one_div, div_div_eq_mul_div, div_one, mul_comm]
 
+/-- The curvature parameter of the spatial geometry, the constant `k` of the first-order
+  Friedmann equation `FLRW.FriedmannEquation.FirstOrderFriedmann`:
+- `1 / k ^ 2` for `Spherical k`, whose profile `S` is that of a sphere of radius `|k|`,
+- `0` for `Flat`,
+- `-1 / k ^ 2` for `Saddle k`, whose profile `S` is that of a hyperbolic space of curvature
+  radius `|k|`.
+-/
+noncomputable def curvature : SpatialGeometry → ℝ
+  | Spherical k _ => 1 / k ^ 2
+  | Flat => 0
+  | Saddle k _ => -1 / k ^ 2
+
+@[simp]
+lemma curvature_flat : Flat.curvature = 0 := rfl
+
+/-- The spherical geometry has a positive curvature parameter. -/
+lemma curvature_spherical_pos (k : ℝ) (h : k < 0) : 0 < (Spherical k h).curvature := by
+  have hk : k ≠ 0 := h.ne
+  simp only [curvature]
+  positivity
+
+/-- The saddle geometry has a negative curvature parameter. -/
+lemma curvature_saddle_neg (k : ℝ) (h : k > 0) : (Saddle k h).curvature < 0 := by
+  simp only [curvature, neg_div]
+  exact neg_neg_of_pos (by positivity)
+
 end SpatialGeometry
 
-/-- The structure FLRW is defined to contain the physical parameters of the
-  Friedmann-Lemaître-Robertson-Walker metric. That is, it contains
-- The scale factor `a(t)`
-- An element of `SpatialGeometry`.
+open Time in
+/-- An FLRW model: the scale factor `a` of the Friedmann-Lemaître-Robertson-Walker metric on an
+  open interval `I` of cosmic time, positive and twice differentiable on `I`, together with the
+  geometry of the spatial slices. The values of `a` outside `I` carry no meaning. The interval
+  lets a model begin at a Big Bang, as the Milne solution `FriedmannSolution.milne` does on
+  `I = {t | 0 < t.val}`. -/
+structure FLRW where
+  /-- The interval of cosmic time on which the model is defined. -/
+  I : Set Time
+  /-- The interval `I` is open. -/
+  isOpen_I : IsOpen I
+  /-- The set `I` is an interval. -/
+  ordConnected_I : I.OrdConnected
+  /-- The scale factor as a function of cosmic time. -/
+  a : Time → ℝ
+  /-- The scale factor is positive on `I`. -/
+  a_pos : ∀ t ∈ I, 0 < a t
+  /-- The scale factor is differentiable on `I`. -/
+  differentiableOn_a : DifferentiableOn ℝ a I
+  /-- The time derivative of the scale factor is differentiable on `I`. -/
+  differentiableOn_deriv_a : DifferentiableOn ℝ (∂ₜ a) I
+  /-- The geometry of the spatial slices. -/
+  geometry : SpatialGeometry
 
-Semiformal implementation note: It is possible that we should restrict
-`a(t)` to be smooth or at least twice differentiable.
--/
-@[sorryful]
-def FLRW : Type := sorry
-
-TODO "Replace the placeholder `FLRW` type with a concrete structure bundling a positive
-  scale factor `a : Time → ℝ` (smooth, or at least twice differentiable) together with an
-  element of `SpatialGeometry`. If the structure also bundles the dynamics, it should carry the
-  first- and second-order Friedmann equations as fields and obtain the continuity equation as a
-  lemma through `FriedmannEquation.continuityEquation_of_friedmann`, never the other way round:
-  where `∂ₜ a = 0` the first-order and continuity equations leave the pressure unconstrained,
-  whereas the second-order equation fixes `ρ + 3 p / c²` (the Einstein static universe)."
+/-- The cosmic fluid filling an FLRW model, described by its total energy density `ρ` and its
+  pressure `p`, both functions of cosmic time, as in the first- and second-order Friedmann
+  equations `FLRW.FriedmannEquation.FirstOrderFriedmann` and
+  `FLRW.FriedmannEquation.SecondOrderFriedmann`. -/
+structure CosmicFluid where
+  /-- The total energy density as a function of cosmic time. -/
+  ρ : Time → ℝ
+  /-- The pressure as a function of cosmic time. -/
+  p : Time → ℝ
 
 namespace FLRW
+
+section
+
+open Time
+
+variable (U : FLRW)
+
+lemma a_ne_zero {t : Time} (ht : t ∈ U.I) : U.a t ≠ 0 := (U.a_pos t ht).ne'
+
+lemma differentiableAt_a {t : Time} (ht : t ∈ U.I) : DifferentiableAt ℝ U.a t :=
+  U.differentiableOn_a.differentiableAt (U.isOpen_I.mem_nhds ht)
+
+lemma differentiableAt_deriv_a {t : Time} (ht : t ∈ U.I) : DifferentiableAt ℝ (∂ₜ U.a) t :=
+  U.differentiableOn_deriv_a.differentiableAt (U.isOpen_I.mem_nhds ht)
+
+end
 
 namespace FriedmannEquation
 
@@ -249,5 +308,23 @@ lemma exists_deriv_hubbleConstant_neg_iff
   exists_congr fun t => deriv_hubbleConstant_neg_iff (ha t) (hd_a t) (haz t) (hd_az t)
 end FriedmannEquation
 end FLRW
+
+open FLRW.FriedmannEquation in
+/-- A solution of the Friedmann equations: an FLRW model filled with a cosmic fluid such that
+  the first- and second-order Friedmann equations, with cosmological constant `Λ`, Newton's
+  constant `G` and speed of light `c`, hold at every time of the interval `I`, the curvature
+  parameter being the one of the spatial geometry. The continuity equation of the fluid is not
+  a field: it follows from the two Friedmann equations
+  (`FriedmannSolution.continuityEquation` in `Physlib.Cosmology.FLRW.MatterContent`). -/
+structure FriedmannSolution (Λ G c : ℝ) extends FLRW, CosmicFluid where
+  /-- The first-order Friedmann equation holds on `I`. -/
+  firstOrder : ∀ t ∈ I, FirstOrderFriedmann a ρ geometry.curvature Λ G c t
+  /-- The second-order Friedmann equation holds on `I`. -/
+  secondOrder : ∀ t ∈ I, SecondOrderFriedmann a ρ p Λ G c t
+
+TODO "State the results on FLRW cosmology (density parameters, reduced Hubble function, exact
+  solutions and dynamical criteria) directly in terms of `FLRW`, `CosmicFluid` and
+  `FriedmannSolution`, so that the API is organised around these structures rather than around
+  separate functions `a`, `ρ` and `p`."
 
 end Cosmology
