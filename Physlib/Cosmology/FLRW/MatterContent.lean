@@ -24,9 +24,10 @@ equations are therefore not independent, but not symmetrically so: where `∂ₜ
 first-order and the continuity equations leave `p` unconstrained, while the second-order
 equation still fixes `ρ + 3 p / c²` (the Einstein static universe of
 `Physlib.Cosmology.FLRW.Solutions`). The two Friedmann equations are the primitive pair, and
-the continuity equation is derived from them; accordingly, `FriedmannSolution` carries the
-two Friedmann equations as fields and the continuity equation is the lemma
-`FriedmannSolution.continuityEquation`. For a barotropic equation of state `p = w ρ c²` with
+the continuity equation is derived from them; accordingly, the proposition
+`FLRW.FriedmannSolution` consists of the two Friedmann equations, and the continuity equation is
+the lemma `FLRW.FriedmannSolution.continuityEquation`. For a barotropic equation of state
+`p = w ρ c²` with
 constant `w`, the continuity equation gives the density scaling law `ρ ∝ a^(-3(1+w))`,
 specialised to dust, radiation and vacuum energy; and the cosmological constant is equivalent
 to a `w = -1` fluid of density `ρ_Λ = Λ c² / (8 π G)`. The perfect-fluid stress-energy
@@ -44,8 +45,8 @@ Time derivatives of curves `Time → ℝ` are computed through the bridge
   equations.
 - `secondOrderFriedmann_of_continuityEquation`: the second-order Friedmann equation follows
   from the first-order equation and the continuity equation when `∂ₜ a ≠ 0`.
-- `FriedmannSolution.continuityEquation`: the continuity equation holds on the interval of a
-  solution of the Friedmann equations.
+- `FLRW.FriedmannSolution.continuityEquation`: the continuity equation holds on the interval of
+  an FLRW model whose cosmic fluid solves the Friedmann equations.
 - `barotropicPressure`: `p = w ρ c²`; `density_scaling`: under the barotropic continuity
   equation at all times, `ρ t = ρ t₀ (a t / a t₀)^(-3(1+w))`; `continuityEquation_of_scaling`:
   the converse; `density_scaling_dust`, `density_scaling_radiation`,
@@ -183,16 +184,17 @@ lemma secondOrderFriedmann_of_continuityEquation {a ρ p : Time → ℝ} {k Λ G
 
 -/
 
-/-- In a solution of the Friedmann equations, the continuity equation holds at every time of
-  the interval `I` at which the energy density is differentiable: it is obtained from the two
-  Friedmann equations through `continuityEquation_of_friedmann`. -/
-lemma _root_.Cosmology.FriedmannSolution.continuityEquation {Λ G c : ℝ}
-    (U : FriedmannSolution Λ G c) (hG : G ≠ 0) {t : Time} (ht : t ∈ U.I)
-    (hdρ : DifferentiableAt ℝ U.ρ t) :
-    ContinuityEquation U.a U.ρ U.p c t :=
+/-- If the FLRW model `U` filled with the cosmic fluid `F` solves the Friedmann equations, the
+  continuity equation holds at every time of the interval `U.I` at which the energy density is
+  differentiable: it is obtained from the two Friedmann equations through
+  `continuityEquation_of_friedmann`. -/
+lemma _root_.Cosmology.FLRW.FriedmannSolution.continuityEquation {U : FLRW} {F : CosmicFluid}
+    {Λ G c : ℝ} (h : U.FriedmannSolution F Λ G c) (hG : G ≠ 0) {t : Time} (ht : t ∈ U.I)
+    (hdρ : DifferentiableAt ℝ F.ρ t) :
+    ContinuityEquation U.a F.ρ F.p c t :=
   continuityEquation_of_friedmann hG (U.a_ne_zero ht) (U.differentiableAt_a ht)
     (U.differentiableAt_deriv_a ht) hdρ
-    (Filter.eventually_of_mem (U.isOpen_I.mem_nhds ht) U.firstOrder) (U.secondOrder t ht)
+    (Filter.eventually_of_mem (U.isOpen_I.mem_nhds ht) h.firstOrder) (h.secondOrder t ht)
 
 /-!
 

@@ -14,9 +14,10 @@ public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 
 # The Friedmann-Lemaître-Robertson-Walker metric
 
-The spatial geometry of an FLRW model and its curvature parameter, the structures `FLRW`,
-`CosmicFluid` and `FriedmannSolution`, the first- and second-order Friedmann equations, and the
-Hubble and deceleration parameters.
+The spatial geometry of an FLRW model and its curvature parameter, the structures `FLRW` and
+`CosmicFluid`, the first- and second-order Friedmann equations, the proposition
+`FLRW.FriedmannSolution` that a model and a fluid solve them, and the Hubble and deceleration
+parameters.
 
 -/
 
@@ -121,7 +122,7 @@ open Time in
 /-- An FLRW model: the scale factor `a` of the Friedmann-Lemaître-Robertson-Walker metric on an
   open interval `I` of cosmic time, positive and twice differentiable on `I`, together with the
   geometry of the spatial slices. The values of `a` outside `I` carry no meaning. The interval
-  lets a model begin at a Big Bang, as the Milne solution `FriedmannSolution.milne` does on
+  lets a model begin at a Big Bang, as the Milne model `FLRW.milne` does on
   `I = {t | 0 < t.val}`. -/
 structure FLRW where
   /-- The interval of cosmic time on which the model is defined. -/
@@ -150,6 +151,9 @@ structure CosmicFluid where
   ρ : Time → ℝ
   /-- The pressure as a function of cosmic time. -/
   p : Time → ℝ
+
+/-- The empty cosmic fluid, with zero energy density and zero pressure at all times. -/
+def CosmicFluid.empty : CosmicFluid := ⟨fun _ => 0, fun _ => 0⟩
 
 namespace FLRW
 
@@ -309,22 +313,27 @@ lemma exists_deriv_hubbleConstant_neg_iff
 end FriedmannEquation
 end FLRW
 
-open FLRW.FriedmannEquation in
-/-- A solution of the Friedmann equations: an FLRW model filled with a cosmic fluid such that
-  the first- and second-order Friedmann equations, with cosmological constant `Λ`, Newton's
-  constant `G` and speed of light `c`, hold at every time of the interval `I`, the curvature
-  parameter being the one of the spatial geometry. The continuity equation of the fluid is not
-  a field: it follows from the two Friedmann equations
-  (`FriedmannSolution.continuityEquation` in `Physlib.Cosmology.FLRW.MatterContent`). -/
-structure FriedmannSolution (Λ G c : ℝ) extends FLRW, CosmicFluid where
-  /-- The first-order Friedmann equation holds on `I`. -/
-  firstOrder : ∀ t ∈ I, FirstOrderFriedmann a ρ geometry.curvature Λ G c t
-  /-- The second-order Friedmann equation holds on `I`. -/
-  secondOrder : ∀ t ∈ I, SecondOrderFriedmann a ρ p Λ G c t
+namespace FLRW
+
+open FriedmannEquation
+
+/-- The proposition that the FLRW model `U` filled with the cosmic fluid `F` solves the
+  Friedmann equations: the first- and second-order Friedmann equations, with cosmological
+  constant `Λ`, Newton's constant `G` and speed of light `c`, hold at every time of the interval
+  `U.I`, the curvature parameter being the one of the spatial geometry. The continuity equation
+  of the fluid is not part of it: it follows from the two Friedmann equations
+  (`FLRW.FriedmannSolution.continuityEquation` in `Physlib.Cosmology.FLRW.MatterContent`). -/
+structure FriedmannSolution (U : FLRW) (F : CosmicFluid) (Λ G c : ℝ) : Prop where
+  /-- The first-order Friedmann equation holds on `U.I`. -/
+  firstOrder : ∀ t ∈ U.I, FirstOrderFriedmann U.a F.ρ U.geometry.curvature Λ G c t
+  /-- The second-order Friedmann equation holds on `U.I`. -/
+  secondOrder : ∀ t ∈ U.I, SecondOrderFriedmann U.a F.ρ F.p Λ G c t
+
+end FLRW
 
 TODO "State the results on FLRW cosmology (density parameters, reduced Hubble function, exact
   solutions and dynamical criteria) directly in terms of `FLRW`, `CosmicFluid` and
-  `FriedmannSolution`, so that the API is organised around these structures rather than around
+  `FLRW.FriedmannSolution`, so that the API is organised around these rather than around
   separate functions `a`, `ρ` and `p`."
 
 end Cosmology
