@@ -144,7 +144,7 @@ Requirements:
       Λ, and the deceleration parameter in terms of the density parameters, q =
       ½ Σ_i Ω_i (1 + 3 w_i), with its ΛCDM special case.
     done: true
-    location: "Physlib/Cosmology/FLRW/Dynamics.lean (NullEnergyCondition, WeakEnergyCondition, StrongEnergyCondition, DominantEnergyCondition, deriv_deriv_pos_iff, deriv_deriv_pos_iff_lambda, decelerationParameter_eq_sum, decelerationParameter_lambdaCDM)"
+    location: "Physlib/Cosmology/FLRW/Dynamics.lean (NullEnergyCondition, WeakEnergyCondition, StrongEnergyCondition, DominantEnergyCondition, deriv_deriv_scaleFactor_pos_iff, deriv_deriv_scaleFactor_pos_iff_lambda, decelerationParameter_eq_sum, decelerationParameter_lambdaCDM)"
 
   - description: >
       The API contains eternal expansion for k ≤ 0, Λ ≥ 0 and positive density,
@@ -152,4 +152,4 @@ Requirements:
       a t₀ > 0 has a zero of its scale factor at most 1 / H₀ in the past,
       whereas the de Sitter scale factor is positive at all times.
     done: true
-    location: "Physlib/Cosmology/FLRW/Dynamics.lean (deriv_ne_zero_of_friedmann, deriv_pos_of_friedmann, deriv_deriv_nonpos_of_friedmann, scaleFactor_nonpos_of_decelerating, exists_scaleFactor_eq_zero, deSitterScaleFactor_pos)"
+    location: "Physlib/Cosmology/FLRW/Dynamics.lean (deriv_scaleFactor_ne_zero_of_friedmann, deriv_scaleFactor_pos_of_friedmann, deriv_deriv_scaleFactor_nonpos_of_friedmann, scaleFactor_nonpos_of_decelerating, exists_scaleFactor_eq_zero, deSitterScaleFactor_pos)"

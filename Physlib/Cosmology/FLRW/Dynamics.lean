@@ -29,12 +29,13 @@ past if it is continuous, whereas the de Sitter scale factor is positive at all 
 
 - `NullEnergyCondition`, `WeakEnergyCondition`, `StrongEnergyCondition`,
   `DominantEnergyCondition` and the implications between them.
-- `deriv_deriv_pos_iff`: `∂ₜ ∂ₜ a > 0 ↔ ρ + 3 p / c² < 0` (`Λ = 0`);
-  `deriv_deriv_pos_iff_lambda`: the same for the total fluid with `Λ` folded in.
+- `deriv_deriv_scaleFactor_pos_iff`: `∂ₜ ∂ₜ a > 0 ↔ ρ + 3 p / c² < 0` (`Λ = 0`);
+  `deriv_deriv_scaleFactor_pos_iff_lambda`: the same for the total fluid with `Λ` folded in.
 - `decelerationParameter_eq_sum`: `q = ½ Σ_i Ω_i (1 + 3 w_i)`;
   `decelerationParameter_lambdaCDM`: `q = ½ (Ω_m + 2 Ω_r - 2 Ω_Λ)`.
-- `deriv_ne_zero_of_friedmann`, `deriv_pos_of_friedmann`: eternal expansion for `k ≤ 0`.
-- `deriv_deriv_nonpos_of_friedmann`, `scaleFactor_nonpos_of_decelerating`,
+- `deriv_scaleFactor_ne_zero_of_friedmann`, `deriv_scaleFactor_pos_of_friedmann`: eternal expansion
+  for `k ≤ 0`.
+- `deriv_deriv_scaleFactor_nonpos_of_friedmann`, `scaleFactor_nonpos_of_decelerating`,
   `exists_scaleFactor_eq_zero`: the Big-Bang bound and the existence of a zero of `a`;
   `deSitterScaleFactor_pos`: no such zero for de Sitter.
 
@@ -61,23 +62,34 @@ open Real Time
 
 ## A. The energy conditions
 
+The cosmic fluid is described, as in `Physlib.Cosmology.FLRW.Basic`, by its total energy density
+`ρ : Time → ℝ` and its pressure `p : Time → ℝ`, both functions of cosmic time; `c` is the speed of
+light. The energy conditions below are conditions on `ρ` and `p` at one time `t`. The scale factor
+`a : Time → ℝ` of the FLRW metric enters from Section B on.
+
 -/
 
-/-- The null energy condition `ρ + p / c² ≥ 0`. -/
+/-- The null energy condition at time `t`, `ρ + p / c² ≥ 0`, where `ρ : Time → ℝ` is the total
+  energy density of the cosmic fluid, `p : Time → ℝ` its pressure, both functions of cosmic time,
+  and `c` is the speed of light. -/
 def NullEnergyCondition (ρ p : Time → ℝ) (c : ℝ) (t : Time) : Prop := 0 ≤ ρ t + p t / c ^ 2
 
-/-- The weak energy condition `ρ ≥ 0 ∧ ρ + p / c² ≥ 0`. -/
+/-- The weak energy condition at time `t`, `ρ ≥ 0 ∧ ρ + p / c² ≥ 0`, for the total energy density
+  `ρ` and the pressure `p` of the cosmic fluid, `c` being the speed of light. -/
 def WeakEnergyCondition (ρ p : Time → ℝ) (c : ℝ) (t : Time) : Prop :=
   0 ≤ ρ t ∧ 0 ≤ ρ t + p t / c ^ 2
 
-/-- The strong energy condition `ρ + p / c² ≥ 0 ∧ ρ + 3 p / c² ≥ 0`. -/
+/-- The strong energy condition at time `t`, `ρ + p / c² ≥ 0 ∧ ρ + 3 p / c² ≥ 0`, for the total
+  energy density `ρ` and the pressure `p` of the cosmic fluid, `c` being the speed of light. -/
 def StrongEnergyCondition (ρ p : Time → ℝ) (c : ℝ) (t : Time) : Prop :=
   0 ≤ ρ t + p t / c ^ 2 ∧ 0 ≤ ρ t + 3 * p t / c ^ 2
 
-/-- The dominant energy condition `ρ ≥ 0 ∧ |p| ≤ ρ c²`. -/
+/-- The dominant energy condition at time `t`, `ρ ≥ 0 ∧ |p| ≤ ρ c²`, for the total energy density
+  `ρ` and the pressure `p` of the cosmic fluid, `c` being the speed of light. -/
 def DominantEnergyCondition (ρ p : Time → ℝ) (c : ℝ) (t : Time) : Prop :=
   0 ≤ ρ t ∧ |p t| ≤ ρ t * c ^ 2
 
+/-- For `c ≠ 0`, the dominant energy condition implies the weak energy condition. -/
 lemma WeakEnergyCondition.of_dominant {ρ p : Time → ℝ} {c : ℝ} {t : Time} (hc : c ≠ 0)
     (h : DominantEnergyCondition ρ p c t) : WeakEnergyCondition ρ p c t := by
   obtain ⟨h0, h1⟩ := h
@@ -89,9 +101,11 @@ lemma WeakEnergyCondition.of_dominant {ρ p : Time → ℝ} {c : ℝ} {t : Time}
     linarith
   linarith
 
+/-- The weak energy condition implies the null energy condition. -/
 lemma NullEnergyCondition.of_weak {ρ p : Time → ℝ} {c : ℝ} {t : Time}
     (h : WeakEnergyCondition ρ p c t) : NullEnergyCondition ρ p c t := h.2
 
+/-- The strong energy condition implies the null energy condition. -/
 lemma NullEnergyCondition.of_strong {ρ p : Time → ℝ} {c : ℝ} {t : Time}
     (h : StrongEnergyCondition ρ p c t) : NullEnergyCondition ρ p c t := h.1
 
@@ -101,11 +115,11 @@ lemma NullEnergyCondition.of_strong {ρ p : Time → ℝ} {c : ℝ} {t : Time}
 
 -/
 
-/-- Without cosmological constant, the expansion accelerates if and only if
-  `ρ + 3 p / c² < 0`, that is, if and only if the strong energy condition fails through its
-  second inequality. -/
-lemma deriv_deriv_pos_iff {a ρ p : Time → ℝ} {G c : ℝ} {t : Time} (hG : 0 < G) (ha : 0 < a t)
-    (hF2 : SecondOrderFriedmann a ρ p 0 G c t) :
+/-- Without cosmological constant, the second derivative `∂ₜ ∂ₜ a` of the scale factor `a` is
+  positive (the expansion accelerates) if and only if `ρ + 3 p / c² < 0`, that is, if and only if
+  the strong energy condition fails through its second inequality. -/
+lemma deriv_deriv_scaleFactor_pos_iff {a ρ p : Time → ℝ} {G c : ℝ} {t : Time} (hG : 0 < G)
+    (ha : 0 < a t) (hF2 : SecondOrderFriedmann a ρ p 0 G c t) :
     0 < ∂ₜ (∂ₜ a) t ↔ ρ t + 3 * p t / c ^ 2 < 0 := by
   unfold SecondOrderFriedmann at hF2
   rw [← div_pos_iff_of_pos_right ha, hF2]
@@ -121,14 +135,15 @@ lemma deriv_deriv_pos_iff {a ρ p : Time → ℝ} {G c : ℝ} {t : Time} (hG : 0
     have := mul_pos hk (neg_pos.mpr h)
     linarith
 
-/-- With cosmological constant, the expansion accelerates if and only if the total fluid,
-  `Λ` folded in as the `w = -1` component, violates `ρ + 3 p / c² ≥ 0`. -/
-lemma deriv_deriv_pos_iff_lambda {a ρ p : Time → ℝ} {Λ G c : ℝ} {t : Time} (hG : 0 < G)
+/-- With cosmological constant `Λ`, the second derivative `∂ₜ ∂ₜ a` of the scale factor `a` is
+  positive if and only if the total fluid, `Λ` folded in as the `w = -1` component, violates
+  `ρ + 3 p / c² ≥ 0`. -/
+lemma deriv_deriv_scaleFactor_pos_iff_lambda {a ρ p : Time → ℝ} {Λ G c : ℝ} {t : Time} (hG : 0 < G)
     (hc : c ≠ 0) (ha : 0 < a t) (hF2 : SecondOrderFriedmann a ρ p Λ G c t) :
     0 < ∂ₜ (∂ₜ a) t ↔
       (ρ t + cosmologicalConstantDensity Λ G c)
         + 3 * (p t + cosmologicalConstantPressure Λ G c) / c ^ 2 < 0 :=
-  deriv_deriv_pos_iff hG ha ((secondOrderFriedmann_iff_lambdaFluid hG.ne' hc).mp hF2)
+  deriv_deriv_scaleFactor_pos_iff hG ha ((secondOrderFriedmann_iff_lambdaFluid hG.ne' hc).mp hF2)
 
 /-!
 
@@ -192,9 +207,9 @@ lemma decelerationParameter_lambdaCDM {a ρm ρr : Time → ℝ} {Λ G c : ℝ} 
 -/
 
 /-- For `k ≤ 0`, `Λ ≥ 0` and positive density, the first-order Friedmann equation forces
-  `H² > 0`, hence `∂ₜ a ≠ 0` at every time. -/
-lemma deriv_ne_zero_of_friedmann {a ρ : Time → ℝ} {k Λ G c : ℝ} (hk : k ≤ 0) (hΛ : 0 ≤ Λ)
-    (hρ : ∀ s, 0 < ρ s) (hapos : ∀ s, 0 < a s) (hG : 0 < G)
+  `H² > 0`, hence the derivative `∂ₜ a` of the scale factor `a` does not vanish at any time. -/
+lemma deriv_scaleFactor_ne_zero_of_friedmann {a ρ : Time → ℝ} {k Λ G c : ℝ} (hk : k ≤ 0)
+    (hΛ : 0 ≤ Λ) (hρ : ∀ s, 0 < ρ s) (hapos : ∀ s, 0 < a s) (hG : 0 < G)
     (hF1 : ∀ s, FirstOrderFriedmann a ρ k Λ G c s) (s : Time) : ∂ₜ a s ≠ 0 := by
   have h := hF1 s
   unfold FirstOrderFriedmann at h
@@ -218,13 +233,14 @@ lemma deriv_ne_zero_of_friedmann {a ρ : Time → ℝ} {k Λ G c : ℝ} (hk : k 
     simp at hsq
   exact (div_ne_zero_iff.mp hne).1
 
-/-- If moreover `∂ₜ a` is continuous and positive at one time, it is positive at all times:
+/-- If moreover the derivative `∂ₜ a` of the scale factor is continuous and positive at one time,
+  it is positive at all times:
   an expanding universe with `k ≤ 0`, `Λ ≥ 0` and positive density expands forever. -/
-lemma deriv_pos_of_friedmann {a ρ : Time → ℝ} {k Λ G c : ℝ} (hk : k ≤ 0) (hΛ : 0 ≤ Λ)
+lemma deriv_scaleFactor_pos_of_friedmann {a ρ : Time → ℝ} {k Λ G c : ℝ} (hk : k ≤ 0) (hΛ : 0 ≤ Λ)
     (hρ : ∀ s, 0 < ρ s) (hapos : ∀ s, 0 < a s) (hG : 0 < G)
     (hF1 : ∀ s, FirstOrderFriedmann a ρ k Λ G c s) (hcont : Continuous (∂ₜ a)) {t₀ : Time}
     (h0 : 0 < ∂ₜ a t₀) (s : Time) : 0 < ∂ₜ a s := by
-  have hne := deriv_ne_zero_of_friedmann hk hΛ hρ hapos hG hF1
+  have hne := deriv_scaleFactor_ne_zero_of_friedmann hk hΛ hρ hapos hG hF1
   have hf : Continuous (fun σ : ℝ => ∂ₜ a ⟨σ⟩) := hcont.comp toRealCLE.symm.continuous
   obtain ⟨τ₀⟩ := t₀
   obtain ⟨σ⟩ := s
@@ -252,9 +268,9 @@ lemma deriv_pos_of_friedmann {a ρ : Time → ℝ} {k Λ G c : ℝ} (hk : k ≤ 
 -/
 
 /-- With `ρ ≥ 0`, `p ≥ 0`, `Λ = 0` and `a > 0`, the second-order Friedmann equation gives
-  `∂ₜ ∂ₜ a ≤ 0`. -/
-lemma deriv_deriv_nonpos_of_friedmann {a ρ p : Time → ℝ} {G c : ℝ} {t : Time} (hρ : 0 ≤ ρ t)
-    (hp : 0 ≤ p t) (ha : 0 < a t) (hG : 0 < G) (hc : c ≠ 0)
+  `∂ₜ ∂ₜ a ≤ 0` for the scale factor `a`: the expansion decelerates. -/
+lemma deriv_deriv_scaleFactor_nonpos_of_friedmann {a ρ p : Time → ℝ} {G c : ℝ} {t : Time}
+    (hρ : 0 ≤ ρ t) (hp : 0 ≤ p t) (ha : 0 < a t) (hG : 0 < G) (hc : c ≠ 0)
     (hF2 : SecondOrderFriedmann a ρ p 0 G c t) : ∂ₜ (∂ₜ a) t ≤ 0 := by
   unfold SecondOrderFriedmann at hF2
   have ha'' := (div_eq_iff ha.ne').mp hF2
