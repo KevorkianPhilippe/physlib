@@ -5,8 +5,8 @@ Authors: Eduardo Nava-Hernandez
 -/
 module
 
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.Current
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.Uncertainty
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.Current.Basic
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.Open.Uncertainty
 /-!
 
 # Mandelstam–Tamm and Cramér–Rao in the open tight binding chain

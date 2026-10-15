@@ -5,51 +5,48 @@ Authors: Jinzheng Li, Nathaneal Sajan, Joseph Tooby-Smith
 -/
 module
 
-public import Mathlib.Analysis.Complex.Basic
-public import Mathlib.LinearAlgebra.BilinearForm.TensorProduct
-public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
-public import Mathlib.LinearAlgebra.Matrix.PosDef
-public import Mathlib.RepresentationTheory.Intertwining
+public import Mathlib.Analysis.Complex.Polynomial.Basic
+public import Mathlib.LinearAlgebra.Matrix.Permutation
+public import Mathlib.RepresentationTheory.Irreducible
+public import Mathlib.RingTheory.RootsOfUnity.Complex
 public import Physlib.Mathematics.Groups.SpecialUnitary.LieAlgebra.Basic
 /-!
 
 # The adjoint representation of `SU(n)`
 
-The adjoint representation of `SU(n)` and its complexification, defined as `x ↦ g x g†`.
+The adjoint representation of `SU(n)` and its complexification, defined as `x ↦ g x g†`, and
+the irreducibility of the latter.
 
 ## i. Overview
 
 We define the adjont representation of `SU(n)` on its Lie algebra `su(n)` and its complexification.
 The adjoint is defined by conjugation, `x ↦ g x g†`. It preserves the bracket, and its kernel is
-the centre of `SU(n)`, the scalar matrices (A).
-
-The contraction `adjointContr` of two real adjoint indices is the trace form `x ⊗ y ↦ tr (x y)` on
-`su(n)`, which is real since `x` and `y` are hermitian, and invariant under the adjoint action by
-the cyclicity of the trace. It is symmetric, invariant under the bracket, and positive definite
-since `tr (x x) = tr (x x†)` vanishes only for `x = 0` (B.1).
-
-The contraction `adjointℂContr` of two complex adjoint indices is its complexification. On the
-underlying matrices it is the trace form `A ⊗ B ↦ tr (A B)`, and it is again symmetric, invariant
-under the bracket and nondegenerate (B.2).
+the centre of `SU(n)`, the scalar matrices (A.1, A.2). On the underlying matrices of the
+complexification the adjoint action of any unitary matrix, and in particular of any permutation of
+the coordinates, is realised by an element of `SU(n)`; diagonal elements of `SU(n)` act on the
+entries by phases (A.3). The complex adjoint representation is irreducible for `2 ≤ n` (C.1),
+and hence, by Schur's lemma over an algebraically closed field, that every endomorphism of the
+complexification commuting with the adjoint action is a multiple of the identity (C.2).
 
 ## ii. Key results
 
 - `SULieAlgebra.adjoint` : the adjoint representation on `su(n)`.
 - `SULieAlgebra.adjointℂ` : the adjoint representation on the complexification.
 - `SULieAlgebra.adjoint_eq_iff` : the adjoint representation is faithful modulo the centre.
-- `SULieAlgebra.adjointContr` : the contraction of two real adjoint indices.
-- `SULieAlgebra.adjointℂContr` : the contraction of two complex adjoint indices.
-- `SULieAlgebra.adjointContr_self_pos` : the real contraction is positive definite.
-- `SULieAlgebra.adjointℂContr_nondegenerate` : the complex contraction is nondegenerate.
+- `SULieAlgebra.isIrreducible_adjointℂ` : the complex adjoint representation is irreducible.
+- `SULieAlgebra.end_eq_smul_id_of_commute_adjointℂ` : Schur's lemma for the complex adjoint
+  representation.
 
 ## iii. Table of contents
 
 - A. The adjoint representation
   - A.1. The real adjoint representation
   - A.2. The complex adjoint representation
-- B. The contraction of adjoint indices
-  - B.1. The real case
-  - B.2. The complex case
+  - A.3. The action on the underlying matrices
+- B. The relation to single-entry elements
+- C. Irreducibility and Schur's lemma
+  - C.1. Irreducibility
+  - C.2. Schur's lemma
 
 ## iv. References
 
@@ -59,8 +56,7 @@ under the bracket and nondegenerate (B.2).
 
 @[expose] public section
 
-open Matrix TensorProduct ComplexStarModule
-open scoped ComplexOrder
+open Matrix TensorProduct
 
 namespace SULieAlgebra
 
@@ -191,6 +187,12 @@ lemma adjointℂ_eq_iff {n : ℕ} (g h : specialUnitaryGroup (Fin n) ℂ) :
   · change Module.End.baseChangeHom ℝ ℂ _ (adjoint g) = Module.End.baseChangeHom ℝ ℂ _ (adjoint h)
     rw [hgh]
 
+/-!
+
+### A.3. The action on the underlying matrices
+
+-/
+
 /-- The adjoint representation conjugates the matrix, `M ↦ g M g†`. -/
 @[simp]
 lemma toMatrixℂ_adjointℂ {n} (g : specialUnitaryGroup (Fin n) ℂ) (A : Complexification n) :
@@ -200,6 +202,46 @@ lemma toMatrixℂ_adjointℂ {n} (g : specialUnitaryGroup (Fin n) ℂ) (A : Comp
     rw [adjointℂ_tmul, toMatrixℂ_tmul, toMatrixℂ_tmul, adjoint_val, Matrix.mul_smul,
       Matrix.smul_mul]
   | add A B hA hB => rw [map_add, map_add, hA, hB, map_add, Matrix.mul_add, Matrix.add_mul]
+
+/-- Conjugation by any unitary matrix is the adjoint action of an element of `SU(n)`: a
+  unitary matrix agrees with an element of `SU(n)` up to a phase, which conjugation does not
+  see. -/
+lemma exists_toMatrixℂ_adjointℂ_eq_unitary {n : ℕ} (U : unitaryGroup (Fin n) ℂ) :
+    ∃ g : specialUnitaryGroup (Fin n) ℂ, ∀ A : Complexification n,
+      toMatrixℂ (adjointℂ g A) = U.1 * toMatrixℂ A * star U.1 := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · exact ⟨1, fun A => Subsingleton.elim _ _⟩
+  have hd : Complex.normSq U.1.det = 1 := by
+    exact_mod_cast Complex.normSq_eq_conj_mul_self.trans
+      (Unitary.star_mul_self_of_mem (det_of_mem_unitary U.2))
+  obtain ⟨c, hc⟩ : ∃ c : ℂ, c ^ n = (U.1.det)⁻¹ := ⟨_, Complex.cpow_nat_inv_pow _ hn.ne'⟩
+  have hc1 : c * star c = 1 := by
+    rw [Complex.star_def, Complex.mul_conj, (pow_eq_one_iff_of_nonneg (Complex.normSq_nonneg c)
+      hn.ne').1 (by rw [← map_pow, hc, map_inv₀, hd, inv_one]), Complex.ofReal_one]
+  refine ⟨⟨c • U.1, mem_specialUnitaryGroup_iff.2 ⟨mem_unitaryGroup_iff.2 ?_, ?_⟩⟩, fun A => ?_⟩
+  · rw [star_smul, Matrix.smul_mul, Matrix.mul_smul, smul_smul, hc1, mem_unitaryGroup_iff.1 U.2,
+      one_smul]
+  · rw [det_smul, Fintype.card_fin, hc, inv_mul_cancel₀ fun h => by simp [h] at hd]
+  · rw [toMatrixℂ_adjointℂ]
+    change c • U.1 * toMatrixℂ A * star (c • U.1) = _
+    rw [star_smul, Matrix.smul_mul, Matrix.smul_mul, Matrix.mul_smul, smul_smul, hc1, one_smul]
+
+/-- The adjoint action realises any permutation `σ` of the coordinates: some element of `SU(n)`
+  moves the entry `(x, y)` of every matrix to `(σ x, σ y)`. -/
+lemma exists_toMatrixℂ_adjointℂ_apply_perm {n : ℕ} (σ : Equiv.Perm (Fin n)) :
+    ∃ g : specialUnitaryGroup (Fin n) ℂ, ∀ A x y,
+      toMatrixℂ (adjointℂ g A) (σ x) (σ y) = toMatrixℂ A x y := by
+  have hP : Equiv.Perm.permMatrix ℂ σ⁻¹ ∈ unitaryGroup (Fin n) ℂ := by
+    rw [mem_unitaryGroup_iff, star_eq_conjTranspose, conjTranspose_permMatrix, inv_inv,
+      ← permMatrix_mul, mul_inv_cancel, permMatrix_one]
+  obtain ⟨g, hg⟩ := exists_toMatrixℂ_adjointℂ_eq_unitary ⟨_, hP⟩
+  refine ⟨g, fun A x y => ?_⟩
+  rw [hg]
+  change (Equiv.Perm.permMatrix ℂ σ⁻¹ * toMatrixℂ A * star (Equiv.Perm.permMatrix ℂ σ⁻¹))
+    (σ x) (σ y) = _
+  rw [star_eq_conjTranspose, conjTranspose_permMatrix, inv_inv, Equiv.Perm.permMatrix,
+    Equiv.Perm.permMatrix, PEquiv.toMatrix_toPEquiv_mul, PEquiv.mul_toMatrix_toPEquiv]
+  simp
 
 /-- The adjoint action of a diagonal element of `SU(n)` scales the entry at `(x, y)` of the
   matrix by `d x * star (d y)`. -/
@@ -217,207 +259,207 @@ lemma toMatrixℂ_adjointℂ_trace {n} (g : specialUnitaryGroup (Fin n) ℂ) (A 
 
 /-!
 
-## B. The contraction of adjoint indices
-
-### B.1. The real case
+## B. The relation to single-entry elements
 
 -/
 
-/-- The contraction of two real adjoint indices: the trace form `x ⊗ y ↦ tr (x y)` on `su(n)`,
-  which is real since `x` and `y` are hermitian. -/
-noncomputable def adjointContr {n : ℕ} : ((adjoint (n := n)).tprod adjoint).IntertwiningMap
-    (Representation.trivial ℝ (specialUnitaryGroup (Fin n) ℂ) ℝ) where
-  toLinearMap := TensorProduct.lift <|
-    LinearMap.mk₂ ℝ (fun x y : SULieAlgebra n ℂ => (x.1 * y.1).trace.re)
-      (fun x x' y => by simp [add_mul, trace_add])
-      (fun r x y => by simp)
-      (fun x y y' => by simp [mul_add, trace_add])
-      (fun r x y => by simp)
-  isIntertwining' g := TensorProduct.ext' fun x y => by
-    have hg : star g.1 * g.1 = 1 := (mem_specialUnitaryGroup_iff.mp g.2).1.1
-    simp only [LinearMap.comp_apply, Representation.tprod_apply, TensorProduct.map_tmul,
-      Representation.trivial_apply, lift.tmul, LinearMap.mk₂_apply, adjoint_val]
-    rw [show g.1 * x.1 * star g.1 * (g.1 * y.1 * star g.1) = g.1 * (x.1 * y.1) * star g.1 by
-      simp only [Matrix.mul_assoc]
-      rw [← Matrix.mul_assoc (star g.1), hg, Matrix.one_mul],
-      Matrix.trace_mul_cycle, hg, Matrix.one_mul]
+/-- All the off-diagonal matrix units `singleℂ` lie in one adjoint orbit -/
+lemma exists_adjointℂ_singleℂ_eq_singleℂ {n : ℕ} {i j p q : Fin n} (hij : i ≠ j) (hpq : p ≠ q) :
+    ∃ g : specialUnitaryGroup (Fin n) ℂ, adjointℂ g (singleℂ i j hij) = singleℂ p q hpq := by
+  obtain ⟨σ, hσi, hσj⟩ : ∃ σ : Equiv.Perm (Fin n), σ i = p ∧ σ j = q := by
+    refine ⟨Equiv.swap (Equiv.swap i p j) q * Equiv.swap i p, ?_, ?_⟩
+    · rw [Equiv.Perm.mul_apply, Equiv.swap_apply_left, Equiv.swap_apply_of_ne_of_ne
+        (fun h => hij ((Equiv.swap i p).injective ((Equiv.swap_apply_left i p).trans h))) hpq]
+    · rw [Equiv.Perm.mul_apply, Equiv.swap_apply_left]
+  obtain ⟨g, hg⟩ := exists_toMatrixℂ_adjointℂ_apply_perm σ
+  refine ⟨g, toMatrixℂ_injective (Matrix.ext fun u v => ?_)⟩
+  simpa only [singleℂ, toMatrixℂ_ofTracelessℂ, single_apply, Equiv.apply_symm_apply,
+    Equiv.eq_symm_apply, hσi, hσj] using hg (singleℂ i j hij) (σ.symm u) (σ.symm v)
 
-/-- The real contraction is the real part of the trace, `x ⊗ y ↦ re tr (x y)`. -/
-@[simp]
-lemma adjointContr_tmul {n : ℕ} (x y : SULieAlgebra n ℂ) :
-    adjointContr (x ⊗ₜ y) = (x.1 * y.1).trace.re := rfl
+/-- If the matrix of `A` has a non-zero entry at the off-diagonal position `(p, q)`, then
+  `singleℂ p q h` lies in the span of the adjoint orbit of `A`. -/
+lemma singleℂ_mem_span_range_adjointℂ {n : ℕ} {p q : Fin n} (h : p ≠ q)
+    {A : Complexification n} (hA : toMatrixℂ A p q ≠ 0) :
+    singleℂ p q h ∈ Submodule.span ℂ (Set.range fun g => adjointℂ g A) := by
+  obtain ⟨ζ, hζ⟩ : ∃ ζ : ℂ, IsPrimitiveRoot ζ 5 := ⟨_, Complex.isPrimitiveRoot_exp 5 (by norm_num)⟩
+  have hζ0 : ζ ≠ 0 := hζ.ne_zero (by norm_num)
+  have hinv : ζ⁻¹ = starRingEnd ℂ ζ := Complex.inv_eq_conj (hζ.norm'_eq_one (by norm_num))
+  have hphase (a b : ℤ) : ζ ^ a * star (ζ ^ b) = ζ ^ (a - b) := by
+    simp [← hinv, zpow_sub₀ hζ0, div_eq_mul_inv]
+  have hgeom (m : ℤ) (hm : ¬ (5 : ℤ) ∣ m) : ∑ k ∈ Finset.range 5, (ζ ^ m) ^ k = 0 := by
+    have h1 : ζ ^ m ≠ 1 := by rw [Ne, hζ.zpow_eq_one_iff_dvd]; exact_mod_cast hm
+    rw [geom_sum_eq h1, ← zpow_natCast (ζ ^ m) 5, ← _root_.zpow_mul,
+      (hζ.zpow_eq_one_iff_dvd _).2 ⟨m, by push_cast; ring⟩, sub_self, zero_div]
+  set e : Fin n → ℤ := fun x => if x = p then 1 else if x = q then -1 else 0 with he
+  obtain ⟨g, hg⟩ : ∃ g : specialUnitaryGroup (Fin n) ℂ, g.1 = diagonal fun x => ζ ^ e x := by
+    refine ⟨⟨diagonal (fun x => ζ ^ e x), mem_specialUnitaryGroup_iff.2 ⟨?_, ?_⟩⟩, rfl⟩
+    · simp [mem_unitaryGroup_iff, star_eq_conjTranspose, diagonal_conjTranspose, ← hinv,
+        zpow_ne_zero _ hζ0]
+    · simp [he, apply_ite (ζ ^ · : ℤ → ℂ), Finset.prod_ite, Finset.filter_eq', hζ0, h.symm]
+  have hgk (k : ℕ) (x y : Fin n) :
+      toMatrixℂ (adjointℂ (g ^ k) A) x y = (ζ ^ (e x - e y)) ^ k * toMatrixℂ A x y := by
+    rw [toMatrixℂ_adjointℂ_apply_of_diagonal (show (g ^ k).1 = diagonal fun x => (ζ ^ e x) ^ k from
+      by rw [SubmonoidClass.coe_pow, hg]; exact diagonal_pow _ k), star_pow, ← mul_pow, hphase]
+  have hcollect (m : ℤ) (c : ℂ) : ∑ k ∈ Finset.range 5, ((5 : ℂ)⁻¹ * (ζ ^ (-2 : ℤ)) ^ k) *
+      ((ζ ^ m) ^ k * c) = (5 : ℂ)⁻¹ * (∑ k ∈ Finset.range 5, (ζ ^ (m - 2)) ^ k) * c := by
+    rw [Finset.mul_sum, Finset.sum_mul]
+    exact Finset.sum_congr rfl fun k _ => by
+      rw [show m - 2 = -2 + m by ring, zpow_add₀ hζ0, mul_pow]; ring
+  have hentry (x y : Fin n) : ∑ k ∈ Finset.range 5, ((5 : ℂ)⁻¹ * (ζ ^ (-2 : ℤ)) ^ k) *
+      ((ζ ^ (e x - e y)) ^ k * toMatrixℂ A x y) = single p q (toMatrixℂ A p q) x y := by
+    rw [hcollect]
+    by_cases hxy : x = p ∧ y = q
+    · obtain ⟨rfl, rfl⟩ := hxy
+      rw [single_apply_same, show e x - e y - 2 = 0 by simp [he, h.symm]]; norm_num
+    · rw [single_apply_of_ne (c := _) (h := mt (And.imp Eq.symm Eq.symm) hxy), hgeom, mul_zero,
+        zero_mul]
+      simp only [he]; split_ifs <;> omega
+  rw [← Submodule.smul_mem_iff _ hA, show toMatrixℂ A p q • singleℂ p q h =
+      ∑ k ∈ Finset.range 5, ((5 : ℂ)⁻¹ * (ζ ^ (-2 : ℤ)) ^ k) • adjointℂ (g ^ k) A from
+    toMatrixℂ_injective (Matrix.ext fun x y => by
+      simp only [map_sum, map_smul, Matrix.sum_apply, Matrix.smul_apply, smul_eq_mul, hgk, hentry,
+        singleℂ, toMatrixℂ_ofTracelessℂ, single_apply, mul_ite, mul_one, mul_zero])]
+  exact Submodule.sum_mem _ fun k _ => Submodule.smul_mem _ _ (Submodule.subset_span ⟨g ^ k, rfl⟩)
 
-/-- The adjoint representation preserves the real contraction, so `SU(n)` acts on `su(n)` by
-  isometries. -/
-lemma adjointContr_adjoint {n : ℕ} (g : specialUnitaryGroup (Fin n) ℂ) (x y : SULieAlgebra n ℂ) :
-    adjointContr (adjoint g x ⊗ₜ adjoint g y) = adjointContr (x ⊗ₜ y) :=
-  Representation.IntertwiningMap.isIntertwining _ _ adjointContr g (x ⊗ₜ y)
+/-- The adjoint action of some element of `SU(n)` — the rotation by `π / 4` in the `(p, q)`-plane —
+  changes an element whose matrix is the diagonal matrix `d` only in the `(p, q)`-block, by
+  `(d p - d q) / 2` times `singleℂ p q h + singleℂ q p h.symm - diagDiffℂ p q`. -/
+lemma exists_adjointℂ_eq_of_toMatrixℂ_eq_diagonal {n : ℕ} {p q : Fin n} (h : p ≠ q)
+    {A : Complexification n} {d : Fin n → ℂ} (hA : toMatrixℂ A = diagonal d) :
+    ∃ g : specialUnitaryGroup (Fin n) ℂ, adjointℂ g A =
+      A + ((d p - d q) / 2) • (singleℂ p q h + singleℂ q p h.symm - diagDiffℂ p q) := by
+  set s : ℂ := (((√2)⁻¹ : ℝ) : ℂ)
+  have hs : s ^ 2 = 1 / 2 := by simp [s, ← Complex.ofReal_pow]
+  set U : Matrix (Fin n) (Fin n) ℂ := 1 - single p p 1 - single q q 1 +
+    s • (single p p 1 + single p q 1 + single q p 1 - single q q 1) with hU
+  have hUs : star U = U := by simp [hU, s, star_eq_conjTranspose]; module
+  have hUU : U * U = 1 := by
+    simp only [hU, mul_add, add_mul, mul_sub, sub_mul, Matrix.mul_smul, Matrix.smul_mul,
+      Matrix.one_mul, single_mul_single_same, single_mul_single_of_ne _ _ _ _ h,
+      single_mul_single_of_ne _ _ _ _ h.symm, mul_one]
+    match_scalars <;> first | ring1 | linear_combination 2 * hs
+  have hds (i j : Fin n) : diagonal d * single i j (1 : ℂ) = d i • single i j 1 :=
+    Matrix.ext fun x y => by by_cases hc : i = x <;> simp [diagonal_mul, single_apply, hc]
+  have hsd (i j : Fin n) : single i j (1 : ℂ) * diagonal d = d j • single i j 1 :=
+    Matrix.ext fun x y => by by_cases hc : j = y <;> simp [mul_diagonal, single_apply, hc]
+  obtain ⟨g, hg⟩ := exists_toMatrixℂ_adjointℂ_eq_unitary
+    ⟨U, mem_unitaryGroup_iff.2 (by rw [hUs, hUU])⟩
+  refine ⟨g, toMatrixℂ_injective ?_⟩
+  rw [hg]; change U * toMatrixℂ A * star U = _; rw [hUs, hA]
+  simp only [map_add, map_smul, map_sub, singleℂ, diagDiffℂ, toMatrixℂ_ofTracelessℂ, hA, hU,
+    mul_add, add_mul, mul_sub, sub_mul, Matrix.mul_smul, Matrix.smul_mul, Matrix.one_mul,
+    hds, hsd, single_mul_single_same, single_mul_single_of_ne _ _ _ _ h,
+    single_mul_single_of_ne _ _ _ _ h.symm, mul_one, smul_zero]
+  match_scalars <;> first
+    | ring1 | linear_combination (d p + d q) * hs | linear_combination (d p - d q) * hs
 
-/-- The trace `tr (x y)` of two elements of `su(n)` is real, equal to their contraction. -/
-lemma ofReal_adjointContr_tmul {n : ℕ} (x y : SULieAlgebra n ℂ) :
-    (adjointContr (x ⊗ₜ y) : ℂ) = (x.1 * y.1).trace := by
-  rw [adjointContr_tmul]
-  refine Complex.conj_eq_iff_re.1 ?_
-  change star (x.1 * y.1).trace = _
-  rw [← trace_conjTranspose, conjTranspose_mul, ← star_eq_conjTranspose,
-    ← star_eq_conjTranspose, x.star_val_eq, y.star_val_eq, trace_mul_comm]
+/-- The difference of two diagonal entries lies in the adjoint orbit of the sum of the two
+  elements supported at the corresponding off-diagonal entries. -/
+lemma exists_diagDiffℂ_eq_adjointℂ_singleℂ_add_singleℂ {n : ℕ} {p q : Fin n} (h : p ≠ q) :
+    ∃ g : specialUnitaryGroup (Fin n) ℂ,
+      diagDiffℂ p q = adjointℂ g (singleℂ p q h + singleℂ q p h.symm) := by
+  have hdiag : toMatrixℂ (diagDiffℂ p q) = diagonal fun x => toMatrixℂ (diagDiffℂ p q) x x :=
+    Matrix.ext fun x y => by
+      rcases eq_or_ne x y with rfl | hxy
+      · rw [diagonal_apply_eq]
+      · rw [diagonal_apply_ne _ hxy]
+        simp only [diagDiffℂ, toMatrixℂ_ofTracelessℂ, Matrix.sub_apply, sub_zero,
+          single_apply_of_ne _ _ (1 : ℂ) x y fun hc => hxy (hc.1.symm.trans hc.2)]
+  have hc : (toMatrixℂ (diagDiffℂ p q) p p - toMatrixℂ (diagDiffℂ p q) q q) / 2 = 1 := by
+    simp [diagDiffℂ, h, h.symm]
+  obtain ⟨g, hg⟩ := exists_adjointℂ_eq_of_toMatrixℂ_eq_diagonal h hdiag
+  have hg' : adjointℂ g (diagDiffℂ p q) = singleℂ p q h + singleℂ q p h.symm := by
+    simp only [hg, hc, one_smul]; abel
+  exact ⟨g⁻¹, by rw [← hg', Representation.inv_self_apply]⟩
 
-lemma adjointContr_symm {n : ℕ} (x y : SULieAlgebra n ℂ) :
-    adjointContr (x ⊗ₜ y) = adjointContr (y ⊗ₜ x) := by
-  rw [adjointContr_tmul, adjointContr_tmul, trace_mul_comm]
-
-/-- The real contraction is invariant under the bracket, `tr (⁅x, y⁆ z) = tr (x ⁅y, z⁆)`; in terms
-  of generators, the structure constants `tr (T^a ⁅T^b, T^c⁆)` are totally antisymmetric. -/
-lemma adjointContr_lie {n : ℕ} (x y z : SULieAlgebra n ℂ) :
-    adjointContr (⁅x, y⁆ ⊗ₜ z) = adjointContr (x ⊗ₜ ⁅y, z⁆) := by
-  rw [adjointContr_tmul, adjointContr_tmul, val_bracket, val_bracket, Matrix.smul_mul,
-    Matrix.mul_smul, trace_smul, trace_smul, sub_mul, mul_sub, trace_sub, trace_sub,
-    Matrix.mul_assoc, Matrix.mul_assoc, trace_mul_comm y.1 (x.1 * z.1), Matrix.mul_assoc]
-
-/-- The real contraction is positive semidefinite: `tr (x x) = tr (x x†) ≥ 0`. -/
-lemma adjointContr_self_nonneg {n : ℕ} (x : SULieAlgebra n ℂ) : 0 ≤ adjointContr (x ⊗ₜ x) := by
-  have h := (posSemidef_self_mul_conjTranspose x.1).trace_nonneg
-  rw [← star_eq_conjTranspose, x.star_val_eq, ← ofReal_adjointContr_tmul] at h
-  exact Complex.zero_le_real.mp h
-
-/-- The real contraction of `x` with itself vanishes only for `x = 0`. -/
-lemma adjointContr_self_eq_zero_iff {n : ℕ} (x : SULieAlgebra n ℂ) :
-    adjointContr (x ⊗ₜ x) = 0 ↔ x = 0 := by
-  refine ⟨fun hx => Subtype.ext (trace_mul_conjTranspose_self_eq_zero_iff.mp ?_),
-    fun hx => by rw [hx, zero_tmul, map_zero]⟩
-  rw [← star_eq_conjTranspose, x.star_val_eq, ← ofReal_adjointContr_tmul, hx, Complex.ofReal_zero]
-
-/-- The real contraction is positive definite, making it an inner product on `su(n)`. -/
-lemma adjointContr_self_pos {n : ℕ} {x : SULieAlgebra n ℂ} (hx : x ≠ 0) :
-    0 < adjointContr (x ⊗ₜ x) :=
-  (adjointContr_self_nonneg x).lt_of_ne fun h => hx ((adjointContr_self_eq_zero_iff x).mp h.symm)
-
-lemma adjointContr_separating_left {n : ℕ} (x : SULieAlgebra n ℂ)
-    (hx : ∀ y, adjointContr (x ⊗ₜ y) = 0) : x = 0 :=
-  (adjointContr_self_eq_zero_iff x).mp (hx x)
-
-lemma adjointContr_separating_right {n : ℕ} (y : SULieAlgebra n ℂ)
-    (hy : ∀ x, adjointContr (x ⊗ₜ y) = 0) : y = 0 :=
-  adjointContr_separating_left y fun x => by rw [adjointContr_symm, hy]
-
-/-- The real contraction separates `su(n)`: `y ↦ (x ↦ re tr (x y))` is injective. -/
-lemma adjointContr_flip_injective {n : ℕ} :
-    Function.Injective (TensorProduct.curry (adjointContr (n := n)).toLinearMap).flip := by
-  intro w w' h
-  refine sub_eq_zero.1 (adjointContr_separating_right _ fun x => ?_)
-  have hx := LinearMap.congr_fun h x
-  simp only [LinearMap.flip_apply, TensorProduct.curry_apply] at hx
-  rw [tmul_sub, map_sub, sub_eq_zero]
-  exact hx
-
-/-- The real contraction, as a bilinear form, is symmetric. -/
-lemma adjointContr_isSymm {n : ℕ} :
-    LinearMap.BilinForm.IsSymm (TensorProduct.curry (adjointContr (n := n)).toLinearMap) :=
-  ⟨fun x y => adjointContr_symm x y⟩
-
-/-- The real contraction, as a bilinear form, is nondegenerate. -/
-lemma adjointContr_nondegenerate {n : ℕ} :
-    (TensorProduct.curry (adjointContr (n := n)).toLinearMap).Nondegenerate :=
-  ⟨fun x hx => adjointContr_separating_left x hx, fun y hy => adjointContr_separating_right y hy⟩
+/-- The span of the adjoint orbit of a non-zero element contains an element supported at a single
+  off-diagonal entry. -/
+lemma exists_singleℂ_mem_span_range_adjointℂ {n : ℕ} {A : Complexification n} (hA : A ≠ 0) :
+    ∃ (p q : Fin n) (h : p ≠ q),
+      singleℂ p q h ∈ Submodule.span ℂ (Set.range fun g => adjointℂ g A) := by
+  obtain ⟨x, y, hxy, hne⟩ | hdiag := em (∃ x y : Fin n, x ≠ y ∧ toMatrixℂ A x y ≠ 0)
+  · exact ⟨x, y, hxy, singleℂ_mem_span_range_adjointℂ hxy hne⟩
+  push Not at hdiag
+  obtain ⟨d, hAd⟩ : ∃ d, toMatrixℂ A = diagonal d :=
+    ⟨(toMatrixℂ A).diag, Matrix.ext fun x y => by
+      by_cases hxy : x = y <;> simp [Matrix.diag, hxy, hdiag]⟩
+  obtain ⟨i, hi⟩ := Function.ne_iff.1
+    (show d ≠ 0 from fun hd => hA (toMatrixℂ_injective (by simp [hAd, hd])))
+  obtain ⟨p, q, hpq, hne⟩ : ∃ p q, p ≠ q ∧ d p ≠ d q := by
+    by_contra hc
+    push Not at hc
+    have hsum : ∑ x, d x = 0 := by rw [← Matrix.trace_diagonal d, ← hAd, trace_toMatrixℂ]
+    rw [Finset.sum_congr rfl fun x _ => (eq_or_ne x i).elim (fun hx => hx ▸ rfl)
+      fun hx => hc x i hx, Finset.sum_const, Finset.card_univ, Fintype.card_fin,
+      nsmul_eq_mul] at hsum
+    have hn : n = 0 := Nat.cast_eq_zero.1 ((mul_eq_zero.1 hsum).resolve_right hi)
+    exact absurd i.isLt (by omega)
+  obtain ⟨g, hg⟩ := exists_adjointℂ_eq_of_toMatrixℂ_eq_diagonal hpq hAd
+  have hentry : toMatrixℂ (adjointℂ g A) p q ≠ 0 := by
+    rw [show toMatrixℂ (adjointℂ g A) p q = (d p - d q) / 2 from by
+      rw [hg]; simp [singleℂ, diagDiffℂ, hAd, hpq, hpq.symm]]
+    exact div_ne_zero (sub_ne_zero.2 hne) two_ne_zero
+  refine ⟨p, q, hpq, Submodule.span_mono ?_ (singleℂ_mem_span_range_adjointℂ hpq hentry)⟩
+  rintro _ ⟨k, rfl⟩
+  exact ⟨k * g, by simp only [map_mul, Module.End.mul_apply]⟩
 
 /-!
 
-### B.2. The complex case
+## C. Irreducibility and Schur's lemma
+
+### C.1. Irreducibility
+
+The complex adjoint representation has no proper non-zero subrepresentations.
 
 -/
 
-/-- The contraction of two complex adjoint indices: the complexification of the real contraction
-  `adjointContr`. -/
-noncomputable def adjointℂContr {n : ℕ} : ((adjointℂ (n := n)).tprod adjointℂ).IntertwiningMap
-    (Representation.trivial ℂ (specialUnitaryGroup (Fin n) ℂ) ℂ) where
-  toLinearMap := TensorProduct.lift <| LinearMap.BilinForm.baseChange ℂ <|
-    TensorProduct.curry (adjointContr (n := n)).toLinearMap
-  isIntertwining' g := TensorProduct.ext' fun A B => by
-    simp only [LinearMap.comp_apply, Representation.tprod_apply, TensorProduct.map_tmul,
-      Representation.trivial_apply]
-    induction A using TensorProduct.inductionOn with
-    | tmul z x =>
-      induction B using TensorProduct.inductionOn with
-      | tmul w y =>
-        simp only [adjointℂ_tmul, lift.tmul, LinearMap.BilinForm.baseChange_tmul,
-          TensorProduct.curry_apply, Representation.IntertwiningMap.toLinearMap_apply,
-          adjointContr_adjoint]
-      | add B B' hB hB' => rw [map_add, tmul_add, map_add, hB, hB', tmul_add, map_add]
-    | add A A' hA hA' => rw [map_add, add_tmul, map_add, hA, hA', add_tmul, map_add]
+/-- The complex adjoint representation of `SU(n)` is irreducible for `2 ≤ n`. -/
+lemma isIrreducible_adjointℂ {n : ℕ} (hn : 2 ≤ n) : (adjointℂ (n := n)).IsIrreducible := by
+  have hij : (⟨0, by omega⟩ : Fin n) ≠ ⟨1, by omega⟩ := by simp
+  have hne : singleℂ (⟨0, by omega⟩ : Fin n) ⟨1, by omega⟩ hij ≠ 0 := fun h0 => by
+    simpa [singleℂ, toMatrixℂ_ofTracelessℂ] using
+      congrArg (fun A => toMatrixℂ A ⟨0, by omega⟩ ⟨1, by omega⟩) h0
+  have hbot : (⊥ : Subrepresentation (adjointℂ (n := n))) ≠ ⊤ := fun h => hne <|
+    (Submodule.mem_bot ℂ).1 ((congrArg Subrepresentation.toSubmodule h).ge Submodule.mem_top)
+  have : Nontrivial (Subrepresentation (adjointℂ (n := n))) := ⟨⊥, ⊤, hbot⟩
+  refine ⟨fun W => (eq_or_ne W ⊥).imp id fun hW => ?_⟩
+  obtain ⟨A, hAW, hA0⟩ := (Submodule.ne_bot_iff _).1
+    fun h => hW (Subrepresentation.toSubmodule_injective h)
+  have horb : Submodule.span ℂ (Set.range fun g => adjointℂ g A) ≤ W.toSubmodule :=
+    Submodule.span_le.2 <| Set.range_subset_iff.2 fun g => W.apply_mem_toSubmodule g hAW
+  obtain ⟨p, q, hpq, hmem⟩ := exists_singleℂ_mem_span_range_adjointℂ hA0
+  have hoff : ∀ (r s : Fin n) (h : r ≠ s), singleℂ r s h ∈ W.toSubmodule := fun r s h => by
+    obtain ⟨g, hg⟩ := exists_adjointℂ_singleℂ_eq_singleℂ hpq h
+    exact hg ▸ W.apply_mem_toSubmodule g (horb hmem)
+  refine Subrepresentation.toSubmodule_injective
+    (submodule_eq_top_of_singleℂ_mem_of_diagDiffℂ_mem hoff fun r s => ?_)
+  rcases eq_or_ne r s with rfl | h
+  · rw [show diagDiffℂ r r = 0 from toMatrixℂ_injective (by simp [diagDiffℂ])]
+    exact Submodule.zero_mem _
+  obtain ⟨g, hg⟩ := exists_diagDiffℂ_eq_adjointℂ_singleℂ_add_singleℂ h
+  exact hg ▸ W.apply_mem_toSubmodule g (add_mem (hoff r s h) (hoff s r h.symm))
 
-/-- The adjoint representation preserves the complex contraction. -/
-lemma adjointℂContr_adjointℂ {n : ℕ} (g : specialUnitaryGroup (Fin n) ℂ)
-    (A B : Complexification n) :
-    adjointℂContr (adjointℂ g A ⊗ₜ adjointℂ g B) = adjointℂContr (A ⊗ₜ B) := by
-  have h := Representation.IntertwiningMap.isIntertwining _ _ (adjointℂContr (n := n)) g (A ⊗ₜ B)
-  simpa only [Representation.tprod_apply, TensorProduct.map_tmul, Representation.trivial_apply]
-    using h
+/-!
 
-/-- The contraction is the trace form, `A ⊗ B ↦ tr (A B)`. -/
-lemma adjointℂContr_tmul (A B : Complexification n) :
-    adjointℂContr (A ⊗ₜ B) = (toMatrixℂ A * toMatrixℂ B).trace := by
-  induction A using TensorProduct.inductionOn with
-  | tmul z x =>
-    induction B using TensorProduct.inductionOn with
-    | tmul w y =>
-      change TensorProduct.lift _ ((z ⊗ₜ x) ⊗ₜ (w ⊗ₜ y)) = _
-      rw [lift.tmul, LinearMap.BilinForm.baseChange_tmul, TensorProduct.curry_apply,
-        Representation.IntertwiningMap.toLinearMap_apply, Complex.real_smul,
-        ofReal_adjointContr_tmul, toMatrixℂ_tmul, toMatrixℂ_tmul, Matrix.smul_mul,
-        Matrix.mul_smul, trace_smul, trace_smul, smul_eq_mul, smul_eq_mul]
-      ring
-    | add B B' hB hB' => rw [tmul_add, map_add, hB, hB', map_add, Matrix.mul_add, trace_add]
-  | add A A' hA hA' => rw [add_tmul, map_add, hA, hA', map_add, Matrix.add_mul, trace_add]
+### C.2. Schur's lemma
 
-/-- On the real elements `1 ⊗ x` of the complexification the complex contraction is the real
-  contraction, so the two agree on real gauge fields. -/
-lemma adjointℂContr_one_tmul {n : ℕ} (x y : SULieAlgebra n ℂ) :
-    adjointℂContr ((1 ⊗ₜ x) ⊗ₜ (1 ⊗ₜ y)) = adjointContr (x ⊗ₜ y) := by
-  rw [adjointℂContr_tmul, toMatrixℂ_tmul, toMatrixℂ_tmul, one_smul, one_smul,
-    ofReal_adjointContr_tmul]
+-/
 
-lemma adjointℂContr_symm {n} (A B : Complexification n) :
-    adjointℂContr (A ⊗ₜ B) = adjointℂContr (B ⊗ₜ A) := by
-  rw [adjointℂContr_tmul, adjointℂContr_tmul, Matrix.trace_mul_comm]
-
-/-- The complex contraction is invariant under the bracket, `tr (⁅A, B⁆ C) = tr (A ⁅B, C⁆)`. -/
-lemma adjointℂContr_lie {n} (A B C : Complexification n) :
-    adjointℂContr (⁅A, B⁆ ⊗ₜ C) = adjointℂContr (A ⊗ₜ ⁅B, C⁆) := by
-  rw [adjointℂContr_tmul, adjointℂContr_tmul, toMatrixℂ_lie, toMatrixℂ_lie, Matrix.smul_mul,
-    Matrix.mul_smul, trace_smul, trace_smul, sub_mul, mul_sub, trace_sub, trace_sub,
-    Matrix.mul_assoc, Matrix.mul_assoc, trace_mul_comm (toMatrixℂ B) (toMatrixℂ A * toMatrixℂ C),
-    Matrix.mul_assoc]
-
-lemma adjointℂContr_separating_left {n} (A : Complexification n)
-    (hA : ∀ B, adjointℂContr (A ⊗ₜ B) = 0) : A = 0 := by
-  have h := hA (ofTracelessℂ (toMatrixℂ A)ᴴ
-    (by rw [trace_conjTranspose, trace_toMatrixℂ, star_zero]))
-  rw [adjointℂContr_tmul, toMatrixℂ_ofTracelessℂ, trace_mul_conjTranspose_self_eq_zero_iff] at h
-  exact toMatrixℂ_injective (h.trans (map_zero _).symm)
-
-lemma adjointℂContr_separating_right {n} (B : Complexification n)
-    (hB : ∀ A, adjointℂContr (A ⊗ₜ B) = 0) : B = 0 :=
-  adjointℂContr_separating_left B fun A => by rw [adjointℂContr_symm, hB]
-
-/-- The contraction separates the complexification: `B ↦ (A ↦ tr (A B))` is injective. -/
-lemma adjointℂContr_flip_injective :
-    Function.Injective (TensorProduct.curry (adjointℂContr (n := n)).toLinearMap).flip := by
-  intro w w' h
-  refine sub_eq_zero.1 (adjointℂContr_separating_right _ fun A => ?_)
-  have hA := LinearMap.congr_fun h A
-  simp only [LinearMap.flip_apply, TensorProduct.curry_apply] at hA
-  rw [tmul_sub, map_sub, sub_eq_zero]
-  exact hA
-
-/-- The complex contraction, as a bilinear form, is symmetric. -/
-lemma adjointℂContr_isSymm {n : ℕ} :
-    LinearMap.BilinForm.IsSymm (TensorProduct.curry (adjointℂContr (n := n)).toLinearMap) :=
-  ⟨fun A B => adjointℂContr_symm A B⟩
-
-/-- The complex contraction, as a bilinear form, is nondegenerate. -/
-lemma adjointℂContr_nondegenerate {n : ℕ} :
-    (TensorProduct.curry (adjointℂContr (n := n)).toLinearMap).Nondegenerate :=
-  ⟨fun A hA => adjointℂContr_separating_left A hA,
-    fun B hB => adjointℂContr_separating_right B hB⟩
+/-- An endomorphism of the complexification commuting with the adjoint action is a scalar. -/
+lemma end_eq_smul_id_of_commute_adjointℂ {n : ℕ} {T : Module.End ℂ (Complexification n)}
+    (hT : ∀ g, T ∘ₗ adjointℂ g = adjointℂ g ∘ₗ T) : ∃ μ : ℂ, T = μ • LinearMap.id := by
+  rcases lt_or_ge n 2 with hn | hn
+  · have h0 : ∀ A : Complexification n, A = 0 := by
+      interval_cases n
+      · exact fun A => toMatrixℂ_injective (Subsingleton.elim _ _)
+      · exact fun A => toMatrixℂ_injective (Matrix.ext fun x y => by
+          simpa [Subsingleton.elim x 0, Subsingleton.elim y 0, Matrix.trace_fin_one] using
+            trace_toMatrixℂ A)
+    exact ⟨0, LinearMap.ext fun A => (h0 (T A)).trans (by simp)⟩
+  · have := isIrreducible_adjointℂ hn
+    obtain ⟨μ, hμ⟩ :=
+      (Representation.IsIrreducible.algebraMap_intertwiningMap_bijective_of_isAlgClosed
+        (ρ := adjointℂ (n := n))).2 ⟨T, hT⟩
+    exact ⟨μ, LinearMap.ext fun A => by simpa using (DFunLike.congr_fun hμ A).symm⟩
 
 end SULieAlgebra

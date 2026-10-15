@@ -5,7 +5,7 @@ Authors: Eduardo Nava-Hernandez
 -/
 module
 
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.OpenBoundary
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.Open.Basic
 /-!
 
 # The current operator of the open tight binding chain

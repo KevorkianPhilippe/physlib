@@ -5,8 +5,8 @@ Authors: Eduardo Nava-Hernandez
 -/
 module
 
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.MandelstamTamm
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.MaxCurrentState
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.Current.MandelstamTamm
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.MaxCurrentState.Basic
 /-!
 
 # The speed limit of the open tight binding chain
@@ -168,7 +168,7 @@ lemma abs_re_inner_current_le (ht : T.t ≠ 0) (ψ : T.HilbertSpace) :
 
 /-- **Speed limit.** In every state, `|⟨J⟩| ≤ maxCurrent`: no state of the open chain moves
 faster than `2 |a t| cos (π / (N + 1))`. -/
-theorem abs_expectation_current_le (ht : T.t ≠ 0)
+lemma abs_expectation_current_le (ht : T.t ≠ 0)
     (ω : 𝓢[ℂ, T.HilbertSpace →L[ℂ] T.HilbertSpace]) :
     |ω⟨T.currentObservable⟩| ≤ T.maxCurrent := by
   have hpos (s : ℝ) (hs : |s| = 1) :

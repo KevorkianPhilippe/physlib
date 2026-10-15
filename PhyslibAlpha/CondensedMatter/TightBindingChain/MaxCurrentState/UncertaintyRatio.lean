@@ -5,7 +5,7 @@ Authors: Eduardo Nava-Hernandez
 -/
 module
 
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.Saturation
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.MaxCurrentState.Saturation
 /-!
 
 # The elemental uncertainty of the open tight binding chain
@@ -14,22 +14,22 @@ public import PhyslibAlpha.CondensedMatter.TightBindingChain.Saturation
 
 In the maximal current state of the open chain the energy and position fluctuations are
 uncorrelated, so the uncertainty relation closes as an identity: the variance product is the
-squared bracket `(a t cos (π / (N + 1)))²` plus the centered Gram defect. The constant
-`C_Nava = √(Var H · Var X) / |a t cos (π / (N + 1))|` is therefore at least one, and equals
-one exactly for `N = 2` and `N = 3`. From four sites on it is strictly larger than one.
+squared bracket `(a t cos (π / (N + 1)))²` plus the centered Gram defect. The uncertainty ratio
+`C = √(Var H · Var X) / |a t cos (π / (N + 1))|` is therefore at least one, and equals one exactly
+for `N = 2` and `N = 3`. From four sites on it is strictly larger than one.
 
 ## ii. Key results
 
 - `covariance_maxCurrentState` : `Cov(H, X) = 0` in the maximal current state.
 - `variance_mul_variance_maxCurrentState` : `Var H · Var X = (a t cos (π / (N + 1)))² + defect`.
-- `CNava` : `C_Nava = √(Var H · Var X) / |a t cos (π / (N + 1))|`.
-- `one_le_CNava`, `CNava_eq_one_iff`, `one_lt_CNava`.
-- `nava_robertson_schrodinger_elemental_dimensional_uncertainty_inequality` : everything at once.
+- `uncertaintyRatio` : `C = √(Var H · Var X) / |a t cos (π / (N + 1))|`.
+- `one_le_uncertaintyRatio`, `uncertaintyRatio_eq_one_iff`, `one_lt_uncertaintyRatio`.
+- `robertson_schrodinger_uncertaintyRatio` : everything at once.
 
 ## iii. Table of contents
 
 - A. No correlation
-- B. The constant `C_Nava`
+- B. The uncertainty ratio `C`
 
 ## iv. References
 
@@ -89,12 +89,13 @@ lemma variance_mul_variance_maxCurrentState :
 
 /-!
 
-## B. The constant `C_Nava`
+## B. The uncertainty ratio `C`
 
 -/
 
-/-- `C_Nava = √(Var H · Var X) / |a t cos (π / (N + 1))|` in the maximal current state. -/
-noncomputable def CNava : ℝ :=
+/-- The uncertainty ratio `C = √(Var H · Var X) / |a t cos (π / (N + 1))|` of the maximal current
+state: the uncertainty product over its Robertson bound. -/
+noncomputable def uncertaintyRatio : ℝ :=
   √(variance T.maxCurrentVectorState T.openHamiltonianObservable *
     variance T.maxCurrentVectorState T.positionObservable) /
       |T.a * T.t * Real.cos (Real.pi / (T.N + 1))|
@@ -108,38 +109,38 @@ lemma bound_ne_zero (ht : T.t ≠ 0) (hN : 2 ≤ T.N) :
   · rw [div_lt_div_iff_of_pos_left Real.pi_pos (by positivity) two_pos]
     linarith
 
-/-- `C_Nava` is at least one. -/
-lemma one_le_CNava (ht : T.t ≠ 0) (hN : 2 ≤ T.N) : 1 ≤ T.CNava := by
-  rw [CNava, one_le_div (abs_pos.mpr (T.bound_ne_zero ht hN)), ← Real.sqrt_sq_eq_abs,
+/-- `C` is at least one. -/
+lemma one_le_uncertaintyRatio (ht : T.t ≠ 0) (hN : 2 ≤ T.N) : 1 ≤ T.uncertaintyRatio := by
+  rw [uncertaintyRatio, one_le_div (abs_pos.mpr (T.bound_ne_zero ht hN)), ← Real.sqrt_sq_eq_abs,
     variance_mul_variance_maxCurrentState]
   exact Real.sqrt_le_sqrt (le_add_of_nonneg_right (centeredGramDefect_nonneg _ _ _))
 
-/-- `C_Nava` equals one exactly for `N = 2` and `N = 3`. -/
-lemma CNava_eq_one_iff (ht : T.t ≠ 0) (hN : 2 ≤ T.N) :
-    T.CNava = 1 ↔ T.N = 2 ∨ T.N = 3 := by
-  rw [CNava, div_eq_one_iff_eq (abs_pos.mpr (T.bound_ne_zero ht hN)).ne',
+/-- `C` equals one exactly for `N = 2` and `N = 3`. -/
+lemma uncertaintyRatio_eq_one_iff (ht : T.t ≠ 0) (hN : 2 ≤ T.N) :
+    T.uncertaintyRatio = 1 ↔ T.N = 2 ∨ T.N = 3 := by
+  rw [uncertaintyRatio, div_eq_one_iff_eq (abs_pos.mpr (T.bound_ne_zero ht hN)).ne',
     ← Real.sqrt_sq_eq_abs, variance_mul_variance_maxCurrentState,
     Real.sqrt_inj (add_nonneg (sq_nonneg _) (centeredGramDefect_nonneg _ _ _)) (sq_nonneg _),
     add_eq_left, centeredGramDefect_maxCurrentState_eq_zero_iff T ht hN]
 
-/-- From four sites on, `C_Nava` is strictly larger than one. -/
-lemma one_lt_CNava (ht : T.t ≠ 0) (hN : 4 ≤ T.N) : 1 < T.CNava :=
-  (T.one_le_CNava ht (by omega)).lt_of_ne fun h => by
-    rcases (T.CNava_eq_one_iff ht (by omega)).mp h.symm with h | h <;> omega
+/-- From four sites on, `C` is strictly larger than one. -/
+lemma one_lt_uncertaintyRatio (ht : T.t ≠ 0) (hN : 4 ≤ T.N) : 1 < T.uncertaintyRatio :=
+  (T.one_le_uncertaintyRatio ht (by omega)).lt_of_ne fun h => by
+    rcases (T.uncertaintyRatio_eq_one_iff ht (by omega)).mp h.symm with h | h <;> omega
 
-/-- **Nava–Robertson–Schrödinger elemental dimensional uncertainty inequality.** In the maximal
-current state, `Var H · Var X = (a t cos (π / (N + 1)))² + defect`, `C_Nava` is at least one, and
+/-- The Robertson–Schrödinger relation through the uncertainty ratio. In the maximal
+current state, `Var H · Var X = (a t cos (π / (N + 1)))² + defect`, `C` is at least one, and
 it equals one exactly for `N = 2` and `N = 3`. -/
-theorem nava_robertson_schrodinger_elemental_dimensional_uncertainty_inequality (ht : T.t ≠ 0)
+lemma robertson_schrodinger_uncertaintyRatio (ht : T.t ≠ 0)
     (hN : 2 ≤ T.N) :
     variance T.maxCurrentVectorState T.openHamiltonianObservable *
         variance T.maxCurrentVectorState T.positionObservable =
       (T.a * T.t * Real.cos (Real.pi / (T.N + 1))) ^ 2 +
         centeredGramDefect T.maxCurrentVectorState T.openHamiltonianObservable
           T.positionObservable ∧
-      1 ≤ T.CNava ∧ (T.CNava = 1 ↔ T.N = 2 ∨ T.N = 3) :=
-  ⟨T.variance_mul_variance_maxCurrentState, T.one_le_CNava ht hN,
-    T.CNava_eq_one_iff ht hN⟩
+      1 ≤ T.uncertaintyRatio ∧ (T.uncertaintyRatio = 1 ↔ T.N = 2 ∨ T.N = 3) :=
+  ⟨T.variance_mul_variance_maxCurrentState, T.one_le_uncertaintyRatio ht hN,
+    T.uncertaintyRatio_eq_one_iff ht hN⟩
 
 end TightBindingChain
 end CondensedMatter

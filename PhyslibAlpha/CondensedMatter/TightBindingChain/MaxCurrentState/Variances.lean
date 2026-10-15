@@ -5,7 +5,7 @@ Authors: Eduardo Nava-Hernandez
 -/
 module
 
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.ElementalUncertainty
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.MaxCurrentState.UncertaintyRatio
 /-!
 
 # The variances of the maximal current state
@@ -20,21 +20,21 @@ and position variances are
 
 The position variance rests on one sum over the `(N + 1)`-th roots of unity,
 `∑ j < N + 1, (j - (N + 1) / 2)² cos (2 j θ) = (N + 1) / (2 sin² θ)`, obtained by summation by
-parts. Hence `C_Nava²` has the closed form
+parts. Hence `C²` has the closed form
 `2 (N - 1) / ((N + 1) cos² θ) · (((N + 1)² + 2) / 6 · sin² θ - 1)`.
 
 ## ii. Key results
 
 - `variance_openHamiltonian_maxCurrentState` : `Var H = 4 t² sin² θ (N - 1) / (N + 1)`.
 - `variance_position_maxCurrentState` : `Var X = a² (((N + 1)² + 2) / 12 - 1 / (2 sin² θ))`.
-- `CNava_sq_eq` : the closed form of `C_Nava²`.
+- `uncertaintyRatio_sq_eq` : the closed form of `C²`.
 
 ## iii. Table of contents
 
 - A. Sums over the roots of unity
 - B. The energy variance
 - C. The position variance
-- D. The closed form of `C_Nava`
+- D. The closed form of `C`
 
 ## iv. References
 
@@ -222,14 +222,14 @@ lemma variance_position_maxCurrentState :
 
 /-!
 
-## D. The closed form of `C_Nava`
+## D. The closed form of `C`
 
 -/
 
-/-- The closed form of `C_Nava²` in the maximal current state, with `θ = π / (N + 1)`:
-`C_Nava² = 2 (N - 1) / ((N + 1) cos² θ) · (((N + 1)² + 2) / 6 · sin² θ - 1)`. -/
-theorem CNava_sq_eq (ht : T.t ≠ 0) (hN : 2 ≤ T.N) :
-    T.CNava ^ 2 = 2 * (T.N - 1) / ((T.N + 1) * Real.cos (Real.pi / (T.N + 1)) ^ 2) *
+/-- The closed form of `C²` in the maximal current state, with `θ = π / (N + 1)`:
+`C² = 2 (N - 1) / ((N + 1) cos² θ) · (((N + 1)² + 2) / 6 · sin² θ - 1)`. -/
+lemma uncertaintyRatio_sq_eq (ht : T.t ≠ 0) (hN : 2 ≤ T.N) :
+    T.uncertaintyRatio ^ 2 = 2 * (T.N - 1) / ((T.N + 1) * Real.cos (Real.pi / (T.N + 1)) ^ 2) *
       (((T.N + 1) ^ 2 + 2) / 6 * Real.sin (Real.pi / (T.N + 1)) ^ 2 - 1) := by
   have hN' : (2 : ℝ) ≤ T.N := by exact_mod_cast hN
   have hθ : 0 < Real.pi / (T.N + 1) := by positivity
@@ -240,7 +240,8 @@ theorem CNava_sq_eq (ht : T.t ≠ 0) (hN : 2 ≤ T.N) :
       linarith
   have hsin : Real.sin (Real.pi / (T.N + 1)) ≠ 0 := (Real.sin_pos_of_pos_of_lt_pi hθ
     (div_lt_self Real.pi_pos (by linarith))).ne'
-  rw [CNava, div_pow, Real.sq_sqrt (mul_nonneg (variance_nonneg _ _) (variance_nonneg _ _)),
+  rw [uncertaintyRatio, div_pow,
+    Real.sq_sqrt (mul_nonneg (variance_nonneg _ _) (variance_nonneg _ _)),
     sq_abs, variance_openHamiltonian_maxCurrentState, variance_position_maxCurrentState]
   have ha := T.a_pos.ne'
   field_simp

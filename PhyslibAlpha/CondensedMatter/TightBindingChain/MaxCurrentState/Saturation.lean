@@ -5,7 +5,7 @@ Authors: Eduardo Nava-Hernandez
 -/
 module
 
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.MaxCurrentState
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.MaxCurrentState.Basic
 /-!
 
 # Saturation of the uncertainty relation in the maximal current state
@@ -103,7 +103,7 @@ private lemma parallel_of_two_or_three (h : T.N = 2 ∨ T.N = 3) (m : Fin T.N) :
 
 /-- In the maximal current state of a chain with `N ≥ 2` sites and hopping `t ≠ 0`, the centered
 Gram defect of `H` and `X` vanishes exactly for `N = 2` and `N = 3`. -/
-theorem centeredGramDefect_maxCurrentState_eq_zero_iff (ht : T.t ≠ 0) (hN : 2 ≤ T.N) :
+lemma centeredGramDefect_maxCurrentState_eq_zero_iff (ht : T.t ≠ 0) (hN : 2 ≤ T.N) :
     centeredGramDefect T.maxCurrentVectorState T.openHamiltonianObservable
       T.positionObservable = 0 ↔ T.N = 2 ∨ T.N = 3 := by
   have hu := T.inner_energyFluctuation_maxCurrentState
@@ -195,7 +195,7 @@ theorem centeredGramDefect_maxCurrentState_eq_zero_iff (ht : T.t ≠ 0) (hN : 2 
 
 /-- **Saturation.** In the maximal current state of a chain with `N ≥ 2` sites and hopping
 `t ≠ 0`, the energy–position uncertainty relation is an equality exactly for `N = 2, 3`. -/
-theorem robertson_schrodinger_maxCurrentState_eq_iff (ht : T.t ≠ 0) (hN : 2 ≤ T.N) :
+lemma robertson_schrodinger_maxCurrentState_eq_iff (ht : T.t ≠ 0) (hN : 2 ≤ T.N) :
     covariance T.maxCurrentVectorState T.openHamiltonianObservable T.positionObservable ^ 2 +
         (T.a * T.t * Real.cos (Real.pi / (T.N + 1))) ^ 2 =
       variance T.maxCurrentVectorState T.openHamiltonianObservable *
@@ -205,7 +205,7 @@ theorem robertson_schrodinger_maxCurrentState_eq_iff (ht : T.t ≠ 0) (hN : 2 �
     centeredGramDefect_maxCurrentState_eq_zero_iff T ht hN]
 
 /-- From four sites on, the uncertainty relation of the maximal current state is strict. -/
-theorem robertson_schrodinger_maxCurrentState_lt (ht : T.t ≠ 0) (hN : 4 ≤ T.N) :
+lemma robertson_schrodinger_maxCurrentState_lt (ht : T.t ≠ 0) (hN : 4 ≤ T.N) :
     covariance T.maxCurrentVectorState T.openHamiltonianObservable T.positionObservable ^ 2 +
         (T.a * T.t * Real.cos (Real.pi / (T.N + 1))) ^ 2 <
       variance T.maxCurrentVectorState T.openHamiltonianObservable *

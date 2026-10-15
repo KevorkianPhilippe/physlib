@@ -5,7 +5,7 @@ Authors: Eduardo Nava-Hernandez
 -/
 module
 
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.OpenBoundary
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.Open.Basic
 public import PhyslibAlpha.ProbabilisticTheory.HilbertSpace.State.VectorUncertainty
 public import PhyslibAlpha.QuantumMechanics.HilbertSpaces.FiniteTarget.Operators
 

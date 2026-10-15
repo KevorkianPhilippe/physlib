@@ -5,7 +5,7 @@ Authors: Eduardo Nava-Hernandez
 -/
 module
 
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.Current
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.Current.Basic
 public import Mathlib.RingTheory.RootsOfUnity.Complex
 /-!
 

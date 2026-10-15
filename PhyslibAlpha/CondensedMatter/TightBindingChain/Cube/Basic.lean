@@ -5,7 +5,7 @@ Authors: Eduardo Nava-Hernandez
 -/
 module
 
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.ElementalUncertainty
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.MaxCurrentState.UncertaintyRatio
 public import PhyslibAlpha.QuantumMechanics.HilbertSpaces.FiniteTarget.ProductState
 /-!
 
@@ -19,7 +19,7 @@ acts on its own axis and leaves the other two in place. Observables of different
 only the Hamiltonian and the position of the same axis fail to commute.
 
 In the maximal current state of the cube, the product of the maximal current states of the three
-chains, each axis carries the constant `C_Nava` of its own chain. The energy–position uncertainty
+chains, each axis carries the constant `C` of its own chain. The energy–position uncertainty
 relation of an axis is an equality exactly when that axis has `2` or `3` sites, and it is strict
 from `4` sites on, on the three axes at once.
 
@@ -27,7 +27,7 @@ The six observables `(H, X)` of the three axes satisfy Robertson's relation `|de
 every state of the cube. Since different axes commute, `Ω` is block diagonal and `|det Ω|` is the
 product of the squared brackets of the three axes. In the maximal current state `Σ` is block
 diagonal too, and `det Σ / |det Ω|` is the product of the squares of the three constants
-`C_Nava`, so the relation is strict from `4 × 4 × 4` on.
+`C`, so the relation is strict from `4 × 4 × 4` on.
 
 ## ii. Key results
 
@@ -35,15 +35,16 @@ diagonal too, and `det Σ / |det Ω|` is the product of the squares of the three
 - `bracket_alongX_alongY`, `bracket_alongX_alongZ`, `bracket_alongY_alongZ` : different axes
   commute.
 - `maxCurrentCubeState` : the maximal current state of the cube.
-- `CNava_alongX`, `CNava_alongY`, `CNava_alongZ` : each axis carries its own `C_Nava`.
+- `uncertaintyRatio_alongX`, `uncertaintyRatio_alongY`, `uncertaintyRatio_alongZ` : each axis
+  carries its own `C`.
 - `centeredGramDefect_alongX_eq_zero_iff` (and `Y`, `Z`) : saturation on an axis iff it has `2`
   or `3` sites.
-- `nava_robertson_schrodinger_cube` : from `4 × 4 × 4` on, strict on the three axes.
+- `robertson_schrodinger_cube` : from `4 × 4 × 4` on, strict on the three axes.
 - `cubePairs` : the six observables `(H, X)` of the three axes.
 - `bracketMatrix_cubePairs` : in every state `Ω` is block diagonal, one block per axis.
 - `robertson_det_cube` : Robertson's relation for the six observables, in every state.
 - `covarianceMatrix_maxCurrentCubeState` : in the maximal current state `Σ` is block diagonal.
-- `det_covarianceMatrix_maxCurrentCubeState` : `det Σ = (C_Nava(x) C_Nava(y) C_Nava(z))² |det Ω|`.
+- `det_covarianceMatrix_maxCurrentCubeState` : `det Σ = (C(x) C(y) C(z))² |det Ω|`.
 - `robertson_det_maxCurrentCubeState_strict` : from `4 × 4 × 4` on, `|det Ω| < det Σ`.
 
 ## iii. Table of contents
@@ -209,26 +210,26 @@ lemma centeredGramDefect_alongZ :
 
 end Statistics
 
-/-- The `x` axis of the cube carries the constant `C_Nava` of the chain `Tx`. -/
-lemma CNava_alongX :
+/-- The `x` axis of the cube carries the constant `C` of the chain `Tx`. -/
+lemma uncertaintyRatio_alongX :
     √(variance (Tx.maxCurrentCubeVectorState Ty Tz) (Tx.alongX Ty Tz Tx.openHamiltonianObservable) *
       variance (Tx.maxCurrentCubeVectorState Ty Tz) (Tx.alongX Ty Tz Tx.positionObservable)) /
-        |Tx.a * Tx.t * Real.cos (Real.pi / (Tx.N + 1))| = Tx.CNava := by
-  rw [variance_alongX, variance_alongX, CNava]
+        |Tx.a * Tx.t * Real.cos (Real.pi / (Tx.N + 1))| = Tx.uncertaintyRatio := by
+  rw [variance_alongX, variance_alongX, uncertaintyRatio]
 
-/-- The `y` axis of the cube carries the constant `C_Nava` of the chain `Ty`. -/
-lemma CNava_alongY :
+/-- The `y` axis of the cube carries the constant `C` of the chain `Ty`. -/
+lemma uncertaintyRatio_alongY :
     √(variance (Tx.maxCurrentCubeVectorState Ty Tz) (Tx.alongY Ty Tz Ty.openHamiltonianObservable) *
       variance (Tx.maxCurrentCubeVectorState Ty Tz) (Tx.alongY Ty Tz Ty.positionObservable)) /
-        |Ty.a * Ty.t * Real.cos (Real.pi / (Ty.N + 1))| = Ty.CNava := by
-  rw [variance_alongY, variance_alongY, CNava]
+        |Ty.a * Ty.t * Real.cos (Real.pi / (Ty.N + 1))| = Ty.uncertaintyRatio := by
+  rw [variance_alongY, variance_alongY, uncertaintyRatio]
 
-/-- The `z` axis of the cube carries the constant `C_Nava` of the chain `Tz`. -/
-lemma CNava_alongZ :
+/-- The `z` axis of the cube carries the constant `C` of the chain `Tz`. -/
+lemma uncertaintyRatio_alongZ :
     √(variance (Tx.maxCurrentCubeVectorState Ty Tz) (Tx.alongZ Ty Tz Tz.openHamiltonianObservable) *
       variance (Tx.maxCurrentCubeVectorState Ty Tz) (Tx.alongZ Ty Tz Tz.positionObservable)) /
-        |Tz.a * Tz.t * Real.cos (Real.pi / (Tz.N + 1))| = Tz.CNava := by
-  rw [variance_alongZ, variance_alongZ, CNava]
+        |Tz.a * Tz.t * Real.cos (Real.pi / (Tz.N + 1))| = Tz.uncertaintyRatio := by
+  rw [variance_alongZ, variance_alongZ, uncertaintyRatio]
 
 /-- Along `x`, the centered Gram defect vanishes, that is the uncertainty relation is an
 equality, iff the axis has `2` or `3` sites. -/
@@ -255,10 +256,10 @@ lemma centeredGramDefect_alongZ_eq_zero_iff (ht : Tz.t ≠ 0) (hN : 2 ≤ Tz.N) 
   rw [centeredGramDefect_alongZ]
   exact centeredGramDefect_maxCurrentState_eq_zero_iff Tz ht hN
 
-/-- **Nava–Robertson–Schrödinger on the cube.** From `4 × 4 × 4` on, the uncertainty relation of
+/-- Robertson–Schrödinger on the cube. From `4 × 4 × 4` on, the uncertainty relation of
 the maximal current state is strict on the three axes at once: the centered Gram defect of each
 axis is positive. -/
-theorem nava_robertson_schrodinger_cube (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 0) (hz : Tz.t ≠ 0)
+lemma robertson_schrodinger_cube (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 0) (hz : Tz.t ≠ 0)
     (hNx : 4 ≤ Tx.N) (hNy : 4 ≤ Ty.N) (hNz : 4 ≤ Tz.N) :
     0 < centeredGramDefect (Tx.maxCurrentCubeVectorState Ty Tz)
         (Tx.alongX Ty Tz Tx.openHamiltonianObservable) (Tx.alongX Ty Tz Tx.positionObservable) ∧
@@ -460,16 +461,17 @@ lemma covarianceMatrix_maxCurrentCubeState :
     | 2, 0, _ => exact (covariance_comm _ _ _).trans (Tx.covariance_alongX_alongZ Ty Tz _ _)
     | 2, 1, _ => exact (covariance_comm _ _ _).trans (Tx.covariance_alongY_alongZ Ty Tz _ _)
 
-/-- In the maximal current state of a chain, `det Σ = C_Nava² (a t cos (π / (N + 1)))²` for the
+/-- In the maximal current state of a chain, `det Σ = C² (a t cos (π / (N + 1)))²` for the
 pair `(H, X)`. -/
 lemma det_covarianceMatrix_conjugatePair (T : TightBindingChain) (ht : T.t ≠ 0) (hN : 2 ≤ T.N) :
     (covarianceMatrix T.maxCurrentVectorState T.conjugatePair).det =
-      T.CNava ^ 2 * (T.a * T.t * Real.cos (Real.pi / (T.N + 1))) ^ 2 := by
+      T.uncertaintyRatio ^ 2 * (T.a * T.t * Real.cos (Real.pi / (T.N + 1))) ^ 2 := by
   rw [det_fin_two, covarianceMatrix, of_apply, of_apply, of_apply, of_apply]
   change variance _ _ * variance _ _ - covariance _ T.openHamiltonianObservable
     T.positionObservable * covariance _ T.positionObservable T.openHamiltonianObservable = _
   rw [covariance_comm _ T.positionObservable, covariance_maxCurrentState, mul_zero, sub_zero,
-    CNava, div_pow, Real.sq_sqrt (mul_nonneg (variance_nonneg _ _) (variance_nonneg _ _)),
+    uncertaintyRatio, div_pow,
+    Real.sq_sqrt (mul_nonneg (variance_nonneg _ _) (variance_nonneg _ _)),
     sq_abs, div_mul_cancel₀ _ (pow_ne_zero 2 (T.bound_ne_zero ht hN))]
   rfl
 
@@ -512,13 +514,13 @@ lemma sq_axisBracket_maxCurrentCubeState :
   rw [mul_pow, mul_pow, ex, ey, ez]
   ring
 
-/-- In the maximal current state of the cube, `det Σ = C_Nava(x)² C_Nava(y)² C_Nava(z)² |det Ω|`:
+/-- In the maximal current state of the cube, `det Σ = C(x)² C(y)² C(z)² |det Ω|`:
 the ratio of the two sides of Robertson's relation is the product of the constants of the three
 axes. -/
 lemma det_covarianceMatrix_maxCurrentCubeState (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 0) (hz : Tz.t ≠ 0)
     (hNx : 2 ≤ Tx.N) (hNy : 2 ≤ Ty.N) (hNz : 2 ≤ Tz.N) :
     (covarianceMatrix (Tx.maxCurrentCubeVectorState Ty Tz) (Tx.cubePairs Ty Tz)).det =
-      (Tx.CNava * Ty.CNava * Tz.CNava) ^ 2 *
+      (Tx.uncertaintyRatio * Ty.uncertaintyRatio * Tz.uncertaintyRatio) ^ 2 *
         (Tx.axisBracket Ty Tz (Tx.maxCurrentCubeVectorState Ty Tz) 0 *
           Tx.axisBracket Ty Tz (Tx.maxCurrentCubeVectorState Ty Tz) 1 *
           Tx.axisBracket Ty Tz (Tx.maxCurrentCubeVectorState Ty Tz) 2) ^ 2 := by
@@ -547,9 +549,11 @@ lemma robertson_det_maxCurrentCubeState_strict (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 
     exact (sq_nonneg _).lt_of_ne (pow_ne_zero 2 (mul_ne_zero (mul_ne_zero
       (Tx.bound_ne_zero hx (by omega)) (Ty.bound_ne_zero hy (by omega)))
       (Tz.bound_ne_zero hz (by omega)))).symm
-  have hC : 1 < (Tx.CNava * Ty.CNava * Tz.CNava) ^ 2 :=
-    one_lt_pow₀ (one_lt_mul_of_lt_of_le (one_lt_mul_of_lt_of_le (Tx.one_lt_CNava hx hNx)
-      (Ty.one_le_CNava hy (by omega))) (Tz.one_le_CNava hz (by omega))) two_ne_zero
+  have hC : 1 < (Tx.uncertaintyRatio * Ty.uncertaintyRatio * Tz.uncertaintyRatio) ^ 2 :=
+    one_lt_pow₀ (one_lt_mul_of_lt_of_le
+      (one_lt_mul_of_lt_of_le (Tx.one_lt_uncertaintyRatio hx hNx)
+        (Ty.one_le_uncertaintyRatio hy (by omega)))
+      (Tz.one_le_uncertaintyRatio hz (by omega))) two_ne_zero
   nlinarith
 
 end TightBindingChain

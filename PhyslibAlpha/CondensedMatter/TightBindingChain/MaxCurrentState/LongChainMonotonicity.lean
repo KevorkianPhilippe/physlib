@@ -5,26 +5,26 @@ Authors: Eduardo Nava-Hernandez
 -/
 module
 
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.LongChainLimit
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.MaxCurrentState.LongChainLimit
 public import Mathlib.Analysis.Real.Pi.Bounds
 /-!
 
-# `C_Nava` grows with the length of the chain
+# `C` grows with the length of the chain
 
 ## i. Overview
 
-From four sites on, `C_Nava` of the maximal current state is strictly increasing in the number
+From four sites on, `C` of the maximal current state is strictly increasing in the number
 of sites `N`, and so it stays strictly below its long chain limit `√(π² / 3 - 2)`. With
-`x = π / (N + 1)`, the closed form of `C_Nava²` is
+`x = π / (N + 1)`, the closed form of `C²` is
 `((π² / x² - 2π / x - 4 + 8x / π) / 3) tan² x - 2 + 4x / π`, whose derivative is negative on
 `0 < x ≤ π / 5`. The sign follows from Taylor bounds for `sin` and `cos`, the bounds
 `3.141592 < π < 3.141593`, and a Bernstein certificate for one polynomial of degree twelve.
 
 ## ii. Key results
 
-- `cNavaSqForm_strictMonoOn` : the closed form of `C_Nava²` is strictly increasing on `n ≥ 5`.
-- `CNava_lt_CNava` : `C_Nava` strictly increases with `N` from four sites on.
-- `CNava_lt_sqrt_pi_sq_div_three_sub_two` : `C_Nava < √(π² / 3 - 2)` from four sites on.
+- `uncertaintyRatioSqForm_strictMonoOn` : the closed form of `C²` is strictly increasing on `n ≥ 5`.
+- `uncertaintyRatio_lt_uncertaintyRatio` : `C` strictly increases with `N` from four sites on.
+- `uncertaintyRatio_lt_sqrt_pi_sq_div_three_sub_two` : `C < √(π² / 3 - 2)` from four sites on.
 
 ## iii. Table of contents
 
@@ -144,13 +144,13 @@ private lemma remainder_neg {x p : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1571 / 2500
 
 -/
 
-/-- The closed form of `C_Nava²` in the angle `x = π / n`. -/
+/-- The closed form of `C²` in the angle `x = π / n`. -/
 private noncomputable def angleForm (x : ℝ) : ℝ :=
   ((Real.pi ^ 2 / x ^ 2 - 2 * Real.pi / x - 4 + 8 * x / Real.pi) / 3) * Real.tan x ^ 2 - 2 +
     4 * x / Real.pi
 
-private lemma cNavaSqForm_eq_angleForm {n : ℝ} (hn : 2 < n) :
-    cNavaSqForm n = angleForm (Real.pi / n) := by
+private lemma uncertaintyRatioSqForm_eq_angleForm {n : ℝ} (hn : 2 < n) :
+    uncertaintyRatioSqForm n = angleForm (Real.pi / n) := by
   have hn0 : n ≠ 0 := by positivity
   have hx : Real.pi / n ≠ 0 := div_ne_zero Real.pi_ne_zero hn0
   have hx0 : 0 < Real.pi / n := by positivity
@@ -159,7 +159,7 @@ private lemma cNavaSqForm_eq_angleForm {n : ℝ} (hn : 2 < n) :
     · linarith [Real.pi_pos]
     · rw [div_lt_div_iff_of_pos_left Real.pi_pos (by linarith) two_pos]
       exact hn
-  rw [cNavaSqForm, angleForm, Real.sinc_of_ne_zero hx, Real.tan_eq_sin_div_cos]
+  rw [uncertaintyRatioSqForm, angleForm, Real.sinc_of_ne_zero hx, Real.tan_eq_sin_div_cos]
   simp only [div_pow, Real.sin_sq]
   field_simp
   ring
@@ -251,46 +251,49 @@ private lemma angleForm_strictAntiOn : StrictAntiOn angleForm (Ioc 0 (Real.pi / 
 
 -/
 
-private lemma CNava_nonneg : 0 ≤ T.CNava := div_nonneg (Real.sqrt_nonneg _) (abs_nonneg _)
+private lemma uncertaintyRatio_nonneg : 0 ≤ T.uncertaintyRatio :=
+  div_nonneg (Real.sqrt_nonneg _) (abs_nonneg _)
 
-/-- The closed form of `C_Nava²` is strictly increasing on `n ≥ 5`, that is, from four sites on. -/
-lemma cNavaSqForm_strictMonoOn : StrictMonoOn cNavaSqForm (Ici 5) := by
+/-- The closed form of `C²` is strictly increasing on `n ≥ 5`, that is, from four sites on. -/
+lemma uncertaintyRatioSqForm_strictMonoOn : StrictMonoOn uncertaintyRatioSqForm (Ici 5) := by
   intro m hm n hn hmn
   have hm' : (5 : ℝ) ≤ m := hm
   have hn' : (5 : ℝ) ≤ n := hn
-  rw [cNavaSqForm_eq_angleForm (by linarith), cNavaSqForm_eq_angleForm (by linarith)]
+  rw [uncertaintyRatioSqForm_eq_angleForm (by linarith),
+    uncertaintyRatioSqForm_eq_angleForm (by linarith)]
   refine angleForm_strictAntiOn ⟨div_pos Real.pi_pos (by linarith), ?_⟩
     ⟨div_pos Real.pi_pos (by linarith), ?_⟩ ?_
   · exact div_le_div_of_nonneg_left Real.pi_pos.le (by norm_num) (by linarith)
   · exact div_le_div_of_nonneg_left Real.pi_pos.le (by norm_num) hm'
   · exact div_lt_div_of_pos_left Real.pi_pos (by linarith) hmn
 
-/-- **Monotonicity.** From four sites on, `C_Nava` strictly increases with the number of sites. -/
-theorem CNava_lt_CNava {T T' : TightBindingChain} (ht : T.t ≠ 0) (ht' : T'.t ≠ 0)
-    (hN : 4 ≤ T.N) (hNN' : T.N < T'.N) : T.CNava < T'.CNava := by
+/-- **Monotonicity.** From four sites on, `C` strictly increases with the number of sites. -/
+lemma uncertaintyRatio_lt_uncertaintyRatio {T T' : TightBindingChain} (ht : T.t ≠ 0)
+    (ht' : T'.t ≠ 0) (hN : 4 ≤ T.N) (hNN' : T.N < T'.N) :
+    T.uncertaintyRatio < T'.uncertaintyRatio := by
   have h4 : (5 : ℝ) ≤ T.N + 1 := by
     have : (4 : ℝ) ≤ T.N := by exact_mod_cast hN
     linarith
   have hlt : (T.N : ℝ) + 1 < T'.N + 1 := by exact_mod_cast Nat.succ_lt_succ hNN'
-  have h := cNavaSqForm_strictMonoOn h4 (show (5 : ℝ) ≤ T'.N + 1 by linarith) hlt
-  rw [← CNava_sq_eq_cNavaSqForm T ht (by omega),
-    ← CNava_sq_eq_cNavaSqForm T' ht' (by omega)] at h
-  exact lt_of_pow_lt_pow_left₀ 2 (CNava_nonneg _) h
+  have h := uncertaintyRatioSqForm_strictMonoOn h4 (show (5 : ℝ) ≤ T'.N + 1 by linarith) hlt
+  rw [← uncertaintyRatio_sq_eq_uncertaintyRatioSqForm T ht (by omega),
+    ← uncertaintyRatio_sq_eq_uncertaintyRatioSqForm T' ht' (by omega)] at h
+  exact lt_of_pow_lt_pow_left₀ 2 (uncertaintyRatio_nonneg _) h
 
-/-- From four sites on, `C_Nava` stays strictly below its long chain limit `√(π² / 3 - 2)`. -/
-theorem CNava_lt_sqrt_pi_sq_div_three_sub_two (ht : T.t ≠ 0) (hN : 4 ≤ T.N) :
-    T.CNava < √(Real.pi ^ 2 / 3 - 2) := by
+/-- From four sites on, `C` stays strictly below its long chain limit `√(π² / 3 - 2)`. -/
+lemma uncertaintyRatio_lt_sqrt_pi_sq_div_three_sub_two (ht : T.t ≠ 0) (hN : 4 ≤ T.N) :
+    T.uncertaintyRatio < √(Real.pi ^ 2 / 3 - 2) := by
   have h5 : (5 : ℝ) ≤ T.N + 1 := by
     have : (4 : ℝ) ≤ T.N := by exact_mod_cast hN
     linarith
-  have hle : cNavaSqForm (T.N + 2) ≤ Real.pi ^ 2 / 3 - 2 := by
-    refine ge_of_tendsto tendsto_cNavaSqForm ?_
+  have hle : uncertaintyRatioSqForm (T.N + 2) ≤ Real.pi ^ 2 / 3 - 2 := by
+    refine ge_of_tendsto tendsto_uncertaintyRatioSqForm ?_
     filter_upwards [eventually_ge_atTop ((T.N : ℝ) + 2)] with n hn
-    exact cNavaSqForm_strictMonoOn.monotoneOn (by simp; linarith) (by simp; linarith) hn
-  have hlt := cNavaSqForm_strictMonoOn h5 (show (5 : ℝ) ≤ T.N + 2 by linarith)
+    exact uncertaintyRatioSqForm_strictMonoOn.monotoneOn (by simp; linarith) (by simp; linarith) hn
+  have hlt := uncertaintyRatioSqForm_strictMonoOn h5 (show (5 : ℝ) ≤ T.N + 2 by linarith)
     (by linarith : (T.N : ℝ) + 1 < T.N + 2)
-  rw [← CNava_sq_eq_cNavaSqForm T ht (by omega)] at hlt
-  rw [← Real.sqrt_sq (CNava_nonneg T)]
+  rw [← uncertaintyRatio_sq_eq_uncertaintyRatioSqForm T ht (by omega)] at hlt
+  rw [← Real.sqrt_sq (uncertaintyRatio_nonneg T)]
   exact Real.sqrt_lt_sqrt (sq_nonneg _) (hlt.trans_le hle)
 
 end TightBindingChain

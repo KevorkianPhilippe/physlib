@@ -5,8 +5,8 @@ Authors: Eduardo Nava-Hernandez
 -/
 module
 
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.Saturation
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.SpeedLimit
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.Current.SpeedLimit
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.MaxCurrentState.Saturation
 /-!
 
 # The velocity band of forced uncertainty
@@ -17,7 +17,7 @@ A unit vector has minimum uncertainty when the energy–position uncertainty rel
 equality, that is when the centered Gram defect of `H` and `X` vanishes. These vectors form a
 compact set, so among them some moves fastest: the threshold `v*` is attained. Every vector
 moving faster, with `v* < |⟨J⟩| ≤ maxCurrent`, carries a positive defect. This is the velocity
-band `Ϙ = (v*, maxCurrent]`. For `N = 2, 3` the maximal current state has minimum uncertainty,
+band `(v*, maxCurrent]`. For `N = 2, 3` the maximal current state has minimum uncertainty,
 so the band is empty.
 
 ## ii. Key results
@@ -26,7 +26,7 @@ so the band is empty.
 - `minUncertainty` : the unit vectors of minimum uncertainty, a compact set.
 - `threshold` : the largest speed `|⟨J⟩|` of a vector of minimum uncertainty, attained by
   `exists_threshold`.
-- `velocityBand` : the band `Ϙ = (threshold, maxCurrent]`.
+- `velocityBand` : the band `(threshold, maxCurrent]`.
 - `defectOf_pos_of_mem_velocityBand` : in the band, the defect is forced.
 - `velocityBand_eq_empty` : for `N = 2, 3` the band is empty.
 
@@ -149,7 +149,7 @@ lemma threshold_le_maxCurrent (ht : T.t ≠ 0) : T.threshold ≤ T.maxCurrent :=
 
 -/
 
-/-- The velocity band `Ϙ = (threshold, maxCurrent]` of forced uncertainty. -/
+/-- The velocity band `(threshold, maxCurrent]` of forced uncertainty. -/
 def velocityBand : Set ℝ := Set.Ioc T.threshold T.maxCurrent
 
 /-- In the velocity band, the uncertainty defect is forced. -/

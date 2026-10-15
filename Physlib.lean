@@ -145,6 +145,7 @@ public import Physlib.Mathematics.ForMathlib.Trigonometry.Tanh
 public import Physlib.Mathematics.Groups.SO3.Basic
 public import Physlib.Mathematics.Groups.SpecialUnitary.LieAlgebra.Adjoint
 public import Physlib.Mathematics.Groups.SpecialUnitary.LieAlgebra.Basic
+public import Physlib.Mathematics.Groups.SpecialUnitary.LieAlgebra.Contractions
 public import Physlib.Mathematics.Groups.SpecialUnitary.LieAlgebra.GellMann.Adjoint
 public import Physlib.Mathematics.Groups.SpecialUnitary.LieAlgebra.GellMann.Basic
 public import Physlib.Mathematics.Groups.SpecialUnitary.LieAlgebra.GellMann.SpecialCases
@@ -408,6 +409,10 @@ public import Physlib.QuantumMechanics.QuantumSystem.Basic
 public import Physlib.QuantumMechanics.RectangularBarrier.Basic
 public import Physlib.QuantumMechanics.SpaceDQuantumSystem
 public import Physlib.Relativity.Bispinors.Basic
+public import Physlib.Relativity.Causality.Basic
+public import Physlib.Relativity.Causality.CausallyFollows
+public import Physlib.Relativity.Causality.LightLike
+public import Physlib.Relativity.Causality.TimeLike
 public import Physlib.Relativity.CliffordAlgebra
 public import Physlib.Relativity.Fermions.Dirac.Basic
 public import Physlib.Relativity.Fermions.Dirac.GammaMatrices
@@ -500,10 +505,6 @@ public import Physlib.Relativity.Tensors.RealTensor.ToComplex
 public import Physlib.Relativity.Tensors.RealTensor.Units.Basic
 public import Physlib.Relativity.Tensors.RealTensor.Units.Pre
 public import Physlib.Relativity.Tensors.RealTensor.Vector.Basic
-public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.Basic
-public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.CausallyFollows
-public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.LightLike
-public import Physlib.Relativity.Tensors.RealTensor.Vector.Causality.TimeLike
 public import Physlib.Relativity.Tensors.RealTensor.Vector.MinkowskiProduct
 public import Physlib.Relativity.Tensors.RealTensor.Vector.Pre.Basic
 public import Physlib.Relativity.Tensors.RealTensor.Vector.Pre.Contraction
@@ -555,6 +556,7 @@ public import Physlib.SpaceAndTime.SpaceTime.LorentzAction
 public import Physlib.SpaceAndTime.SpaceTime.SpaceTimeAlgebra.Basic
 public import Physlib.SpaceAndTime.SpaceTime.SpaceTimeAlgebra.Star
 public import Physlib.SpaceAndTime.SpaceTime.SpaceTimeAlgebra.TaylorSeries
+public import Physlib.SpaceAndTime.SpaceTime.SpaceTimeDerivAlgebra.Action
 public import Physlib.SpaceAndTime.SpaceTime.SpaceTimeDerivAlgebra.Basic
 public import Physlib.SpaceAndTime.SpaceTime.TimeSlice
 public import Physlib.SpaceAndTime.Time.Basic

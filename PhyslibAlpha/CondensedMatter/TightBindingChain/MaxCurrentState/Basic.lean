@@ -5,8 +5,8 @@ Authors: Eduardo Nava-Hernandez
 -/
 module
 
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.CurrentEigenstates
-public import PhyslibAlpha.CondensedMatter.TightBindingChain.Uncertainty
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.Current.Eigenstates
+public import PhyslibAlpha.CondensedMatter.TightBindingChain.Open.Uncertainty
 /-!
 
 # The maximal current state of the open tight binding chain
