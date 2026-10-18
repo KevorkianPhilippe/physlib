@@ -10,11 +10,17 @@ public import Physlib.Meta.Linters.Sorry
 public import Physlib.Meta.TODO.Basic
 public import Physlib.SpaceAndTime.Time.Derivatives
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
+public import Mathlib.Analysis.Calculus.Deriv.MeanValue
 /-!
 
 # The Friedmann-Lemaître-Robertson-Walker metric
 
-Parts of this file is currently informal or semiformal.
+The spatial geometry of an FLRW model and its curvature parameter, the structures `FLRW` and
+`CosmicFluid`, the density and pressure of the cosmological constant as a fluid and the cosmic
+fluid with the cosmological constant folded in, the tangent-line bound for an FLRW model whose
+scale factor decelerates and the resulting lower bound on its interval of time, the first- and
+second-order Friedmann equations, the proposition `FLRW.FriedmannSolution` that a model and a
+fluid solve them, and the Hubble and deceleration parameters.
 
 -/
 
@@ -87,28 +93,199 @@ lemma limit_S_sphere(r : ℝ) :
   exact ((tendsto_sin_rx_over_x r).comp hg).congr fun k => by
     simp only [Function.comp_apply, mul_one_div, div_div_eq_mul_div, div_one, mul_comm]
 
+/-- The curvature parameter of the spatial geometry, the constant `k` of the first-order
+  Friedmann equation `FLRW.FriedmannEquation.FirstOrderFriedmann`:
+- `1 / k ^ 2` for `Spherical k`, whose profile `S` is that of a sphere of radius `|k|`,
+- `0` for `Flat`,
+- `-1 / k ^ 2` for `Saddle k`, whose profile `S` is that of a hyperbolic space of curvature
+  radius `|k|`.
+-/
+noncomputable def curvature : SpatialGeometry → ℝ
+  | Spherical k _ => 1 / k ^ 2
+  | Flat => 0
+  | Saddle k _ => -1 / k ^ 2
+
+@[simp]
+lemma curvature_flat : Flat.curvature = 0 := rfl
+
+/-- The spherical geometry has a positive curvature parameter. -/
+lemma curvature_spherical_pos (k : ℝ) (h : k < 0) : 0 < (Spherical k h).curvature := by
+  have hk : k ≠ 0 := h.ne
+  simp only [curvature]
+  positivity
+
+/-- The saddle geometry has a negative curvature parameter. -/
+lemma curvature_saddle_neg (k : ℝ) (h : k > 0) : (Saddle k h).curvature < 0 := by
+  simp only [curvature, neg_div]
+  exact neg_neg_of_pos (by positivity)
+
 end SpatialGeometry
 
-/-- The structure FLRW is defined to contain the physical parameters of the
-  Friedmann-Lemaître-Robertson-Walker metric. That is, it contains
-- The scale factor `a(t)`
-- An element of `SpatialGeometry`.
+open Time in
+/-- An FLRW model: the scale factor `a` of the Friedmann-Lemaître-Robertson-Walker metric on an
+  open interval `I` of cosmic time, positive and twice differentiable on `I`, together with the
+  geometry of the spatial slices. The values of `a` outside `I` carry no meaning. The interval
+  lets a model begin at a Big Bang, as the Milne model `FLRW.milne` does on
+  `I = {t | 0 < t.val}`. -/
+structure FLRW where
+  /-- The interval of cosmic time on which the model is defined. -/
+  I : Set Time
+  /-- The interval `I` is open. -/
+  isOpen_I : IsOpen I
+  /-- The set `I` is an interval. -/
+  ordConnected_I : I.OrdConnected
+  /-- The scale factor as a function of cosmic time. -/
+  a : Time → ℝ
+  /-- The scale factor is positive on `I`. -/
+  a_pos : ∀ t ∈ I, 0 < a t
+  /-- The scale factor is differentiable on `I`. -/
+  differentiableOn_a : DifferentiableOn ℝ a I
+  /-- The time derivative of the scale factor is differentiable on `I`. -/
+  differentiableOn_deriv_a : DifferentiableOn ℝ (∂ₜ a) I
+  /-- The geometry of the spatial slices. -/
+  geometry : SpatialGeometry
 
-Semiformal implementation note: It is possible that we should restrict
-`a(t)` to be smooth or at least twice differentiable.
--/
-@[sorryful]
-def FLRW : Type := sorry
+/-- The cosmic fluid filling an FLRW model, described by its total energy density `ρ` and its
+  pressure `p`, both functions of cosmic time, as in the first- and second-order Friedmann
+  equations `FLRW.FriedmannEquation.FirstOrderFriedmann` and
+  `FLRW.FriedmannEquation.SecondOrderFriedmann`. -/
+structure CosmicFluid where
+  /-- The total energy density as a function of cosmic time. -/
+  ρ : Time → ℝ
+  /-- The pressure as a function of cosmic time. -/
+  p : Time → ℝ
 
-TODO "Replace the placeholder `FLRW` type with a concrete structure bundling a positive
-  scale factor `a : Time → ℝ` (smooth, or at least twice differentiable) together with an
-  element of `SpatialGeometry`. If the structure also bundles the dynamics, it should carry the
-  first- and second-order Friedmann equations as fields and obtain the continuity equation as a
-  lemma through `FriedmannEquation.continuityEquation_of_friedmann`, never the other way round:
-  where `∂ₜ a = 0` the first-order and continuity equations leave the pressure unconstrained,
-  whereas the second-order equation fixes `ρ + 3 p / c²` (the Einstein static universe)."
+/-- The empty cosmic fluid, with zero energy density and zero pressure at all times. -/
+def CosmicFluid.empty : CosmicFluid := ⟨fun _ => 0, fun _ => 0⟩
+
+/-- The density `ρ_Λ = Λ c² / (8 π G)` associated with the cosmological constant. -/
+noncomputable def FLRW.FriedmannEquation.cosmologicalConstantDensity (Λ G c : ℝ) : ℝ :=
+  Λ * c ^ 2 / (8 * Real.pi * G)
+
+/-- The pressure `p_Λ = - ρ_Λ c²` associated with the cosmological constant. -/
+noncomputable def FLRW.FriedmannEquation.cosmologicalConstantPressure (Λ G c : ℝ) : ℝ :=
+  -(FLRW.FriedmannEquation.cosmologicalConstantDensity Λ G c) * c ^ 2
+
+/-- The cosmic fluid `F` with the cosmological constant folded in as a fluid. -/
+noncomputable def CosmicFluid.addCosmologicalConstant (F : CosmicFluid) (Λ G c : ℝ) :
+    CosmicFluid :=
+  ⟨fun s => F.ρ s + FLRW.FriedmannEquation.cosmologicalConstantDensity Λ G c,
+    fun s => F.p s + FLRW.FriedmannEquation.cosmologicalConstantPressure Λ G c⟩
 
 namespace FLRW
+
+section
+
+open Time
+
+variable (U : FLRW)
+
+lemma a_ne_zero {t : Time} (ht : t ∈ U.I) : U.a t ≠ 0 := (U.a_pos t ht).ne'
+
+lemma differentiableAt_a {t : Time} (ht : t ∈ U.I) : DifferentiableAt ℝ U.a t :=
+  U.differentiableOn_a.differentiableAt (U.isOpen_I.mem_nhds ht)
+
+lemma differentiableAt_deriv_a {t : Time} (ht : t ∈ U.I) : DifferentiableAt ℝ (∂ₜ U.a) t :=
+  U.differentiableOn_deriv_a.differentiableAt (U.isOpen_I.mem_nhds ht)
+
+end
+
+/-!
+
+## The interval and the tangent-line bound for a decelerating model
+
+These statements hold for any FLRW model; they do not use the Friedmann equations.
+
+-/
+
+section
+
+open Time
+
+/-- The times between two times of the interval `U.I` of an FLRW model are in `U.I`. -/
+lemma mk_mem_I_of_mem_Icc (U : FLRW) {σ τ x : ℝ} (hσ : (⟨σ⟩ : Time) ∈ U.I)
+    (hτ : (⟨τ⟩ : Time) ∈ U.I) (hx : x ∈ Set.Icc σ τ) : (⟨x⟩ : Time) ∈ U.I :=
+  U.ordConnected_I.out hσ hτ ⟨(Time.le_def _ _).mpr hx.1, (Time.le_def _ _).mpr hx.2⟩
+
+/-- Along the time coordinate, the derivative of the scale factor is continuous on any segment
+  of the interval `U.I`. -/
+lemma continuousOn_deriv_scaleFactor_mk (U : FLRW) {σ τ : ℝ} (hσ : (⟨σ⟩ : Time) ∈ U.I)
+    (hτ : (⟨τ⟩ : Time) ∈ U.I) : ContinuousOn (fun x : ℝ => ∂ₜ U.a ⟨x⟩) (Set.Icc σ τ) :=
+  U.differentiableOn_deriv_a.continuousOn.comp toRealCLE.symm.continuous.continuousOn
+    fun _ hx => U.mk_mem_I_of_mem_Icc hσ hτ hx
+
+/-- If the scale factor decelerates on the interval (`∂ₜ ∂ₜ a ≤ 0` on `U.I`), it lies below its
+  tangent line at any time `t₀` of `U.I`: `a t ≤ a t₀ + ∂ₜ a t₀ (t - t₀)` for `t ∈ U.I`. The
+  derivative is antitone on the segment between `t` and `t₀`, which lies in `U.I`, and the mean
+  value inequality concludes. -/
+lemma scaleFactor_le_tangent (U : FLRW) (hdec : ∀ s ∈ U.I, ∂ₜ (∂ₜ U.a) s ≤ 0) {t₀ t : Time}
+    (ht₀ : t₀ ∈ U.I) (ht : t ∈ U.I) : U.a t ≤ U.a t₀ + ∂ₜ U.a t₀ * (t.val - t₀.val) := by
+  obtain ⟨τ₀⟩ := t₀
+  obtain ⟨σ⟩ := t
+  dsimp only
+  -- on a segment of `U.I`, the scale factor and its derivative have derivatives along the
+  -- time coordinate, and the derivative of the scale factor is antitone
+  have key : ∀ {lo hi : ℝ}, (⟨lo⟩ : Time) ∈ U.I → (⟨hi⟩ : Time) ∈ U.I →
+      (∀ x ∈ Set.Icc lo hi, HasDerivAt (fun y : ℝ => U.a ⟨y⟩) (∂ₜ U.a ⟨x⟩) x) ∧
+      AntitoneOn (fun x : ℝ => ∂ₜ U.a ⟨x⟩) (Set.Icc lo hi) := by
+    intro lo hi hlo hhi
+    have hA : ∀ x ∈ Set.Icc lo hi, HasDerivAt (fun y : ℝ => U.a ⟨y⟩) (∂ₜ U.a ⟨x⟩) x :=
+      fun x hx => hasDerivAt_mk_of_differentiableAt
+        (U.differentiableAt_a (U.mk_mem_I_of_mem_Icc hlo hhi hx))
+    have hA' : ∀ x ∈ Set.Icc lo hi,
+        HasDerivAt (fun y : ℝ => ∂ₜ U.a ⟨y⟩) (∂ₜ (∂ₜ U.a) ⟨x⟩) x :=
+      fun x hx => hasDerivAt_mk_of_differentiableAt
+        (U.differentiableAt_deriv_a (U.mk_mem_I_of_mem_Icc hlo hhi hx))
+    refine ⟨hA, antitoneOn_of_deriv_nonpos (convex_Icc lo hi)
+      (U.continuousOn_deriv_scaleFactor_mk hlo hhi)
+      (fun x hx => (hA' x (interior_subset hx)).differentiableAt.differentiableWithinAt)
+      (fun x hx => ?_)⟩
+    rw [(hA' x (interior_subset hx)).deriv]
+    exact hdec _ (U.mk_mem_I_of_mem_Icc hlo hhi (interior_subset hx))
+  rcases le_total σ τ₀ with h | h
+  · obtain ⟨hA, hanti⟩ := key ht ht₀
+    have hmv := Convex.mul_sub_le_image_sub_of_le_deriv (convex_Icc σ τ₀)
+      (fun x hx => (hA x hx).continuousAt.continuousWithinAt)
+      (fun x hx => (hA x (interior_subset hx)).differentiableAt.differentiableWithinAt)
+      (C := ∂ₜ U.a ⟨τ₀⟩) (fun x hx => by
+        rw [(hA x (interior_subset hx)).deriv]
+        exact hanti (interior_subset hx) ⟨h, le_rfl⟩ (interior_subset hx).2)
+      σ ⟨le_rfl, h⟩ τ₀ ⟨h, le_rfl⟩ h
+    linarith
+  · obtain ⟨hA, hanti⟩ := key ht₀ ht
+    have hmv := Convex.image_sub_le_mul_sub_of_deriv_le (convex_Icc τ₀ σ)
+      (fun x hx => (hA x hx).continuousAt.continuousWithinAt)
+      (fun x hx => (hA x (interior_subset hx)).differentiableAt.differentiableWithinAt)
+      (C := ∂ₜ U.a ⟨τ₀⟩) (fun x hx => by
+        rw [(hA x (interior_subset hx)).deriv]
+        exact hanti ⟨le_rfl, h⟩ (interior_subset hx) (interior_subset hx).1)
+      τ₀ ⟨le_rfl, h⟩ σ ⟨h, le_rfl⟩ h
+    linarith
+
+/-- The Big-Bang bound for an FLRW model: if the scale factor decelerates on `U.I` and the model
+  expands at `t₀ ∈ U.I`, every time of `U.I` is later than `t₀ - a t₀ / ∂ₜ a t₀`. Earlier, the
+  tangent line, and hence the scale factor, would be non-positive. -/
+lemma lt_of_mem_I_of_decelerating (U : FLRW) (hdec : ∀ s ∈ U.I, ∂ₜ (∂ₜ U.a) s ≤ 0)
+    {t₀ : Time} (ht₀ : t₀ ∈ U.I) (h0 : 0 < ∂ₜ U.a t₀) {t : Time} (ht : t ∈ U.I) :
+    t₀.val - U.a t₀ / ∂ₜ U.a t₀ < t.val := by
+  by_contra hle
+  have hle' := not_lt.mp hle
+  have htan := U.scaleFactor_le_tangent hdec ht₀ ht
+  have hpos := U.a_pos t ht
+  have hq : ∂ₜ U.a t₀ * (U.a t₀ / ∂ₜ U.a t₀) = U.a t₀ := by field_simp
+  have h1 : t.val - t₀.val ≤ -(U.a t₀ / ∂ₜ U.a t₀) := by linarith
+  have h2 := mul_le_mul_of_nonneg_left h1 h0.le
+  rw [mul_neg, hq] at h2
+  linarith
+
+/-- Hence the interval of an FLRW model that decelerates on `U.I` and expands at one of its
+  times is bounded below. -/
+lemma bddBelow_I_of_decelerating (U : FLRW) (hdec : ∀ s ∈ U.I, ∂ₜ (∂ₜ U.a) s ≤ 0) {t₀ : Time}
+    (ht₀ : t₀ ∈ U.I) (h0 : 0 < ∂ₜ U.a t₀) : BddBelow U.I :=
+  ⟨⟨t₀.val - U.a t₀ / ∂ₜ U.a t₀⟩, fun _ ht =>
+    (Time.le_def _ _).mpr (U.lt_of_mem_I_of_decelerating hdec ht₀ h0 ht).le⟩
+
+end
 
 namespace FriedmannEquation
 
@@ -246,5 +423,28 @@ lemma exists_deriv_hubbleConstant_neg_iff
   exists_congr fun t => deriv_hubbleConstant_neg_iff (ha t) (hd_a t) (haz t) (hd_az t)
 end FriedmannEquation
 end FLRW
+
+namespace FLRW
+
+open FriedmannEquation
+
+/-- The proposition that the FLRW model `U` filled with the cosmic fluid `F` solves the
+  Friedmann equations: the first- and second-order Friedmann equations, with cosmological
+  constant `Λ`, Newton's constant `G` and speed of light `c`, hold at every time of the interval
+  `U.I`, the curvature parameter being the one of the spatial geometry. The continuity equation
+  of the fluid is not part of it: it follows from the two Friedmann equations
+  (`FLRW.FriedmannSolution.continuityEquation` in `Physlib.Cosmology.FLRW.MatterContent`). -/
+structure FriedmannSolution (U : FLRW) (F : CosmicFluid) (Λ G c : ℝ) : Prop where
+  /-- The first-order Friedmann equation holds on `U.I`. -/
+  firstOrder : ∀ t ∈ U.I, FirstOrderFriedmann U.a F.ρ U.geometry.curvature Λ G c t
+  /-- The second-order Friedmann equation holds on `U.I`. -/
+  secondOrder : ∀ t ∈ U.I, SecondOrderFriedmann U.a F.ρ F.p Λ G c t
+
+end FLRW
+
+TODO "State the results on FLRW cosmology (density parameters, reduced Hubble function, exact
+  solutions and dynamical criteria) directly in terms of `FLRW`, `CosmicFluid` and
+  `FLRW.FriedmannSolution`, so that the API is organised around these rather than around
+  separate functions `a`, `ρ` and `p`."
 
 end Cosmology
