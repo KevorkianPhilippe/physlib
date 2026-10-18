@@ -20,6 +20,7 @@ public import PhyslibAlpha.ClassicalFieldTheory.Local.TotalDerivative
 public import PhyslibAlpha.ClassicalFieldTheory.Local.TotalDivergence
 public import PhyslibAlpha.ClassicalFieldTheory.Local.TotalDivergenceEquivalence
 public import PhyslibAlpha.ClassicalFieldTheory.Local.Variation
+public import PhyslibAlpha.ClassicalMechanics.CentralForce.Basic
 public import PhyslibAlpha.ClassicalMechanics.CoupledSpringPotential
 public import PhyslibAlpha.ClassicalMechanics.MomentMap.Basic
 public import PhyslibAlpha.ClassicalMechanics.MomentMap.Cohomology
@@ -45,8 +46,10 @@ public import PhyslibAlpha.CondensedMatter.Crystal.Basic
 public import PhyslibAlpha.CondensedMatter.Crystal.Brillouin
 public import PhyslibAlpha.CondensedMatter.Crystal.BrillouinCoordinates
 public import PhyslibAlpha.CondensedMatter.Crystal.Examples.Basic
+public import PhyslibAlpha.CondensedMatter.Crystal.Examples.Monoclinic
 public import PhyslibAlpha.CondensedMatter.Crystal.Examples.Orthorhombic
 public import PhyslibAlpha.CondensedMatter.Crystal.Examples.ThreeDimensional
+public import PhyslibAlpha.CondensedMatter.Crystal.Examples.TetragonalHexagonal
 public import PhyslibAlpha.CondensedMatter.Crystal.Folner
 public import PhyslibAlpha.CondensedMatter.Crystal.Geometry
 public import PhyslibAlpha.CondensedMatter.Crystal.Graph
@@ -57,7 +60,9 @@ public import PhyslibAlpha.CondensedMatter.Crystal.PointGroup.Basic
 public import PhyslibAlpha.CondensedMatter.Crystal.PointGroup.Count
 public import PhyslibAlpha.CondensedMatter.Crystal.PointGroup.Cubic
 public import PhyslibAlpha.CondensedMatter.Crystal.PointGroup.Hypercubic
+public import PhyslibAlpha.CondensedMatter.Crystal.PointGroup.Monoclinic
 public import PhyslibAlpha.CondensedMatter.Crystal.PointGroup.Orthorhombic
+public import PhyslibAlpha.CondensedMatter.Crystal.PointGroup.TetragonalHexagonal
 public import PhyslibAlpha.CondensedMatter.Crystal.QuasiLocal
 public import PhyslibAlpha.CondensedMatter.Crystal.Reciprocal
 public import PhyslibAlpha.CondensedMatter.Crystal.Symmetry
@@ -132,6 +137,8 @@ public import PhyslibAlpha.Mathematics.RepresentationTheory.Sl2.Classification
 public import PhyslibAlpha.Mathematics.RepresentationTheory.Sl2.ClebschGordan
 public import PhyslibAlpha.Mathematics.RepresentationTheory.Sl2.CommutingActions
 public import PhyslibAlpha.Mathematics.RepresentationTheory.Sl2.Construction
+public import PhyslibAlpha.Mathematics.RepresentationTheory.Sl2.TensorDecomposition
+public import PhyslibAlpha.Mathematics.RepresentationTheory.Sl2.TensorHighestWeight
 public import PhyslibAlpha.Mathematics.RepresentationTheory.Sl2.Weights
 public import PhyslibAlpha.Mathematics.Sublinear
 public import PhyslibAlpha.Mathematics.TauCeti.Analysis.Bochner.DiscreteGroup
