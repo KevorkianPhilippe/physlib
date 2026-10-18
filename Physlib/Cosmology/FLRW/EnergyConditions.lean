@@ -22,8 +22,9 @@ used in `Physlib.Cosmology.FLRW.FriedmannSolution` to state the acceleration cri
 - `CosmicFluid.NullEnergyCondition`, `CosmicFluid.WeakEnergyCondition`,
   `CosmicFluid.StrongEnergyCondition`, `CosmicFluid.DominantEnergyCondition`: the four energy
   conditions.
-- `CosmicFluid.WeakEnergyCondition.of_dominant`, `CosmicFluid.NullEnergyCondition.of_weak`,
-  `CosmicFluid.NullEnergyCondition.of_strong`: the implications between them.
+- `CosmicFluid.DominantEnergyCondition.weakEnergyCondition`,
+  `CosmicFluid.WeakEnergyCondition.nullEnergyCondition`,
+  `CosmicFluid.StrongEnergyCondition.nullEnergyCondition`: the implications between them.
 
 ## iii. Table of contents
 
@@ -75,8 +76,8 @@ def DominantEnergyCondition : Prop := 0 ≤ F.ρ t ∧ |F.p t| ≤ F.ρ t * c ^ 
 variable {F c t}
 
 /-- For `c ≠ 0`, the dominant energy condition implies the weak energy condition. -/
-lemma WeakEnergyCondition.of_dominant (hc : c ≠ 0) (h : F.DominantEnergyCondition c t) :
-    F.WeakEnergyCondition c t := by
+lemma DominantEnergyCondition.weakEnergyCondition (hc : c ≠ 0)
+    (h : F.DominantEnergyCondition c t) : F.WeakEnergyCondition c t := by
   obtain ⟨h0, h1⟩ := h
   have hc2 : 0 < c ^ 2 := by positivity
   have h2 : -(F.ρ t * c ^ 2) ≤ F.p t := (abs_le.mp h1).1
@@ -87,11 +88,12 @@ lemma WeakEnergyCondition.of_dominant (hc : c ≠ 0) (h : F.DominantEnergyCondit
   linarith
 
 /-- The weak energy condition implies the null energy condition. -/
-lemma NullEnergyCondition.of_weak (h : F.WeakEnergyCondition c t) : F.NullEnergyCondition c t :=
+lemma WeakEnergyCondition.nullEnergyCondition (h : F.WeakEnergyCondition c t) :
+    F.NullEnergyCondition c t :=
   h.2
 
 /-- The strong energy condition implies the null energy condition. -/
-lemma NullEnergyCondition.of_strong (h : F.StrongEnergyCondition c t) :
+lemma StrongEnergyCondition.nullEnergyCondition (h : F.StrongEnergyCondition c t) :
     F.NullEnergyCondition c t :=
   h.1
 

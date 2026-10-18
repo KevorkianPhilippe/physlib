@@ -51,13 +51,11 @@ Time derivatives of curves `Time → ℝ` are computed through the bridge
   equation at all times, `ρ t = ρ t₀ (a t / a t₀)^(-3(1+w))`; `continuityEquation_of_scaling`:
   the converse; `density_scaling_dust`, `density_scaling_radiation`,
   `density_scaling_vacuum`: `ρ ∝ a⁻³`, `ρ ∝ a⁻⁴`, `ρ` constant.
-- `cosmologicalConstantDensity`, `cosmologicalConstantPressure`:
-  `ρ_Λ = Λ c² / (8 π G)`, `p_Λ = - ρ_Λ c²`; `firstOrderFriedmann_iff_lambdaFluid`,
-  `secondOrderFriedmann_iff_lambdaFluid`: the Friedmann equations with `Λ` are the Friedmann
-  equations without `Λ` for the fluid `ρ + ρ_Λ`, `p + p_Λ`;
-  `cosmologicalConstantPressure_eq_barotropic`: `p_Λ` is the `w = -1` barotropic pressure;
-  `CosmicFluid.addCosmologicalConstant`, `FLRW.friedmannSolution_iff_addCosmologicalConstant`:
-  the same for a solution of the Friedmann equations.
+- `firstOrderFriedmann_iff_lambdaFluid`, `secondOrderFriedmann_iff_lambdaFluid`: the Friedmann
+  equations with `Λ` are the Friedmann equations without `Λ` for the fluid `ρ + ρ_Λ`, `p + p_Λ`,
+  where `ρ_Λ = Λ c² / (8 π G)` and `p_Λ = - ρ_Λ c²` (`cosmologicalConstantDensity` and
+  `cosmologicalConstantPressure`, defined in `Physlib.Cosmology.FLRW.Basic`);
+  `cosmologicalConstantPressure_eq_barotropic`: `p_Λ` is the `w = -1` barotropic pressure.
 
 ## iii. Table of contents
 
@@ -317,15 +315,11 @@ lemma density_scaling_vacuum {a ρ : Time → ℝ} {c : ℝ} (hc : c ≠ 0) (hd1
 
 ## C. The cosmological constant as a fluid
 
+The density `cosmologicalConstantDensity` and the pressure `cosmologicalConstantPressure` of the
+cosmological constant, and the cosmic fluid `CosmicFluid.addCosmologicalConstant` with the
+cosmological constant folded in, are defined in `Physlib.Cosmology.FLRW.Basic`.
+
 -/
-
-/-- The density `ρ_Λ = Λ c² / (8 π G)` associated with the cosmological constant. -/
-noncomputable def cosmologicalConstantDensity (Λ G c : ℝ) : ℝ :=
-  Λ * c ^ 2 / (8 * π * G)
-
-/-- The pressure `p_Λ = - ρ_Λ c²` associated with the cosmological constant. -/
-noncomputable def cosmologicalConstantPressure (Λ G c : ℝ) : ℝ :=
-  -(cosmologicalConstantDensity Λ G c) * c ^ 2
 
 /-- The first-order Friedmann equation with `Λ` is the first-order Friedmann equation without
   `Λ` for the density `ρ + ρ_Λ`. -/
@@ -363,24 +357,6 @@ lemma cosmologicalConstantPressure_eq_barotropic (Λ G c : ℝ) (t : Time) :
       = barotropicPressure (-1) (fun _ => cosmologicalConstantDensity Λ G c) c t := by
   unfold cosmologicalConstantPressure barotropicPressure
   ring
-
-/-- The cosmic fluid `F` with the cosmological constant folded in as a fluid: the density
-  `ρ + ρ_Λ` and the pressure `p + p_Λ`. -/
-noncomputable def _root_.Cosmology.CosmicFluid.addCosmologicalConstant (F : CosmicFluid)
-    (Λ G c : ℝ) : CosmicFluid :=
-  ⟨fun s => F.ρ s + cosmologicalConstantDensity Λ G c,
-    fun s => F.p s + cosmologicalConstantPressure Λ G c⟩
-
-/-- An FLRW model filled with the cosmic fluid `F` solves the Friedmann equations with the
-  cosmological constant `Λ` if and only if it solves them without cosmological constant for the
-  fluid `F` with `Λ` folded in. -/
-lemma _root_.Cosmology.FLRW.friedmannSolution_iff_addCosmologicalConstant {U : FLRW}
-    {F : CosmicFluid} {Λ G c : ℝ} (hG : G ≠ 0) (hc : c ≠ 0) :
-    U.FriedmannSolution F Λ G c ↔ U.FriedmannSolution (F.addCosmologicalConstant Λ G c) 0 G c :=
-  ⟨fun h => ⟨fun t ht => (firstOrderFriedmann_iff_lambdaFluid hG).mp (h.firstOrder t ht),
-      fun t ht => (secondOrderFriedmann_iff_lambdaFluid hG hc).mp (h.secondOrder t ht)⟩,
-    fun h => ⟨fun t ht => (firstOrderFriedmann_iff_lambdaFluid hG).mpr (h.firstOrder t ht),
-      fun t ht => (secondOrderFriedmann_iff_lambdaFluid hG hc).mpr (h.secondOrder t ht)⟩⟩
 
 /-!
 

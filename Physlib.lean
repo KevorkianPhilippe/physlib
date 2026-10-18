@@ -60,6 +60,7 @@ public import Physlib.Cosmology.Basic
 public import Physlib.Cosmology.FLRW.Age
 public import Physlib.Cosmology.FLRW.Basic
 public import Physlib.Cosmology.FLRW.ConformalTime
+public import Physlib.Cosmology.FLRW.DeSitter
 public import Physlib.Cosmology.FLRW.DensityParameters
 public import Physlib.Cosmology.FLRW.Distances
 public import Physlib.Cosmology.FLRW.EnergyConditions

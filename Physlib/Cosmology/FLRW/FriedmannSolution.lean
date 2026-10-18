@@ -6,8 +6,6 @@ Authors: Philippe Kevorkian, Jinzheng Li
 module
 
 public import Physlib.Cosmology.FLRW.DensityParameters
-public import Physlib.Cosmology.FLRW.Solutions
-public import Mathlib.Analysis.Calculus.Deriv.MeanValue
 public import Mathlib.Topology.Order.IntermediateValue
 /-!
 
@@ -17,23 +15,27 @@ public import Mathlib.Topology.Order.IntermediateValue
 
 Qualitative consequences of the Friedmann equations for an FLRW model `U : FLRW` filled with a
 cosmic fluid `F : CosmicFluid` that solves them, `U.FriedmannSolution F Λ G c`. The proposition
-`FLRW.FriedmannSolution` itself is defined in `Physlib.Cosmology.FLRW.Basic`: the continuity
-equation (`Physlib.Cosmology.FLRW.MatterContent`), the density parameters and the exact solutions,
-which are used here, are stated about it. The energy conditions of the cosmic fluid are in
-`Physlib.Cosmology.FLRW.EnergyConditions`. On the interval `U.I` of the model: the expansion
-accelerates if and only if the fluid, with the cosmological constant folded in as a `w = -1`
-component, violates the strong energy condition; the deceleration parameter is
+`FLRW.FriedmannSolution` itself is defined in `Physlib.Cosmology.FLRW.Basic`, together with the
+tangent-line bound for a decelerating FLRW model, which does not use the Friedmann equations; the
+continuity equation (`Physlib.Cosmology.FLRW.MatterContent`) and the density parameters, which
+are used here, are stated about it. The energy conditions of the cosmic fluid are in
+`Physlib.Cosmology.FLRW.EnergyConditions`. On the interval `U.I` of the model: a solution with
+cosmological constant `Λ` is a solution without it for the fluid with `Λ` folded in; the
+expansion accelerates if and only if the fluid, with the cosmological constant folded in as a
+`w = -1` component, violates the strong energy condition; the deceleration parameter is
 `q = ½ Σ_x Ω_x (1 + 3 w_x)` for a finite family of barotropic fluids, and
 `q = ½ (Ω_m + 2 Ω_r - 2 Ω_Λ)` for ΛCDM; with a spatial geometry of non-positive curvature,
 positive density and `0 ≤ Λ`, the derivative `∂ₜ a` of the scale factor does not vanish, so that
-a model expanding at one time of `U.I` expands at all times of `U.I`. Finally, a model whose scale
-factor decelerates on `U.I` and expands at `t₀ ∈ U.I` lies below its tangent line at `t₀`, so that
-it cannot be defined at any time earlier than `t₀ - a(t₀) / ∂ₜ a(t₀) = t₀ - 1 / H(t₀)`: its
-interval of time is bounded below, the Big Bang being at most `1 / H(t₀)` in the past. This holds
-for `0 ≤ ρ`, `0 ≤ p` and `Λ = 0`; the de Sitter model, with `0 < Λ`, is defined at all times.
+a model expanding at one time of `U.I` expands at all times of `U.I`. Finally, with `0 ≤ ρ`,
+`0 ≤ p` and `Λ = 0` the scale factor decelerates on `U.I`, so that a model expanding at
+`t₀ ∈ U.I` cannot be defined at any time earlier than `t₀ - 1 / H(t₀)`: its interval of time is
+bounded below, the Big Bang being at most `1 / H(t₀)` in the past. The de Sitter model of
+`Physlib.Cosmology.FLRW.DeSitter`, with `0 < Λ`, is defined at all times.
 
 ## ii. Key results
 
+- `FLRW.friedmannSolution_iff_addCosmologicalConstant`: a solution with `Λ` is a solution
+  without `Λ` for the fluid `F.addCosmologicalConstant Λ G c`.
 - `FLRW.FriedmannSolution.deriv_deriv_scaleFactor_pos_iff`: `0 < ∂ₜ ∂ₜ a ↔ ρ + 3 p / c² < 0`
   (`Λ = 0`); `FLRW.FriedmannSolution.deriv_deriv_scaleFactor_pos_iff_lambda`: the same for the
   total fluid with `Λ` folded in.
@@ -41,18 +43,16 @@ for `0 ≤ ρ`, `0 ≤ p` and `Λ = 0`; the de Sitter model, with `0 < Λ`, is d
   `FLRW.FriedmannSolution.decelerationParameter_lambdaCDM`: `q = ½ (Ω_m + 2 Ω_r - 2 Ω_Λ)`.
 - `FLRW.FriedmannSolution.deriv_scaleFactor_ne_zero`,
   `FLRW.FriedmannSolution.deriv_scaleFactor_pos`: eternal expansion for a non-positive curvature.
-- `FLRW.scaleFactor_le_tangent`, `FLRW.lt_of_mem_I_of_decelerating`,
-  `FLRW.FriedmannSolution.lt_of_mem_I`, `FLRW.FriedmannSolution.bddBelow_I`: the Big-Bang bound;
-  `FLRW.not_bddBelow_deSitter_I`: the de Sitter model is defined at all times.
+- `FLRW.FriedmannSolution.deriv_deriv_scaleFactor_nonpos`,
+  `FLRW.FriedmannSolution.lt_of_mem_I`, `FLRW.FriedmannSolution.bddBelow_I`: the Big-Bang bound.
 
 ## iii. Table of contents
 
-- A. The interval and the tangent-line bound for a decelerating model
+- A. The cosmological constant folded into the cosmic fluid
 - B. Accelerated expansion and the strong energy condition
 - C. The deceleration parameter in terms of the density parameters
 - D. Eternal expansion
 - E. The Big-Bang bound for a solution of the Friedmann equations
-- F. The de Sitter contrast
 
 ## iv. References
 
@@ -62,104 +62,26 @@ for `0 ≤ ρ`, `0 ≤ p` and `Λ = 0`; the de Sitter model, with `0 < Λ`, is d
 
 @[expose] public section
 
-namespace Cosmology
+namespace Cosmology.FLRW.FriedmannSolution
 
-open Real Time FLRW.FriedmannEquation
-
-namespace FLRW
+open Real Time Cosmology.FLRW.FriedmannEquation
 
 /-!
 
-## A. The interval and the tangent-line bound for a decelerating model
-
-These statements hold for any FLRW model; they do not use the Friedmann equations.
+## A. The cosmological constant folded into the cosmic fluid
 
 -/
 
-/-- The times between two times of the interval `U.I` of an FLRW model are in `U.I`. -/
-lemma mk_mem_I_of_mem_Icc (U : FLRW) {σ τ x : ℝ} (hσ : (⟨σ⟩ : Time) ∈ U.I)
-    (hτ : (⟨τ⟩ : Time) ∈ U.I) (hx : x ∈ Set.Icc σ τ) : (⟨x⟩ : Time) ∈ U.I :=
-  U.ordConnected_I.out hσ hτ ⟨(Time.le_def _ _).mpr hx.1, (Time.le_def _ _).mpr hx.2⟩
-
-/-- Along the time coordinate, the derivative of the scale factor is continuous on any segment
-  of the interval `U.I`. -/
-lemma continuousOn_deriv_scaleFactor_mk (U : FLRW) {σ τ : ℝ} (hσ : (⟨σ⟩ : Time) ∈ U.I)
-    (hτ : (⟨τ⟩ : Time) ∈ U.I) : ContinuousOn (fun x : ℝ => ∂ₜ U.a ⟨x⟩) (Set.Icc σ τ) :=
-  U.differentiableOn_deriv_a.continuousOn.comp toRealCLE.symm.continuous.continuousOn
-    fun _ hx => U.mk_mem_I_of_mem_Icc hσ hτ hx
-
-/-- If the scale factor decelerates on the interval (`∂ₜ ∂ₜ a ≤ 0` on `U.I`), it lies below its
-  tangent line at any time `t₀` of `U.I`: `a t ≤ a t₀ + ∂ₜ a t₀ (t - t₀)` for `t ∈ U.I`. The
-  derivative is antitone on the segment between `t` and `t₀`, which lies in `U.I`, and the mean
-  value inequality concludes. -/
-lemma scaleFactor_le_tangent (U : FLRW) (hdec : ∀ s ∈ U.I, ∂ₜ (∂ₜ U.a) s ≤ 0) {t₀ t : Time}
-    (ht₀ : t₀ ∈ U.I) (ht : t ∈ U.I) : U.a t ≤ U.a t₀ + ∂ₜ U.a t₀ * (t.val - t₀.val) := by
-  obtain ⟨τ₀⟩ := t₀
-  obtain ⟨σ⟩ := t
-  dsimp only
-  -- on a segment of `U.I`, the scale factor and its derivative have derivatives along the
-  -- time coordinate, and the derivative of the scale factor is antitone
-  have key : ∀ {lo hi : ℝ}, (⟨lo⟩ : Time) ∈ U.I → (⟨hi⟩ : Time) ∈ U.I →
-      (∀ x ∈ Set.Icc lo hi, HasDerivAt (fun y : ℝ => U.a ⟨y⟩) (∂ₜ U.a ⟨x⟩) x) ∧
-      AntitoneOn (fun x : ℝ => ∂ₜ U.a ⟨x⟩) (Set.Icc lo hi) := by
-    intro lo hi hlo hhi
-    have hA : ∀ x ∈ Set.Icc lo hi, HasDerivAt (fun y : ℝ => U.a ⟨y⟩) (∂ₜ U.a ⟨x⟩) x :=
-      fun x hx => hasDerivAt_mk_of_differentiableAt
-        (U.differentiableAt_a (U.mk_mem_I_of_mem_Icc hlo hhi hx))
-    have hA' : ∀ x ∈ Set.Icc lo hi,
-        HasDerivAt (fun y : ℝ => ∂ₜ U.a ⟨y⟩) (∂ₜ (∂ₜ U.a) ⟨x⟩) x :=
-      fun x hx => hasDerivAt_mk_of_differentiableAt
-        (U.differentiableAt_deriv_a (U.mk_mem_I_of_mem_Icc hlo hhi hx))
-    refine ⟨hA, antitoneOn_of_deriv_nonpos (convex_Icc lo hi)
-      (U.continuousOn_deriv_scaleFactor_mk hlo hhi)
-      (fun x hx => (hA' x (interior_subset hx)).differentiableAt.differentiableWithinAt)
-      (fun x hx => ?_)⟩
-    rw [(hA' x (interior_subset hx)).deriv]
-    exact hdec _ (U.mk_mem_I_of_mem_Icc hlo hhi (interior_subset hx))
-  rcases le_total σ τ₀ with h | h
-  · obtain ⟨hA, hanti⟩ := key ht ht₀
-    have hmv := Convex.mul_sub_le_image_sub_of_le_deriv (convex_Icc σ τ₀)
-      (fun x hx => (hA x hx).continuousAt.continuousWithinAt)
-      (fun x hx => (hA x (interior_subset hx)).differentiableAt.differentiableWithinAt)
-      (C := ∂ₜ U.a ⟨τ₀⟩) (fun x hx => by
-        rw [(hA x (interior_subset hx)).deriv]
-        exact hanti (interior_subset hx) ⟨h, le_rfl⟩ (interior_subset hx).2)
-      σ ⟨le_rfl, h⟩ τ₀ ⟨h, le_rfl⟩ h
-    linarith
-  · obtain ⟨hA, hanti⟩ := key ht₀ ht
-    have hmv := Convex.image_sub_le_mul_sub_of_deriv_le (convex_Icc τ₀ σ)
-      (fun x hx => (hA x hx).continuousAt.continuousWithinAt)
-      (fun x hx => (hA x (interior_subset hx)).differentiableAt.differentiableWithinAt)
-      (C := ∂ₜ U.a ⟨τ₀⟩) (fun x hx => by
-        rw [(hA x (interior_subset hx)).deriv]
-        exact hanti ⟨le_rfl, h⟩ (interior_subset hx) (interior_subset hx).1)
-      τ₀ ⟨le_rfl, h⟩ σ ⟨h, le_rfl⟩ h
-    linarith
-
-/-- The Big-Bang bound for an FLRW model: if the scale factor decelerates on `U.I` and the model
-  expands at `t₀ ∈ U.I`, every time of `U.I` is later than `t₀ - a t₀ / ∂ₜ a t₀`. Earlier, the
-  tangent line, and hence the scale factor, would be non-positive. -/
-lemma lt_of_mem_I_of_decelerating (U : FLRW) (hdec : ∀ s ∈ U.I, ∂ₜ (∂ₜ U.a) s ≤ 0)
-    {t₀ : Time} (ht₀ : t₀ ∈ U.I) (h0 : 0 < ∂ₜ U.a t₀) {t : Time} (ht : t ∈ U.I) :
-    t₀.val - U.a t₀ / ∂ₜ U.a t₀ < t.val := by
-  by_contra hle
-  have hle' := not_lt.mp hle
-  have htan := U.scaleFactor_le_tangent hdec ht₀ ht
-  have hpos := U.a_pos t ht
-  have hq : ∂ₜ U.a t₀ * (U.a t₀ / ∂ₜ U.a t₀) = U.a t₀ := by field_simp
-  have h1 : t.val - t₀.val ≤ -(U.a t₀ / ∂ₜ U.a t₀) := by linarith
-  have h2 := mul_le_mul_of_nonneg_left h1 h0.le
-  rw [mul_neg, hq] at h2
-  linarith
-
-/-- Hence the interval of an FLRW model that decelerates on `U.I` and expands at one of its
-  times is bounded below. -/
-lemma bddBelow_I_of_decelerating (U : FLRW) (hdec : ∀ s ∈ U.I, ∂ₜ (∂ₜ U.a) s ≤ 0) {t₀ : Time}
-    (ht₀ : t₀ ∈ U.I) (h0 : 0 < ∂ₜ U.a t₀) : BddBelow U.I :=
-  ⟨⟨t₀.val - U.a t₀ / ∂ₜ U.a t₀⟩, fun _ ht =>
-    (Time.le_def _ _).mpr (U.lt_of_mem_I_of_decelerating hdec ht₀ h0 ht).le⟩
-
-namespace FriedmannSolution
+/-- An FLRW model filled with the cosmic fluid `F` solves the Friedmann equations with the
+  cosmological constant `Λ` if and only if it solves them without cosmological constant for the
+  fluid `F` with `Λ` folded in. -/
+lemma _root_.Cosmology.FLRW.friedmannSolution_iff_addCosmologicalConstant {U : FLRW}
+    {F : CosmicFluid} {Λ G c : ℝ} (hG : G ≠ 0) (hc : c ≠ 0) :
+    U.FriedmannSolution F Λ G c ↔ U.FriedmannSolution (F.addCosmologicalConstant Λ G c) 0 G c :=
+  ⟨fun h => ⟨fun t ht => (firstOrderFriedmann_iff_lambdaFluid hG).mp (h.firstOrder t ht),
+      fun t ht => (secondOrderFriedmann_iff_lambdaFluid hG hc).mp (h.secondOrder t ht)⟩,
+    fun h => ⟨fun t ht => (firstOrderFriedmann_iff_lambdaFluid hG).mpr (h.firstOrder t ht),
+      fun t ht => (secondOrderFriedmann_iff_lambdaFluid hG hc).mpr (h.secondOrder t ht)⟩⟩
 
 variable {U : FLRW} {F : CosmicFluid} {Λ G c : ℝ}
 
@@ -350,25 +272,4 @@ lemma bddBelow_I (h : U.FriedmannSolution F 0 G c) (hG : 0 < G) (hc : c ≠ 0)
   U.bddBelow_I_of_decelerating
     (fun s hs => h.deriv_deriv_scaleFactor_nonpos hG hc hs (hρ s hs) (hp s hs)) ht₀ h0
 
-end FriedmannSolution
-
-/-!
-
-## F. The de Sitter contrast
-
--/
-
-/-- The de Sitter model, which solves the Friedmann equations with `0 < Λ`
-  (`FLRW.friedmannSolution_deSitter`), is defined at all times: its interval is not bounded
-  below. -/
-lemma not_bddBelow_deSitter_I (a₀ σ Λ c : ℝ) (ha₀ : 0 < a₀) :
-    ¬ BddBelow (FLRW.deSitter a₀ σ Λ c ha₀).I := by
-  rintro ⟨b, hb⟩
-  have h1 := (Time.le_def _ _).mp
-    (hb (show (⟨b.val - 1⟩ : Time) ∈ (FLRW.deSitter a₀ σ Λ c ha₀).I from Set.mem_univ _))
-  dsimp only at h1
-  linarith
-
-end FLRW
-
-end Cosmology
+end Cosmology.FLRW.FriedmannSolution
