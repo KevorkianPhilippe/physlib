@@ -5,7 +5,7 @@ on:
     types: [opened]
   push:
     paths:
-      - scripts/autolabel.lean
+      - scripts/github/autolabel.lean
       - .github/workflows/add_label_from_diff.yaml
 
 # Limit permissions for GITHUB_TOKEN for the entire workflow
@@ -27,7 +27,7 @@ jobs:
         ref: master
         path: tools
     - name: Configure Lean
-      uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9 # v1.5.0
+      uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865 # v1.6.1
       with:
         auto-config: false
         use-github-cache: false

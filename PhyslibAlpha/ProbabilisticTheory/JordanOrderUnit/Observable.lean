@@ -7,12 +7,15 @@ module
 
 public import PhyslibAlpha.ProbabilisticTheory.JordanOrderUnit.Operator
 public import PhyslibAlpha.ProbabilisticTheory.State.Basic
-public import PhyslibAlpha.ProbabilisticTheory.Effect.Sharp
+public import Physlib.ProbabilisticTheory.Effect.Sharp
+public import PhyslibAlpha.ProbabilisticTheory.Effect.Basic
 public import PhyslibAlpha.ProbabilisticTheory.Algebra.Statistics
 
 /-!
 
 # Moments, variance and Jordan projections
+
+Moments and variance of observables, and Jordan projections as effects and compressions.
 
 ## i. Overview
 
@@ -34,6 +37,10 @@ orthogonal when `p ∘ q = 0`. A Jordan projection is an effect, and its quadrat
 - B. Jordan projections and orthogonality
 - C. Projections as effects
 - D. Compression: `U_p` for an idempotent `p`
+
+## iv. References
+
+* None.
 
 -/
 
