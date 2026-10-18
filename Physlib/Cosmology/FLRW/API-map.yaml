@@ -91,10 +91,11 @@ Requirements:
       is defined: both Friedmann equations hold on the interval of the model. The
       continuity equation follows from it as a lemma, and so does the closure
       relation of the density parameters. The de Sitter model, at all times, and
-      the Milne model, after its Big Bang, filled with the empty fluid, are
-      examples.
+      the Milne model, after its Big Bang, filled with the empty fluid, and the
+      flat power-law models, among them the radiation-dominated and Einstein-de
+      Sitter models, after their Big Bang, filled with their fluid, are examples.
     done: true
-    location: "Physlib/Cosmology/FLRW/Basic.lean (CosmicFluid, CosmicFluid.empty, FLRW.FriedmannSolution); Physlib/Cosmology/FLRW/MatterContent.lean (FLRW.FriedmannSolution.continuityEquation); Physlib/Cosmology/FLRW/DensityParameters.lean (FLRW.FriedmannSolution.densityParameter_add_lambda_add_curvature); Physlib/Cosmology/FLRW/DeSitter.lean (FLRW.deSitter, FLRW.friedmannSolution_deSitter); Physlib/Cosmology/FLRW/Solutions.lean (FLRW.milne, FLRW.friedmannSolution_milne)"
+    location: "Physlib/Cosmology/FLRW/Basic.lean (CosmicFluid, CosmicFluid.empty, FLRW.FriedmannSolution); Physlib/Cosmology/FLRW/MatterContent.lean (FLRW.FriedmannSolution.continuityEquation); Physlib/Cosmology/FLRW/DensityParameters.lean (FLRW.FriedmannSolution.densityParameter_add_lambda_add_curvature); Physlib/Cosmology/FLRW/DeSitter.lean (FLRW.deSitter, FLRW.friedmannSolution_deSitter); Physlib/Cosmology/FLRW/Solutions.lean (FLRW.milne, FLRW.friedmannSolution_milne, FLRW.powerLaw, CosmicFluid.powerLaw, FLRW.friedmannSolution_powerLaw, FLRW.radiationDominated, FLRW.friedmannSolution_radiationDominated, FLRW.einsteinDeSitter, FLRW.friedmannSolution_einsteinDeSitter)"
 
   - description: >
       The first-order Friedmann equation

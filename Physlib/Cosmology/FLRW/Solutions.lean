@@ -22,6 +22,10 @@ curvature of the Milne model and the instability of the Einstein static universe
 items: neither the curvature of the FLRW metric nor a perturbation theory of the Friedmann
 equations is available yet.
 
+The flat power-law solutions, among them the radiation-dominated and Einstein-de Sitter
+solutions, are also given as FLRW models on the interval `t > 0` (`FLRW.powerLaw`), which, filled
+with their cosmic fluid, solve the Friedmann equations.
+
 Each solution is a scale factor `a : Time → ℝ` given by an explicit function of the time
 coordinate `t.val`. Its time derivative `∂ₜ a` is computed through the bridge
 `deriv_comp_toRealCLE_of_hasDerivAt` from Mathlib's `HasDerivAt` on `ℝ`.
@@ -41,6 +45,10 @@ coordinate `t.val`. Its time derivative `∂ₜ a` is computed through the bridg
   `einsteinDeSitterScaleFactor_secondOrderFriedmann`: `a = (t / t₀) ^ (2/3)` solves the flat
   Friedmann equations with the dust density `ρ = 1 / (6 π G t²)` and `p = 0`; `q = 1 / 2` and
   `H(t₀) = 2 / (3 t₀)`.
+- `FLRW.powerLaw`, `CosmicFluid.powerLaw`, `FLRW.friedmannSolution_powerLaw`: the flat
+  power-law models on the interval `t > 0`, which, filled with their cosmic fluid, solve the
+  Friedmann equations; `FLRW.radiationDominated`, `FLRW.einsteinDeSitter` and their
+  `FriedmannSolution` lemmas for the cases `n = 1/2` and `n = 2/3`.
 
 - `milneScaleFactor_firstOrderFriedmann`, `milneScaleFactor_secondOrderFriedmann`: the Milne
   scale factor `a = c t` solves the empty (`ρ = 0`, `p = 0`, `Λ = 0`) Friedmann equations with
@@ -61,6 +69,7 @@ Bang is at the origin `t.val = 0` of the time chart.
   - A.2. The Hubble and deceleration parameters
   - A.3. The radiation-dominated solution
   - A.4. The Einstein-de Sitter solution
+  - A.5. The power-law models
 - B. The Milne solution
 - C. The Einstein static universe
 - D. Remaining TODO items
@@ -296,6 +305,89 @@ lemma hubbleConstant_einsteinDeSitterScaleFactor_t₀ {t₀ : Time} (ht₀ : 0 <
   unfold einsteinDeSitterScaleFactor
   rw [hubbleConstant_powerLaw ht₀ _ ht₀]
   ring
+
+/-!
+
+### A.5. The power-law models
+
+The flat power-law solutions as FLRW models on the interval `t > 0`, after the Big Bang at the
+origin of the time chart, filled with the cosmic fluid of density `3 n² / (8 π G t²)` and pressure
+`w ρ c²`. The radiation-dominated and Einstein-de Sitter models are the cases `n = 1/2`, `w = 1/3`
+and `n = 2/3`, `w = 0`.
+
+-/
+
+/-- The spatially flat power-law model `a(t) = (t / t₀) ^ n` on the interval `t > 0`, after the
+  Big Bang at the origin `t.val = 0` of the time chart, for a normalisation epoch `t₀ > 0`. -/
+noncomputable def _root_.Cosmology.FLRW.powerLaw (t₀ : Time) (ht₀ : 0 < t₀.val) (n : ℝ) :
+    FLRW where
+  I := {t | 0 < t.val}
+  isOpen_I := isOpen_lt continuous_const Time.val_differentiable.continuous
+  ordConnected_I := ⟨fun x hx _ _ z hz =>
+    lt_of_lt_of_le (show 0 < x.val from hx) ((Time.le_def x z).mp hz.1)⟩
+  a := fun s => (s.val / t₀.val) ^ n
+  a_pos _ ht := Real.rpow_pos_of_pos (div_pos ht ht₀) n
+  differentiableOn_a := fun t (ht : 0 < t.val) =>
+    (DifferentiableAt.comp (g := fun y : ℝ => (y / t₀.val) ^ n) t
+      ((differentiableAt_id.div_const t₀.val).rpow_const (Or.inl (div_pos ht ht₀).ne'))
+      (Time.val_differentiable t)).differentiableWithinAt
+  differentiableOn_deriv_a := by
+    refine DifferentiableOn.congr (f := fun s : Time => n / t₀.val * (s.val / t₀.val) ^ (n - 1))
+      (fun t (ht : 0 < t.val) => (DifferentiableAt.comp
+        (g := fun y : ℝ => n / t₀.val * (y / t₀.val) ^ (n - 1)) t
+        (((differentiableAt_id.div_const t₀.val).rpow_const
+          (Or.inl (div_pos ht ht₀).ne')).const_mul _)
+        (Time.val_differentiable t)).differentiableWithinAt) ?_
+    intro t (ht : 0 < t.val)
+    exact deriv_powerLaw ht₀.ne' n (ne_of_gt ht)
+  geometry := .Flat
+
+/-- The cosmic fluid of the flat power-law solution: the density `ρ = 3 n² / (8 π G t²)` imposed by
+  the first-order Friedmann equation, and the pressure `p = w ρ c²`. -/
+noncomputable def _root_.Cosmology.CosmicFluid.powerLaw (n w G c : ℝ) : CosmicFluid :=
+  ⟨fun s => 3 * n ^ 2 / (8 * π * G * s.val ^ 2),
+    fun s => w * (3 * n ^ 2 / (8 * π * G * s.val ^ 2)) * c ^ 2⟩
+
+/-- The flat power-law model, filled with the fluid `CosmicFluid.powerLaw n w G c` where
+  `1 + 3 w = 2 (1 - n) / n`, solves the Friedmann equations without cosmological constant on
+  its interval `t > 0`. -/
+lemma _root_.Cosmology.FLRW.friedmannSolution_powerLaw {t₀ : Time} (ht₀ : 0 < t₀.val)
+    {n w G c : ℝ} (hG : 0 < G) (hc : 0 < c) (hn : n ≠ 0) (hw : 1 + 3 * w = 2 * (1 - n) / n) :
+    (FLRW.powerLaw t₀ ht₀ n).FriedmannSolution (CosmicFluid.powerLaw n w G c) 0 G c :=
+  ⟨fun _ ht => powerLaw_firstOrderFriedmann ht₀ hG n ht,
+    fun _ ht => powerLaw_secondOrderFriedmann ht₀ hG hc hn hw ht⟩
+
+/-- The radiation-dominated model, the flat power-law model with `n = 1/2`. -/
+noncomputable def _root_.Cosmology.FLRW.radiationDominated (t₀ : Time) (ht₀ : 0 < t₀.val) : FLRW :=
+  FLRW.powerLaw t₀ ht₀ (1 / 2)
+
+/-- The scale factor of the radiation-dominated model is `radiationScaleFactor t₀`. -/
+lemma _root_.Cosmology.FLRW.radiationDominated_a {t₀ : Time} (ht₀ : 0 < t₀.val) :
+    (FLRW.radiationDominated t₀ ht₀).a = radiationScaleFactor t₀ := rfl
+
+/-- The radiation-dominated model, filled with radiation of density `3 / (32 π G t²)` and pressure
+  `ρ c² / 3`, solves the Friedmann equations without cosmological constant on its interval. -/
+lemma _root_.Cosmology.FLRW.friedmannSolution_radiationDominated {t₀ : Time} (ht₀ : 0 < t₀.val)
+    {G c : ℝ} (hG : 0 < G) (hc : 0 < c) :
+    (FLRW.radiationDominated t₀ ht₀).FriedmannSolution
+      (CosmicFluid.powerLaw (1 / 2) (1 / 3) G c) 0 G c :=
+  FLRW.friedmannSolution_powerLaw ht₀ hG hc (by norm_num) (by norm_num)
+
+/-- The Einstein-de Sitter model, the flat power-law model with `n = 2/3`. -/
+noncomputable def _root_.Cosmology.FLRW.einsteinDeSitter (t₀ : Time) (ht₀ : 0 < t₀.val) : FLRW :=
+  FLRW.powerLaw t₀ ht₀ (2 / 3)
+
+/-- The scale factor of the Einstein-de Sitter model is `einsteinDeSitterScaleFactor t₀`. -/
+lemma _root_.Cosmology.FLRW.einsteinDeSitter_a {t₀ : Time} (ht₀ : 0 < t₀.val) :
+    (FLRW.einsteinDeSitter t₀ ht₀).a = einsteinDeSitterScaleFactor t₀ := rfl
+
+/-- The Einstein-de Sitter model, filled with dust of density `1 / (6 π G t²)` and zero pressure,
+  solves the Friedmann equations without cosmological constant on its interval. -/
+lemma _root_.Cosmology.FLRW.friedmannSolution_einsteinDeSitter {t₀ : Time} (ht₀ : 0 < t₀.val)
+    {G c : ℝ} (hG : 0 < G) (hc : 0 < c) :
+    (FLRW.einsteinDeSitter t₀ ht₀).FriedmannSolution
+      (CosmicFluid.powerLaw (2 / 3) 0 G c) 0 G c :=
+  FLRW.friedmannSolution_powerLaw ht₀ hG hc (by norm_num) (by norm_num)
 
 /-!
 
