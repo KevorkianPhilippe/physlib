@@ -6,11 +6,13 @@ Authors: Tom Ole Diem
 module
 
 public import PhyslibAlpha.ProbabilisticTheory.JordanOrderUnit.JB.GeneratedByOne.CFC
-public import PhyslibAlpha.ProbabilisticTheory.Effect.Sharp
+public import Physlib.ProbabilisticTheory.Effect.Sharp
 
 /-!
 
 # Effects from the functional calculus
+
+A continuous `[0, 1]`-valued function of an observable in a JB-algebra is an effect.
 
 ## i. Overview
 
@@ -19,6 +21,15 @@ A continuous function of an observable with values in `[0, 1]` is an effect.
 ## ii. Key results
 
 - `NormedJordanAlgebra.jordanCfcEffect` : the effect of a `[0, 1]`-valued function.
+- `NormedJordanAlgebra.coe_jordanCfcEffect` : the underlying observable is `f(a)`.
+
+## iii. Table of contents
+
+- A. Effects from the functional calculus
+
+## iv. References
+
+* None.
 
 -/
 
@@ -33,6 +44,12 @@ variable {E : Type*}
 section
 
 variable [IsJBOrderUnit E]
+
+/-!
+
+## A. Effects from the functional calculus
+
+-/
 
 /-- The effect `f(a)` of a continuous function `f` with values in `[0, 1]`. -/
 noncomputable def jordanCfcEffect [Nontrivial E] (a : E)

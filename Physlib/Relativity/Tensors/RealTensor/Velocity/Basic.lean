@@ -140,7 +140,7 @@ noncomputable def pathFromZero (u : Velocity d) : Path zero u where
         simp only [Fin.isValue, x]
         ring_nf
         rw [Real.sq_sqrt, norm_spatialPart_sq_eq]
-        ring
+        · ring
         · apply add_nonneg
           · exact zero_le_one' ℝ
           · apply mul_nonneg

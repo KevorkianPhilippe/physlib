@@ -5,7 +5,7 @@ Authors: Tom Ole Diem
 -/
 module
 
-public import PhyslibAlpha.ProbabilisticTheory.Effect.Sharp
+public import Physlib.ProbabilisticTheory.Effect.Sharp
 public import PhyslibAlpha.ProbabilisticTheory.Channel.Normal
 public import PhyslibAlpha.ProbabilisticTheory.State.Basic
 public import Mathlib.Algebra.Order.Module.PositiveLinearMap
@@ -13,6 +13,8 @@ public import Mathlib.Algebra.Order.Module.PositiveLinearMap
 /-!
 
 # Operations
+
+Operations: positive maps with op 1 ≤ 1, their outcome effects and conditioned states.
 
 ## i. Overview
 
@@ -32,6 +34,10 @@ to `1` is an instrument.
 
 - A. Operations
 - B. Outcome effects
+
+## iv. References
+
+* None.
 
 -/
 
