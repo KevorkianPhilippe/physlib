@@ -11,10 +11,7 @@ Overview: |
     arbitrary finite index type in `QuantumInfo/States/Pure/Braket.lean`, and a general
     state is a density matrix on `Qubit`. The ambient theory of a finite dimensional
     system, in particular density matrices with their evolution, measurements and
-    distinguishability measures, is left to a separate API map. Two modules of the
-    source directory, `BlochSphere.lean` and `BargmannInvariant.lean`, are not
-    imported by `QuantumInfo.lean` and so are not built with the library; the two
-    requirements that point at them record that.
+    distinguishability measures, is left to a separate API map.
 
 ParentAPIs:
   - "Kets and bras of a finite dimensional system (QuantumInfo/States/Pure)"
@@ -47,13 +44,13 @@ Requirements:
     done: true
     location: "QuantumInfo/States/Pure/Qubit.lean (controllize, CNOT, CNOT_matrix, controllize_apply_one_one, controllize_mul, controllize_one, controllize_mul_inv, X_controllize_X)"
 
-  - description: "The API shall contain the Bloch sphere as the unit sphere of three-dimensional Euclidean space, with its parameterization by a polar and an azimuthal angle and the dot product of two of its points in terms of those angles. Stated as `BlochSphere`, `blochPoint`, `blochPoint_val` and `dot_blochPoint` in `QuantumInfo/States/Pure/BlochSphere.lean`, a module that `QuantumInfo.lean` does not import and that is therefore not built with the library."
-    done: false
-    location: "N/A"
+  - description: "The Bloch sphere is the unit sphere of three-dimensional Euclidean space, with its parameterization by a polar and an azimuthal angle and the dot product of two of its points in terms of those angles."
+    done: true
+    location: "QuantumInfo/States/Pure/BlochSphere.lean (BlochSphere, blochPoint, blochPoint_val, dot_blochPoint)"
 
-  - description: "The API shall contain the solid angle of a geodesic triangle on the Bloch sphere, together with the Bargmann invariant of three pure states, its phase, the invariance of that phase under cyclic permutation of the three, its negation under reversal of their order as an equation of angles, and the bound of one on the norm of the invariant. Stated as `solidAngle` in `QuantumInfo/States/Pure/BlochSphere.lean` and as `bargmannInvariantThree`, `bargmannPhaseThree`, `bargmannPhaseThree_cyclic`, `bargmannPhaseThree_reverse` and `norm_bargmannInvariantThree_le_one` in `QuantumInfo/States/Pure/BargmannInvariant.lean`, two modules that `QuantumInfo.lean` does not import and that are therefore not built with the library."
-    done: false
-    location: "N/A"
+  - description: "The API contains the solid angle of a geodesic triangle on the Bloch sphere, together with the Bargmann invariant of three pure states, its phase, the invariance of that phase under cyclic permutation of the three, its negation under reversal of their order as an equation of angles, and the bound of one on the norm of the invariant."
+    done: true
+    location: "QuantumInfo/States/Pure/BlochSphere.lean (solidAngle); QuantumInfo/States/Pure/BargmannInvariant.lean (bargmannInvariantThree, bargmannPhaseThree, bargmannPhaseThree_cyclic, bargmannPhaseThree_reverse, norm_bargmannInvariantThree_le_one)"
 
   - description: "The product of two systems carries product and entangled kets and the maximally entangled state, so that Bell-type states of a pair of qubits can be written."
     done: true
