@@ -158,22 +158,23 @@ Requirements:
 
   - description: >
       The critical density ρ_cr = 3 H^2 / (8πG) and the density parameters Ω = ρ
-      / ρ_cr, Ω_K = -k c^2 / (H^2 a^2) and Ω_Λ = Λ c^2 / (3 H^2) are defined,
-      and the first-order Friedmann equation is read as the closure relation Ω +
-      Ω_Λ + Ω_K = 1. The same quantities are defined for an FLRW model filled with
-      a cosmic fluid, Ω_K being given by its spatial geometry, and the closure
-      relation holds for a model that solves the Friedmann equations, at the times
-      of its interval at which H ≠ 0.
+      / ρ_cr, Ω_K = -k c^2 / (H^2 a^2) and Ω_Λ = Λ c^2 / (3 H^2) of an FLRW model
+      filled with a cosmic fluid are defined, Ω_K being given by its spatial
+      geometry, and the first-order Friedmann equation is read as the closure
+      relation Ω + Ω_Λ + Ω_K = 1 for a model that solves the Friedmann equations,
+      at the times of its interval at which H ≠ 0.
     done: true
-    location: "Physlib/Cosmology/FLRW/DensityParameters.lean (FLRW.FriedmannEquation.criticalDensity, FLRW.FriedmannEquation.densityParameter, FLRW.FriedmannEquation.curvatureDensityParameter, FLRW.FriedmannEquation.lambdaDensityParameter, FLRW.FriedmannEquation.densityParameter_add_lambda_add_curvature, FLRW.FriedmannEquation.densityParameter_add_curvature, FLRW.criticalDensity, FLRW.densityParameter, FLRW.curvatureDensityParameter, FLRW.lambdaDensityParameter, FLRW.densityParameter_addCosmologicalConstant, FLRW.FriedmannSolution.densityParameter_add_lambda_add_curvature, FLRW.FriedmannSolution.densityParameter_add_curvature)"
+    location: "Physlib/Cosmology/FLRW/DensityParameters.lean (FLRW.criticalDensity, FLRW.densityParameter, FLRW.curvatureDensityParameter, FLRW.lambdaDensityParameter, FLRW.lambdaDensityParameter_eq_densityParameter, FLRW.densityParameter_addCosmologicalConstant, FLRW.FriedmannSolution.densityParameter_add_lambda_add_curvature, FLRW.FriedmannSolution.densityParameter_add_curvature)"
 
   - description: >
       The reduced Hubble function E(x)^2 = Ω_Λ + Ω_m x^-3 + Ω_r x^-4 + Ω_K x^-2
-      of the standard cosmological model is defined, with H = H₀ E(a / a₀) for
-      matter and radiation obeying their scaling laws, the age t₀ = H₀^-1 ∫₀¹ dx
+      of the standard cosmological model is defined, with H = H₀ E(a / a₀) for a
+      solution of the Friedmann equations whose cosmic fluid is made of matter and
+      radiation obeying their scaling laws between two times of its interval, the
+      age t₀ = H₀^-1 ∫₀¹ dx
       / (x E(x)) and the radiation-matter and matter-Λ equality scale factors.
     done: true
-    location: "Physlib/Cosmology/FLRW/ReducedHubble.lean (reducedHubble, sq_hubbleConstant_eq_reducedHubble, hubbleConstant_eq_reducedHubble, equalityScaleFactorRadiationMatter, equalityScaleFactorMatterLambda); Physlib/Cosmology/FLRW/Age.lean (age, age_eq)"
+    location: "Physlib/Cosmology/FLRW/ReducedHubble.lean (reducedHubble, FLRW.FriedmannSolution.sq_hubbleConstant_eq_mul_densityParameters, FLRW.FriedmannSolution.sq_hubbleConstant_eq_reducedHubble, FLRW.FriedmannSolution.hubbleConstant_eq_reducedHubble, equalityScaleFactorRadiationMatter, equalityScaleFactorMatterLambda); Physlib/Cosmology/FLRW/Age.lean (age, age_eq)"
 
   - description: >
       The null, weak, strong and dominant energy conditions of the cosmic fluid

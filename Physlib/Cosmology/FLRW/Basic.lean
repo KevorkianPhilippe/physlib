@@ -445,9 +445,9 @@ structure FriedmannSolution (U : FLRW) (F : CosmicFluid) (Λ G c : ℝ) : Prop w
 
 end FLRW
 
-TODO "State the results on FLRW cosmology (density parameters, reduced Hubble function, exact
-  solutions and dynamical criteria) directly in terms of `FLRW`, `CosmicFluid` and
-  `FLRW.FriedmannSolution`, so that the API is organised around these rather than around
-  separate functions `a`, `ρ` and `p`."
+TODO "State the remaining results on FLRW cosmology (the Hubble and deceleration parameters, the
+  continuity equation and the density scaling laws, and the exact solutions) directly in terms of
+  `FLRW`, `CosmicFluid` and `FLRW.FriedmannSolution`, so that the API is organised around these
+  rather than around separate functions `a`, `ρ` and `p`."
 
 end Cosmology
