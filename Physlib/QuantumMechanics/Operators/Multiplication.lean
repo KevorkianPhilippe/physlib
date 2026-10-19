@@ -1,11 +1,12 @@
 /-
 Copyright (c) 2026 Gregory J. Loges. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Gregory J. Loges
+Authors: Gregory J. Loges, Philippe Kevorkian
 -/
 module
 
 public import Physlib.QuantumMechanics.Operators.Unbounded
+public import Physlib.QuantumMechanics.Operators.SpectralTheory.Basic
 public import Physlib.QuantumMechanics.HilbertSpaces.SpaceD.SchwartzSubmodule
 /-!
 
@@ -41,6 +42,13 @@ through multiplication in the Fourier domain: see `Operators/Derivative.lean`.
 - `mulOperator_const_smul_eq` : `𝓜 μ (c • f) = c • 𝓜 μ f` for non-zero `c`.
 - `mulOperator_add_ge` / `mulOperator_sub_ge` : `𝓜 μ (f ± g)` is an extension of `𝓜 μ f ± 𝓜 μ g`.
 - `mulOperator_smul_ge` : `𝓜 μ (f • g)` is an extension of `𝓜 μ f * 𝓜 μ g`.
+- `essRange f μ` : The `μ`-essential range of `f`, the set of `z : ℂ` such that
+    `{x | ‖f x - z‖ < ε}` has positive measure for every `ε > 0`.
+- `mulOperator_spectrum_eq_essRange` : For a σ-finite measure `μ` and a `μ`-a.e. strongly
+    measurable `f`, the spectrum of `𝓜 μ f` is the `μ`-essential range of `f`.
+- `mulOperator_spectrum_eq_closure_range` : For a continuous `f` and a σ-finite measure `μ`
+    which is positive on non-empty open sets, the spectrum of `𝓜 μ f` is the closure of
+    the range of `f`.
 
 ## iii. Table of contents
 
@@ -54,6 +62,8 @@ through multiplication in the Fourier domain: see `Operators/Derivative.lean`.
   - E.2. Add & sub
   - E.3. Composition
 - F. Spectrum
+  - F.1. Essential range
+  - F.2. Spectrum of multiplication operators
 
 ## iv. References
 
@@ -581,11 +591,181 @@ TODO "`mulOperator_smul_eq` has the strong assumption `(𝓜 μ g).domain = ⊤`
 ## F. Spectrum
 -/
 
-TODO "Prove that the spectrum of the multiplication operator `𝓜 μ f`
-  is the 'μ-essential range' of `f`."
+/-!
+### F.1. Essential range
+-/
 
-TODO "Prove that the spectrum of the multiplication operator `𝓜 μ f`
-  is the closure of `f.range` for continuous `f`."
+/-- The `μ`-essential range of `f`: the complex numbers `z` such that, for every `ε > 0`,
+  the set `{x | ‖f x - z‖ < ε}` has positive measure. No measurability of `f` is assumed:
+  for a non-measurable set, `μ` gives its outer measure. -/
+def essRange (f : Space d → ℂ) (μ : Measure (Space d)) : Set ℂ :=
+  {z : ℂ | ∀ ε > 0, 0 < μ {x | ‖f x - z‖ < ε}}
+
+/-- `z` is in the `μ`-essential range of `f` iff, for every `ε > 0`, `f` takes values within
+  distance `ε` of `z` on a set of positive measure. -/
+lemma mem_essRange_iff {f : Space d → ℂ} {μ : Measure (Space d)} {z : ℂ} :
+    z ∈ essRange f μ ↔ ∀ ε > 0, 0 < μ {x | ‖f x - z‖ < ε} :=
+  Iff.rfl
+
+/-- For a continuous `f` and a measure `μ` which is positive on non-empty open sets,
+  the `μ`-essential range of `f` is the closure of the range of `f`. -/
+lemma essRange_eq_closure_range {f : Space d → ℂ} (hf : Continuous f)
+    (μ : Measure (Space d)) [μ.IsOpenPosMeasure] :
+    essRange f μ = _root_.closure (Set.range f) := by
+  ext z
+  refine ⟨fun hz ↦ Metric.mem_closure_iff.mpr fun ε hε ↦ ?_, fun hz ε hε ↦ ?_⟩
+  · obtain ⟨x, hx⟩ := nonempty_of_measure_ne_zero (hz ε hε).ne'
+    exact ⟨f x, ⟨x, rfl⟩, by rwa [dist_comm, dist_eq_norm]⟩
+  · obtain ⟨_, ⟨x, rfl⟩, hx⟩ := Metric.mem_closure_iff.mp hz ε hε
+    rw [dist_comm, dist_eq_norm] at hx
+    exact (isOpen_lt (by fun_prop) continuous_const).measure_pos μ ⟨x, hx⟩
+
+/-!
+### F.2. Spectrum of multiplication operators
+-/
+
+/-- The operator `𝓜 μ f - z • 1` acts by multiplication by `f - z`. -/
+lemma mulOperator_sub_smul_one_apply_ae {μ : Measure (Space d)} {f : Space d → ℂ} {z : ℂ}
+    (ψ : (𝓜 μ f - z • 1).domain) :
+    (𝓜 μ f - z • 1) ψ =ᵐ[μ] fun x ↦ (f x - z) * ψ.1 x := by
+  have h : (𝓜 μ f - z • 1) ψ = 𝓜 μ f ⟨ψ, ψ.2.1⟩ - z • ψ.1 := by simp [LinearPMap.sub_apply]
+  rw [h]
+  filter_upwards [Lp.coeFn_sub (𝓜 μ f ⟨ψ, ψ.2.1⟩) (z • ψ.1),
+    mulOperator_apply_ae (⟨ψ, ψ.2.1⟩ : (𝓜 μ f).domain), Lp.coeFn_smul z ψ.1] with x h₁ h₂ h₃
+  rw [h₁, Pi.sub_apply, h₂, h₃]
+  simp [sub_mul]
+
+/-- If `ε ≤ ‖f x - z‖` for `μ`-a.e. `x`, then `ε` is a lower bound for `𝓜 μ f - z • 1`. -/
+private lemma mulOperator_isLowerBound {μ : Measure (Space d)} {f : Space d → ℂ} {z : ℂ}
+    {ε : ℝ} (hε : 0 < ε) (h : ∀ᵐ x ∂μ, ε ≤ ‖f x - z‖) : IsLowerBound (𝓜 μ f) z ε := by
+  intro ψ
+  refine (le_inv_mul_iff₀ hε).mp (Lp.norm_le_mul_norm_of_ae_le_mul ?_)
+  filter_upwards [h, Lp.coeFn_sub (𝓜 μ f ψ) (z • ψ.1), mulOperator_apply_ae ψ,
+    Lp.coeFn_smul z ψ.1] with x hx h₁ h₂ h₃
+  rw [h₁, Pi.sub_apply, h₂, h₃]
+  simp only [Pi.smul_apply, Pi.mul_apply, smul_eq_mul, ← sub_mul, norm_mul, ← mul_assoc]
+  exact le_mul_of_one_le_left (norm_nonneg _) ((one_le_inv_mul₀ hε).mpr hx)
+
+/-- If `f` is `μ`-a.e. strongly measurable and `ε ≤ ‖f x - z‖` for `μ`-a.e. `x`, with `ε > 0`,
+  then `𝓜 μ f - z • 1` is onto: a preimage of `φ` is `(f - z)⁻¹ • φ`. -/
+private lemma mulOperator_sub_smul_one_range_eq_top {μ : Measure (Space d)} {f : Space d → ℂ}
+    {z : ℂ} {ε : ℝ} (hf : AEStronglyMeasurable f μ) (hε : 0 < ε)
+    (h : ∀ᵐ x ∂μ, ε ≤ ‖f x - z‖) : (𝓜 μ f - z • 1).toFun.range = ⊤ := by
+  have hne : ∀ᵐ x ∂μ, f x - z ≠ 0 := h.mono fun x hx ↦ norm_pos_iff.mp (hε.trans_le hx)
+  refine LinearMap.range_eq_top.mpr fun φ ↦ ?_
+  have hg : MemHS (fun x ↦ (f x - z)⁻¹ * φ x) μ := by
+    refine MemLp.of_le_mul (c := ε⁻¹) (memHS_coe φ)
+      ((hf.sub aestronglyMeasurable_const).inv₀.mul (Lp.aestronglyMeasurable φ)) ?_
+    filter_upwards [h] with x hx
+    rw [norm_mul, norm_inv]
+    exact mul_le_mul_of_nonneg_right (inv_anti₀ hε hx) (norm_nonneg _)
+  have hdom : mk hg ∈ (𝓜 μ f).domain := by
+    refine mem_mulOperator_domain_iff.mpr <|
+      ((memHS_coe φ).add ((memHS_coe (mk hg)).const_smul z)).ae_eq ?_
+    filter_upwards [coeFn_mk hg, hne] with x h₁ h₂
+    simp only [Pi.add_apply, Pi.smul_apply, Pi.mul_apply, smul_eq_mul, h₁]
+    field_simp
+    ring
+  refine ⟨⟨mk hg, hdom, by simp⟩, ?_⟩
+  rw [toFun_eq_coe, ext_iff]
+  filter_upwards [mulOperator_sub_smul_one_apply_ae ⟨mk hg, hdom, by simp⟩, coeFn_mk hg, hne]
+    with x h₁ h₂ h₃
+  rw [h₁]
+  simp only [h₂, mul_inv_cancel_left₀ h₃]
+
+/-- The spectrum of `𝓜 μ f` is contained in the `μ`-essential range of `f`, for any measure `μ`
+  and any `μ`-a.e. strongly measurable `f`. -/
+lemma mulOperator_spectrum_subset_essRange {μ : Measure (Space d)} {f : Space d → ℂ}
+    (hf : AEStronglyMeasurable f μ) : σ (𝓜 μ f) ⊆ essRange f μ := by
+  intro z hz
+  by_contra hz'
+  simp only [mem_essRange_iff, not_forall, not_lt, nonpos_iff_eq_zero] at hz'
+  obtain ⟨ε, hε, hμ⟩ := hz'
+  have h : ∀ᵐ x ∂μ, ε ≤ ‖f x - z‖ := by simpa only [ae_iff, not_le] using hμ
+  obtain ⟨h_ker, h_cont⟩ := mem_regularityDomain_iff.mp ⟨ε, hε, mulOperator_isLowerBound hε h⟩
+  exact hz ⟨h_ker, mulOperator_sub_smul_one_range_eq_top hf hε h, h_cont⟩
+
+/-- If `(f - z) * ψ` is `μ`-a.e. the indicator of `toMeasurable μ B`, where `B` has finite measure
+  and `‖f - z‖ < ε` on `B`, then this indicator is `μ`-a.e. bounded by `ε * ‖ψ‖`. -/
+private lemma norm_indicator_le_mul_ae {μ : Measure (Space d)} {f : Space d → ℂ} {z : ℂ}
+    {ε : ℝ} (hε : 0 < ε) {B : Set (Space d)} (hB : μ B ≠ ⊤) (hBf : ∀ x ∈ B, ‖f x - z‖ < ε)
+    {ψ : SpaceDHilbertSpace d μ}
+    (hψ : ∀ᵐ x ∂μ, (f x - z) * ψ x = (toMeasurable μ B).indicator (fun _ ↦ (1 : ℂ)) x) :
+    ∀ᵐ x ∂μ, ‖(toMeasurable μ B).indicator (fun _ ↦ (1 : ℂ)) x‖ ≤ ε * ‖ψ x‖ := by
+  -- The measurable set where `ψ` is small meets `B`, hence `toMeasurable μ B`, in a null set.
+  have hG : MeasurableSet {x | ‖ψ x‖ < ε⁻¹} :=
+    measurableSet_lt (Lp.stronglyMeasurable ψ).measurable.norm measurable_const
+  have hBG : μ (B ∩ {x | ‖ψ x‖ < ε⁻¹}) = 0 := by
+    refine measure_mono_null ?_ (ae_iff.mp hψ)
+    intro x ⟨hxB, hxG⟩ hx
+    rw [Set.indicator_of_mem (subset_toMeasurable μ B hxB)] at hx
+    have h := mul_lt_mul'' (hBf x hxB) hxG (norm_nonneg _) (norm_nonneg _)
+    rw [mul_inv_cancel₀ hε.ne', ← norm_mul, hx, norm_one] at h
+    exact lt_irrefl _ h
+  rw [← Measure.measure_toMeasurable_inter hG hB] at hBG
+  filter_upwards [measure_eq_zero_iff_ae_notMem.mp hBG] with x hx
+  by_cases hxs : x ∈ toMeasurable μ B
+  · rw [Set.indicator_of_mem hxs, norm_one]
+    have hψx : ε⁻¹ ≤ ‖ψ x‖ := not_lt.mp fun h ↦ hx ⟨hxs, h⟩
+    calc (1 : ℝ) = ε * ε⁻¹ := (mul_inv_cancel₀ hε.ne').symm
+      _ ≤ ε * ‖ψ x‖ := mul_le_mul_of_nonneg_left hψx hε.le
+  · rw [Set.indicator_of_notMem hxs, norm_zero]
+    positivity
+
+/-- If `𝓜 μ f - z • 1` is onto and bounded below by `c > 0`, then every set of finite measure
+  on which `‖f - z‖ < c / 2` is null. The proof applies the lower bound to a preimage of
+  the indicator of the set. -/
+private lemma measure_eq_zero_of_isLowerBound {μ : Measure (Space d)} {f : Space d → ℂ} {z : ℂ}
+    {c : ℝ} (hc : 0 < c) (hlb : IsLowerBound (𝓜 μ f) z c)
+    (hrange : (𝓜 μ f - z • 1).toFun.range = ⊤) {B : Set (Space d)} (hB : μ B ≠ ⊤)
+    (hBf : ∀ x ∈ B, ‖f x - z‖ < c / 2) : μ B = 0 := by
+  by_contra hB0
+  have hs := measurableSet_toMeasurable μ B
+  have hμs : μ (toMeasurable μ B) ≠ ⊤ := by rwa [measure_toMeasurable]
+  let φ : SpaceDHilbertSpace d μ := indicatorConstLp 2 hs hμs 1
+  have hφ := indicatorConstLp_coeFn (p := 2) (hs := hs) (hμs := hμs) (c := (1 : ℂ))
+  obtain ⟨ψ, hψ⟩ := LinearMap.range_eq_top.mp hrange φ
+  rw [toFun_eq_coe] at hψ
+  have hφψ : ∀ᵐ x ∂μ, (f x - z) * ψ.1 x = (toMeasurable μ B).indicator (fun _ ↦ (1 : ℂ)) x := by
+    filter_upwards [hψ ▸ mulOperator_sub_smul_one_apply_ae ψ, hφ] with x h₁ h₂
+    rw [← h₁, h₂]
+  have h₁ : ‖φ‖ ≤ c / 2 * ‖ψ.1‖ := by
+    refine Lp.norm_le_mul_norm_of_ae_le_mul ?_
+    filter_upwards [norm_indicator_le_mul_ae (by positivity) hB hBf hφψ, hφ] with x h h'
+    rwa [h']
+  have h₂ : c * ‖ψ.1‖ ≤ ‖φ‖ := by
+    simpa [← hψ, LinearPMap.sub_apply] using hlb ⟨ψ, ψ.2.1⟩
+  have h₃ : 0 < ‖φ‖ := by
+    rw [norm_indicatorConstLp two_ne_zero ENNReal.ofNat_ne_top, norm_one, one_mul]
+    exact Real.rpow_pos_of_pos (ENNReal.toReal_pos (by rwa [measure_toMeasurable]) hμs) _
+  nlinarith [norm_nonneg ψ.1]
+
+/-- The `μ`-essential range of `f` is contained in the spectrum of `𝓜 μ f`, for any `f` and any
+  σ-finite measure `μ`. No measurability of `f` is needed. -/
+lemma essRange_subset_mulOperator_spectrum (μ : Measure (Space d)) [SigmaFinite μ]
+    (f : Space d → ℂ) : essRange f μ ⊆ σ (𝓜 μ f) := by
+  intro z hz hρ
+  obtain ⟨c, hc, hlb⟩ := resolventSet_subset_regularityDomain _ hρ
+  refine (hz (c / 2) (by positivity)).ne' ?_
+  rw [← Set.inter_univ {x | ‖f x - z‖ < c / 2}, ← iUnion_spanningSets μ, Set.inter_iUnion]
+  refine measure_iUnion_null fun n ↦ measure_eq_zero_of_isLowerBound hc hlb hρ.2.1 ?_
+    fun x hx ↦ hx.1
+  exact ((measure_mono Set.inter_subset_right).trans_lt (measure_spanningSets_lt_top μ n)).ne
+
+/-- For a σ-finite measure `μ` and a `μ`-a.e. strongly measurable `f`, the spectrum of `𝓜 μ f`
+  is the `μ`-essential range of `f`. -/
+lemma mulOperator_spectrum_eq_essRange {μ : Measure (Space d)} [SigmaFinite μ]
+    {f : Space d → ℂ} (hf : AEStronglyMeasurable f μ) :
+    σ (𝓜 μ f) = essRange f μ :=
+  subset_antisymm (mulOperator_spectrum_subset_essRange hf)
+    (essRange_subset_mulOperator_spectrum μ f)
+
+/-- For a continuous `f` and a σ-finite measure `μ` which is positive on non-empty open sets,
+  the spectrum of `𝓜 μ f` is the closure of the range of `f`. -/
+lemma mulOperator_spectrum_eq_closure_range {f : Space d → ℂ} (hf : Continuous f)
+    (μ : Measure (Space d)) [SigmaFinite μ] [μ.IsOpenPosMeasure] :
+    σ (𝓜 μ f) = _root_.closure (Set.range f) :=
+  (mulOperator_spectrum_eq_essRange hf.aestronglyMeasurable).trans (essRange_eq_closure_range hf μ)
 
 end
 end SpaceDHilbertSpace
