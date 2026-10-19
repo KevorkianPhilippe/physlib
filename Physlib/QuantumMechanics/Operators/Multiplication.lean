@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Gregory J. Loges. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Gregory J. Loges
+Authors: Philippe Kevorkian, Gregory J. Loges
 -/
 module
 
@@ -41,6 +41,12 @@ through multiplication in the Fourier domain: see `Operators/Derivative.lean`.
 - `mulOperator_const_smul_eq` : `𝓜 μ (c • f) = c • 𝓜 μ f` for non-zero `c`.
 - `mulOperator_add_ge` / `mulOperator_sub_ge` : `𝓜 μ (f ± g)` is an extension of `𝓜 μ f ± 𝓜 μ g`.
 - `mulOperator_smul_ge` : `𝓜 μ (f • g)` is an extension of `𝓜 μ f * 𝓜 μ g`.
+- `mulOperator_eq_iff` : `𝓜 μ f = 𝓜 μ g ↔ f =ᵐ[μ] g` for σ-finite `μ` and `μ`-a.e. strongly
+    measurable `f`.
+- `mulOperator_add_eq_iff_domain_le` / `mulOperator_sub_eq_iff_domain_le` :
+    `𝓜 μ (f ± g) = 𝓜 μ f ± 𝓜 μ g` exactly when `(𝓜 μ (f ± g)).domain ≤ (𝓜 μ g).domain`.
+- `mulOperator_smul_eq_iff_domain_le` : `𝓜 μ (f • g) = 𝓜 μ f * 𝓜 μ g` exactly when
+    `(𝓜 μ (f • g)).domain ≤ (𝓜 μ g).domain`.
 
 ## iii. Table of contents
 
@@ -410,7 +416,44 @@ lemma mulOperator_eq_of_congr_ae {μ : Measure (Space d)} {f g : Space d → ℂ
   · filter_upwards [h, mulOperator_apply_ae ⟨ψ, hψ⟩, mulOperator_apply_ae ⟨ψ, hψ'⟩]
     simp_all
 
-TODO "Upgrade mulOperator_eq_of_congr_ae to an iff : 𝓜 μ f = 𝓜 μ g ↔ f =ᵐ[μ] g."
+/-- For a σ-finite measure `μ` and a `μ`-a.e. strongly measurable `f`, the multiplication operators
+  of `f` and `g` are equal exactly when `f =ᵐ[μ] g`. No measurability of `g` is assumed.
+
+  `volume`, and any measure which is finite on compact sets, is σ-finite by instance. For a measure
+  with only `[μ.HasTemperateGrowth]` this instance is not found: add `[IsFiniteMeasureOnCompacts μ]`
+  or `[SigmaFinite μ]`. -/
+lemma mulOperator_eq_iff {μ : Measure (Space d)} [SigmaFinite μ] {f g : Space d → ℂ}
+    (hf : AEStronglyMeasurable f μ) :
+    𝓜 μ f = 𝓜 μ g ↔ f =ᵐ[μ] g := by
+  refine ⟨fun h ↦ ?_, mulOperator_eq_of_congr_ae⟩
+  obtain ⟨hdom, hval⟩ := LinearPMap.ext_iff.mp h
+  obtain ⟨u, hu, hfu⟩ := hf.aemeasurable
+  -- Test both operators on the indicator of `t = s ∩ {‖u‖ ≤ n}`, with `μ s < ⊤`.
+  have key (s : Set (Space d)) (hs : MeasurableSet s) (hμs : μ s < ⊤) (n : ℕ) :
+      ∀ᵐ x ∂μ, x ∈ s → ‖u x‖ ≤ n → f x = g x := by
+    let t := s ∩ u ⁻¹' Metric.closedBall 0 n
+    have hmem (x : Space d) : x ∈ t ↔ x ∈ s ∧ ‖u x‖ ≤ n := by simp [t]
+    have hone : MemHS (t.indicator fun _ ↦ (1 : ℂ)) μ :=
+      memLp_indicator_const 2 (hs.inter (hu measurableSet_closedBall)).nullMeasurableSet 1
+        (Or.inr ((measure_mono Set.inter_subset_left).trans_lt hμs).ne)
+    have hψ := coeFn_mk hone
+    have hψf : mk hone ∈ (𝓜 μ f).domain := by
+      refine (hone.const_smul (n : ℂ)).mono (by fun_prop) ?_
+      filter_upwards [hfu, hψ] with x h₁ h₂
+      by_cases hx : x ∈ t
+      · simp [h₁, h₂, hx, ((hmem x).mp hx).2]
+      · simp [h₂, hx]
+    have hψg : mk hone ∈ (𝓜 μ g).domain := hdom ▸ hψf
+    have hfg : f • ⇑(mk hone) =ᵐ[μ] g • ⇑(mk hone) := by
+      refine (mulOperator_apply_ae ⟨_, hψf⟩).symm.trans ?_
+      rw [@hval _ hψf hψg]
+      exact mulOperator_apply_ae ⟨_, hψg⟩
+    filter_upwards [hfg, hψ] with x h₁ h₂ hxs hxn
+    simpa [h₂, (hmem x).mpr ⟨hxs, hxn⟩] using h₁
+  refine ae_of_forall_measure_lt_top_ae_restrict _ fun s hs hμs ↦ ?_
+  rw [ae_restrict_iff' hs]
+  filter_upwards [ae_all_iff.mpr (key s hs hμs)] with x hx hxs
+  exact hx ⌈‖u x‖⌉₊ hxs (Nat.le_ceil _)
 
 /-!
 ### E.1. Smul & neg
@@ -534,7 +577,72 @@ lemma mulOperator_sub_eq' {μ : Measure (Space d)}
   simp only [sub_eq_add_neg, ← mulOperator_neg]
   exact mulOperator_add_eq' hf hg.neg c c' (by simpa) (by simpa)
 
-TODO "Add to the sufficient conditions which ensure `𝓜 μ (f ± g) = 𝓜 μ f ± 𝓜 μ g`."
+/-- If `g` is `μ`-a.e. strongly measurable and `‖g x‖ ≤ a * ‖f x‖ + b` `μ`-a.e. for some
+  `a b : ℝ`, then the domain of `𝓜 μ f` is contained in the domain of `𝓜 μ g`.
+
+  This generalizes `mulOperator_domain_antitone`, which is the case `a = 1` and `b = 0`. -/
+lemma mulOperator_domain_le_of_norm_le {μ : Measure (Space d)} {f g : Space d → ℂ}
+    (hg : AEStronglyMeasurable g μ) {a b : ℝ} (h : ∀ᵐ x ∂μ, ‖g x‖ ≤ a * ‖f x‖ + b) :
+    (𝓜 μ f).domain ≤ (𝓜 μ g).domain := by
+  intro ψ hψ
+  rw [mem_mulOperator_domain_iff] at hψ ⊢
+  refine MemLp.of_le (((MemLp.norm hψ).const_mul |a|).add
+    ((MemLp.norm (memHS_coe ψ)).const_mul |b|)) (by fun_prop) ?_
+  filter_upwards [h] with x hx
+  simp only [smul_eq_mul, Pi.add_apply, Pi.mul_apply, norm_mul]
+  rw [Real.norm_of_nonneg (by positivity)]
+  calc ‖g x‖ * ‖ψ x‖ ≤ (a * ‖f x‖ + b) * ‖ψ x‖ := by gcongr
+    _ ≤ |a| * (‖f x‖ * ‖ψ x‖) + |b| * ‖ψ x‖ := by
+      rw [add_mul, mul_assoc]
+      gcongr <;> exact le_abs_self _
+
+/-- Equality holds in `mulOperator_add_ge` exactly when the domain of `𝓜 μ (f + g)` is contained
+  in the domain of `𝓜 μ g`. No assumption on `μ`, `f` or `g` is needed.
+
+  See `mulOperator_add_eq_of_norm_le` for a pointwise sufficient condition. -/
+lemma mulOperator_add_eq_iff_domain_le {μ : Measure (Space d)} {f g : Space d → ℂ} :
+    𝓜 μ (f + g) = 𝓜 μ f + 𝓜 μ g ↔ (𝓜 μ (f + g)).domain ≤ (𝓜 μ g).domain := by
+  refine ⟨fun h ↦ by rw [h, add_domain]; exact inf_le_right, fun hle ↦ ?_⟩
+  have hge := mulOperator_add_ge μ f g
+  refine (eq_of_le_of_domain_eq hge ?_).symm
+  refine eq_of_le_of_ge hge.1 fun ψ hψ ↦ ?_
+  have hg := hle hψ
+  simp only [add_domain, Submodule.mem_inf, mem_mulOperator_domain_iff] at hψ hg ⊢
+  exact ⟨by simpa [add_mul] using hψ.sub hg, hg⟩
+
+/-- If `g` is `μ`-a.e. strongly measurable and `‖g x‖ ≤ a * ‖f x + g x‖ + b` `μ`-a.e. for some
+  `a b : ℝ`, then equality holds in `mulOperator_add_ge`.
+
+  This covers `μ`-a.e. bounded `g` (`a = 0`), and needs neither the measurability of `f` nor the
+  bound on `f` assumed in `mulOperator_add_eq'`. -/
+lemma mulOperator_add_eq_of_norm_le {μ : Measure (Space d)} {f g : Space d → ℂ}
+    (hg : AEStronglyMeasurable g μ) {a b : ℝ} (h : ∀ᵐ x ∂μ, ‖g x‖ ≤ a * ‖f x + g x‖ + b) :
+    𝓜 μ (f + g) = 𝓜 μ f + 𝓜 μ g :=
+  mulOperator_add_eq_iff_domain_le.mpr (mulOperator_domain_le_of_norm_le (f := f + g) hg h)
+
+/-- Equality holds in `mulOperator_sub_ge` exactly when the domain of `𝓜 μ (f - g)` is contained
+  in the domain of `𝓜 μ g`. No assumption on `μ`, `f` or `g` is needed.
+
+  See `mulOperator_sub_eq_of_norm_le` for a pointwise sufficient condition. -/
+lemma mulOperator_sub_eq_iff_domain_le {μ : Measure (Space d)} {f g : Space d → ℂ} :
+    𝓜 μ (f - g) = 𝓜 μ f - 𝓜 μ g ↔ (𝓜 μ (f - g)).domain ≤ (𝓜 μ g).domain := by
+  refine ⟨fun h ↦ by rw [h, sub_domain]; exact inf_le_right, fun hle ↦ ?_⟩
+  have hge := mulOperator_sub_ge μ f g
+  refine (eq_of_le_of_domain_eq hge ?_).symm
+  refine eq_of_le_of_ge hge.1 fun ψ hψ ↦ ?_
+  have hg := hle hψ
+  simp only [sub_domain, Submodule.mem_inf, mem_mulOperator_domain_iff] at hψ hg ⊢
+  exact ⟨by simpa [sub_mul] using hψ.add hg, hg⟩
+
+/-- If `g` is `μ`-a.e. strongly measurable and `‖g x‖ ≤ a * ‖f x - g x‖ + b` `μ`-a.e. for some
+  `a b : ℝ`, then equality holds in `mulOperator_sub_ge`.
+
+  This covers `μ`-a.e. bounded `g` (`a = 0`), and needs neither the measurability of `f` nor the
+  bound on `f` assumed in `mulOperator_sub_eq'`. -/
+lemma mulOperator_sub_eq_of_norm_le {μ : Measure (Space d)} {f g : Space d → ℂ}
+    (hg : AEStronglyMeasurable g μ) {a b : ℝ} (h : ∀ᵐ x ∂μ, ‖g x‖ ≤ a * ‖f x - g x‖ + b) :
+    𝓜 μ (f - g) = 𝓜 μ f - 𝓜 μ g :=
+  mulOperator_sub_eq_iff_domain_le.mpr (mulOperator_domain_le_of_norm_le (f := f - g) hg h)
 
 /-!
 ### E.3. Composition
@@ -574,8 +682,31 @@ lemma mulOperator_smul_eq
   filter_upwards [mulOperator_apply_ae ⟨ψ, h ▸ Submodule.mem_top⟩]
   simp_all [mul_assoc]
 
-TODO "`mulOperator_smul_eq` has the strong assumption `(𝓜 μ g).domain = ⊤`. Weaken this assumption
-  and/or find other sufficient conditions to ensure the equality `𝓜 μ (f • g) = 𝓜 μ f * 𝓜 μ g`."
+/-- Equality holds in `mulOperator_smul_ge` exactly when the domain of `𝓜 μ (f • g)` is contained
+  in the domain of `𝓜 μ g`. No assumption on `μ`, `f` or `g` is needed: this weakens the assumption
+  `(𝓜 μ g).domain = ⊤` of `mulOperator_smul_eq` to a necessary and sufficient condition.
+
+  See `mulOperator_smul_eq_of_norm_le` for a pointwise sufficient condition. -/
+lemma mulOperator_smul_eq_iff_domain_le {μ : Measure (Space d)} {f g : Space d → ℂ} :
+    𝓜 μ f ∘ᵣ 𝓜 μ g = 𝓜 μ (f • g) ↔ (𝓜 μ (f • g)).domain ≤ (𝓜 μ g).domain := by
+  refine ⟨fun h ↦ h ▸ compRestricted_domain_le _ _, fun hle ↦ ?_⟩
+  have hge := mulOperator_smul_ge μ f g
+  refine eq_of_le_of_domain_eq hge ?_
+  refine eq_of_le_of_ge hge.1 fun ψ hψ ↦ ?_
+  refine mem_compRestricted_domain_iff.mpr ⟨hle hψ, ?_⟩
+  refine (mem_mulOperator_domain_iff.mp hψ).ae_eq ?_
+  filter_upwards [mulOperator_apply_ae ⟨ψ, hle hψ⟩]
+  simp_all [mul_assoc]
+
+/-- If `g` is `μ`-a.e. strongly measurable and `‖g x‖ ≤ a * ‖f x * g x‖ + b` `μ`-a.e. for some
+  `a b : ℝ`, then equality holds in `mulOperator_smul_ge`.
+
+  This covers `μ`-a.e. bounded `g` (`a = 0`), and `f` bounded below: if `c ≤ ‖f x‖` `μ`-a.e. with
+  `0 < c`, take `a = c⁻¹` and `b = 0`. -/
+lemma mulOperator_smul_eq_of_norm_le {μ : Measure (Space d)} {f g : Space d → ℂ}
+    (hg : AEStronglyMeasurable g μ) {a b : ℝ} (h : ∀ᵐ x ∂μ, ‖g x‖ ≤ a * ‖f x * g x‖ + b) :
+    𝓜 μ f ∘ᵣ 𝓜 μ g = 𝓜 μ (f • g) :=
+  mulOperator_smul_eq_iff_domain_le.mpr (mulOperator_domain_le_of_norm_le (f := f • g) hg h)
 
 /-!
 ## F. Spectrum
