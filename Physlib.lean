@@ -68,6 +68,9 @@ public import Physlib.Cosmology.FLRW.FriedmannSolution
 public import Physlib.Cosmology.FLRW.MatterContent
 public import Physlib.Cosmology.FLRW.ReducedHubble
 public import Physlib.Cosmology.FLRW.Solutions
+public import Physlib.Cosmology.FLRW.SpecificCases.EinsteinDeSitter
+public import Physlib.Cosmology.FLRW.SpecificCases.PowerLaw
+public import Physlib.Cosmology.FLRW.SpecificCases.RadiationDominated
 public import Physlib.Electromagnetism.Basic
 public import Physlib.Electromagnetism.Charge.ChargeUnit
 public import Physlib.Electromagnetism.Current.CircularCoil
