@@ -100,7 +100,7 @@ Requirements:
       Einstein-de Sitter models after their Big Bang, filled with their fluid, are
       examples.
     done: true
-    location: "Physlib/Cosmology/FLRW/Basic.lean (CosmicFluid, CosmicFluid.empty, FLRW.FriedmannSolution); Physlib/Cosmology/FLRW/MatterContent.lean (FLRW.FriedmannSolution.continuityEquation); Physlib/Cosmology/FLRW/DensityParameters.lean (FLRW.FriedmannSolution.densityParameter_add_lambda_add_curvature); Physlib/Cosmology/FLRW/DeSitter.lean (FLRW.deSitter, FLRW.friedmannSolution_deSitter); Physlib/Cosmology/FLRW/Solutions.lean (FLRW.milne, FLRW.friedmannSolution_milne); Physlib/Cosmology/FLRW/SpecificCases/PowerLaw.lean (FLRW.powerLaw, CosmicFluid.powerLaw, FLRW.friedmannSolution_powerLaw); Physlib/Cosmology/FLRW/SpecificCases/RadiationDominated.lean (FLRW.radiationDominated, FLRW.friedmannSolution_radiationDominated); Physlib/Cosmology/FLRW/SpecificCases/EinsteinDeSitter.lean (FLRW.einsteinDeSitter, FLRW.friedmannSolution_einsteinDeSitter)"
+    location: "Physlib/Cosmology/FLRW/Basic.lean (CosmicFluid, CosmicFluid.empty, FLRW.FriedmannSolution); Physlib/Cosmology/FLRW/MatterContent.lean (FLRW.FriedmannSolution.continuityEquation); Physlib/Cosmology/FLRW/DensityParameters.lean (FLRW.FriedmannSolution.densityParameter_add_lambda_add_curvature, FLRW.FriedmannSolution.densityParameter_add_curvature); Physlib/Cosmology/FLRW/DeSitter.lean (FLRW.deSitter, FLRW.friedmannSolution_deSitter); Physlib/Cosmology/FLRW/Solutions.lean (FLRW.milne, FLRW.friedmannSolution_milne); Physlib/Cosmology/FLRW/SpecificCases/PowerLaw.lean (FLRW.powerLaw, CosmicFluid.powerLaw, FLRW.friedmannSolution_powerLaw); Physlib/Cosmology/FLRW/SpecificCases/RadiationDominated.lean (FLRW.radiationDominated, FLRW.friedmannSolution_radiationDominated); Physlib/Cosmology/FLRW/SpecificCases/EinsteinDeSitter.lean (FLRW.einsteinDeSitter, FLRW.friedmannSolution_einsteinDeSitter)"
 
   - description: >
       The first-order Friedmann equation
@@ -160,9 +160,12 @@ Requirements:
       The critical density ρ_cr = 3 H^2 / (8πG) and the density parameters Ω = ρ
       / ρ_cr, Ω_K = -k c^2 / (H^2 a^2) and Ω_Λ = Λ c^2 / (3 H^2) are defined,
       and the first-order Friedmann equation is read as the closure relation Ω +
-      Ω_Λ + Ω_K = 1.
+      Ω_Λ + Ω_K = 1. The same quantities are defined for an FLRW model filled with
+      a cosmic fluid, Ω_K being given by its spatial geometry, and the closure
+      relation holds for a model that solves the Friedmann equations, at the times
+      of its interval at which H ≠ 0.
     done: true
-    location: "Physlib/Cosmology/FLRW/DensityParameters.lean (criticalDensity, densityParameter, curvatureDensityParameter, lambdaDensityParameter, densityParameter_add_lambda_add_curvature, densityParameter_add_curvature)"
+    location: "Physlib/Cosmology/FLRW/DensityParameters.lean (FLRW.FriedmannEquation.criticalDensity, FLRW.FriedmannEquation.densityParameter, FLRW.FriedmannEquation.curvatureDensityParameter, FLRW.FriedmannEquation.lambdaDensityParameter, FLRW.FriedmannEquation.densityParameter_add_lambda_add_curvature, FLRW.FriedmannEquation.densityParameter_add_curvature, FLRW.criticalDensity, FLRW.densityParameter, FLRW.curvatureDensityParameter, FLRW.lambdaDensityParameter, FLRW.densityParameter_addCosmologicalConstant, FLRW.FriedmannSolution.densityParameter_add_lambda_add_curvature, FLRW.FriedmannSolution.densityParameter_add_curvature)"
 
   - description: >
       The reduced Hubble function E(x)^2 = Ω_Λ + Ω_m x^-3 + Ω_r x^-4 + Ω_K x^-2
