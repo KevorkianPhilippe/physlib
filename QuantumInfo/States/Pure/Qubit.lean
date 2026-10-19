@@ -161,7 +161,8 @@ lemma S_sq : S * S = Z := by
 lemma T_sq : T * T = S := by
   matrix_expand [T, S]
 
-/-- The anticommutator `{X,Y}` is zero. Marked simp as to put Pauli products in a canonical Y-X-Z order. -/
+/-- The anticommutator `{X,Y}` is zero. Marked simp as to put Pauli products in a canonical Y-X-Z
+order. -/
 @[simp]
 theorem X_Y_anticomm : X * Y = -Y * X := by
   matrix_expand [X, Y]
@@ -217,6 +218,7 @@ def controllize (g : 𝐔[k]) : 𝐔[Qubit × k] :=
       · exact congrFun₂ g.2.2 ti tj
     ⟩
 
+/-- `C[g]` is the controlled gate `controllize g`. -/
 scoped notation "C[" g "]" => controllize g
 
 /-- Controlled-NOT gate on two qubits.
@@ -260,7 +262,6 @@ lemma controllize_mul (g₁ g₂ : 𝐔[k]) : C[g₁] * C[g₂] = C[g₁ * g₂]
 lemma controllize_one : C[(1 : 𝐔[k])] = 1 := by
   matrix_expand
 
-@[simp]
 lemma controllize_mul_inv : C[g] * C[g⁻¹] = 1 := by
   simp
 
