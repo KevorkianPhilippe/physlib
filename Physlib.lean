@@ -3,6 +3,8 @@ module
 public import Physlib.ClassicalFieldTheory.GaugeTheory.LocalGaugeData.Basic
 public import Physlib.ClassicalFieldTheory.Local.Variation
 public import Physlib.ClassicalMechanics.Basic
+public import Physlib.ClassicalMechanics.ConfigurationSpace.Basic
+public import Physlib.ClassicalMechanics.ConfigurationSpace.Variation
 public import Physlib.ClassicalMechanics.DampedHarmonicOscillator.Basic
 public import Physlib.ClassicalMechanics.DampedHarmonicOscillator.Solution
 public import Physlib.ClassicalMechanics.EulerLagrange
@@ -16,6 +18,7 @@ public import Physlib.ClassicalMechanics.HarmonicOscillator.Geometric.KineticEne
 public import Physlib.ClassicalMechanics.HarmonicOscillator.Geometric.Trajectory
 public import Physlib.ClassicalMechanics.HarmonicOscillator.Solution
 public import Physlib.ClassicalMechanics.HarmonicOscillator.WithDim
+public import Physlib.ClassicalMechanics.Lagrangian.Basic
 public import Physlib.ClassicalMechanics.Lagrangian.TotalDerivativeEquivalence
 public import Physlib.ClassicalMechanics.Mass.MassUnit
 public import Physlib.ClassicalMechanics.OrbitalMechanics.VisViva
@@ -68,6 +71,9 @@ public import Physlib.Cosmology.FLRW.FriedmannSolution
 public import Physlib.Cosmology.FLRW.MatterContent
 public import Physlib.Cosmology.FLRW.ReducedHubble
 public import Physlib.Cosmology.FLRW.Solutions
+public import Physlib.Cosmology.FLRW.SpecificCases.EinsteinDeSitter
+public import Physlib.Cosmology.FLRW.SpecificCases.PowerLaw
+public import Physlib.Cosmology.FLRW.SpecificCases.RadiationDominated
 public import Physlib.Electromagnetism.Basic
 public import Physlib.Electromagnetism.Charge.ChargeUnit
 public import Physlib.Electromagnetism.Current.CircularCoil
@@ -136,6 +142,7 @@ public import Physlib.Mathematics.ForMathlib.FDerivCurry
 public import Physlib.Mathematics.ForMathlib.Fin
 public import Physlib.Mathematics.ForMathlib.Fin.Involutions
 public import Physlib.Mathematics.ForMathlib.HasTemperateGrowth
+public import Physlib.Mathematics.ForMathlib.Integration.Basic
 public import Physlib.Mathematics.ForMathlib.LinearMaps
 public import Physlib.Mathematics.ForMathlib.LinearPMap
 public import Physlib.Mathematics.ForMathlib.List
@@ -192,7 +199,9 @@ public import Physlib.Meta.TODO.Basic
 public import Physlib.Meta.TODO.Global
 public import Physlib.Meta.TransverseTactics
 public import Physlib.Optics.Basic
+public import Physlib.Optics.Frequency
 public import Physlib.Optics.Polarization.Basic
+public import Physlib.Optics.Wavelength
 public import Physlib.Particles.BeyondTheStandardModel.GeorgiGlashow.Basic
 public import Physlib.Particles.BeyondTheStandardModel.PatiSalam.Basic
 public import Physlib.Particles.BeyondTheStandardModel.RHN.AnomalyCancellation.Basic
@@ -411,6 +420,7 @@ public import Physlib.QuantumMechanics.Operators.Unbounded
 public import Physlib.QuantumMechanics.Operators.Uncertainty
 public import Physlib.QuantumMechanics.PlanckConstant
 public import Physlib.QuantumMechanics.PoschlTeller.Basic
+public import Physlib.QuantumMechanics.PoschlTeller.Scattering
 public import Physlib.QuantumMechanics.QuantumSystem.Basic
 public import Physlib.QuantumMechanics.RectangularBarrier.Basic
 public import Physlib.QuantumMechanics.SpaceDQuantumSystem
