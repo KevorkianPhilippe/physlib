@@ -75,17 +75,41 @@ noncomputable section diracRepresentation
 def γ0 : Matrix (Fin 4) (Fin 4) ℂ :=
   endEquivMatrix (Fermion.Dirac.gamma (Sum.inl 0))
 
+/-- The entries of `γ0`. -/
+lemma γ0_eq_matrix : γ0 = !![1, 0, 0, 0; 0, 1, 0, 0; 0, 0, -1, 0; 0, 0, 0, -1] := by
+  rw [γ0, endEquivMatrix_apply, gamma_toMatrix]
+  ext i j
+  fin_cases i <;> fin_cases j <;> norm_num [Matrix.mul_apply, Fin.sum_univ_four]
+
 /-- The γ¹ gamma matrix in the Dirac representation. -/
 def γ1 : Matrix (Fin 4) (Fin 4) ℂ :=
   endEquivMatrix (Fermion.Dirac.gamma (Sum.inr 0))
+
+/-- The entries of `γ1`. -/
+lemma γ1_eq_matrix : γ1 = !![0, 0, 0, 1; 0, 0, 1, 0; 0, -1, 0, 0; -1, 0, 0, 0] := by
+  rw [γ1, endEquivMatrix_apply, gamma_toMatrix]
+  ext i j
+  fin_cases i <;> fin_cases j <;> norm_num [Matrix.mul_apply, Fin.sum_univ_four]
 
 /-- The γ² gamma matrix in the Dirac representation. -/
 def γ2 : Matrix (Fin 4) (Fin 4) ℂ :=
   endEquivMatrix (Fermion.Dirac.gamma (Sum.inr 1))
 
+/-- The entries of `γ2`. -/
+lemma γ2_eq_matrix : γ2 = !![0, 0, 0, -I; 0, 0, I, 0; 0, I, 0, 0; -I, 0, 0, 0] := by
+  rw [γ2, endEquivMatrix_apply, gamma_toMatrix]
+  ext i j
+  fin_cases i <;> fin_cases j <;> norm_num [Matrix.mul_apply, Fin.sum_univ_four] <;> ring
+
 /-- The γ³ gamma matrix in the Dirac representation. -/
 def γ3 : Matrix (Fin 4) (Fin 4) ℂ :=
   endEquivMatrix (Fermion.Dirac.gamma (Sum.inr 2))
+
+/-- The entries of `γ3`. -/
+lemma γ3_eq_matrix : γ3 = !![0, 0, 1, 0; 0, 0, 0, -1; -1, 0, 0, 0; 0, 1, 0, 0] := by
+  rw [γ3, endEquivMatrix_apply, gamma_toMatrix]
+  ext i j
+  fin_cases i <;> fin_cases j <;> norm_num [Matrix.mul_apply, Fin.sum_univ_four]
 
 lemma _root_.Matrix.one_fin_four {α} [Zero α] [One α] :
     (1 : Matrix (Fin 4) (Fin 4) α) = !![1, 0, 0, 0; 0, 1, 0, 0; 0, 0, 1, 0; 0, 0, 0, 1] :=
@@ -117,6 +141,18 @@ theorem γ_anticomm (μ ν : Fin 1 ⊕ Fin 3) :
       endEquivMatrix (gamma ν) * endEquivMatrix (gamma μ) =
       (2 * (minkowskiMatrix μ ν : ℂ)) • (1 : Matrix (Fin 4) (Fin 4) ℂ) := by
   rw [← map_mul, ← map_mul, ← map_add, Fermion.Dirac.gamma_anticomm, map_smul, map_one]
+
+/-- The gamma matrices in the Dirac representation are unitary. -/
+lemma γ_mem_unitary (μ : Fin 1 ⊕ Fin 3) :
+    endEquivMatrix (gamma μ) ∈ Matrix.unitaryGroup (Fin 4) ℂ := by
+  rw [Matrix.mem_unitaryGroup_iff]
+  fin_cases μ <;>
+    [(change γ0 * star γ0 = 1; rw [γ0_eq_matrix]);
+      (change γ1 * star γ1 = 1; rw [γ1_eq_matrix]);
+      (change γ2 * star γ2 = 1; rw [γ2_eq_matrix]);
+      (change γ3 * star γ3 = 1; rw [γ3_eq_matrix])] <;>
+    ext i j <;> fin_cases i <;> fin_cases j <;>
+    simp [Matrix.mul_apply, Fin.sum_univ_four, Matrix.star_apply]
 
 /-- The γ⁵ gamma matrix in the Dirac representation. -/
 def γ5 : Matrix (Fin 4) (Fin 4) ℂ := I • (γ0 * γ1 * γ2 * γ3)
@@ -259,160 +295,95 @@ lemma γProd_mem_diracAlgebra (s : Finset (Fin 4)) : γProd s ∈ diracAlgebra :
   · exact γ_in_diracAlgebra _
   · exact one_mem _
 
-/-- The entries of `γ0`. -/
-private lemma γ0_eq_matrix : γ0 = !![1, 0, 0, 0; 0, 1, 0, 0; 0, 0, -1, 0; 0, 0, 0, -1] := by
-  rw [γ0, endEquivMatrix_apply, gamma_toMatrix]
-  ext i j
-  fin_cases i <;> fin_cases j <;> norm_num [Matrix.mul_apply, Fin.sum_univ_four]
+/-- The product `γProd {i}` is the gamma matrix of index `i`. -/
+lemma γProd_singleton (i : Fin 4) :
+    γProd {i} = endEquivMatrix (gamma (finSumFinEquiv.symm i)) := by
+  fin_cases i <;> simp [γProd, List.ofFn_succ]
 
-/-- The entries of `γ1`. -/
-private lemma γ1_eq_matrix : γ1 = !![0, 0, 0, 1; 0, 0, 1, 0; 0, -1, 0, 0; -1, 0, 0, 0] := by
-  rw [γ1, endEquivMatrix_apply, gamma_toMatrix]
-  ext i j
-  fin_cases i <;> fin_cases j <;> norm_num [Matrix.mul_apply, Fin.sum_univ_four]
+/-- The gamma matrix of index `j` commutes past `γProd s` up to the sign `(-1) ^ #(s.erase j)`,
+as it anticommutes with the gamma matrices of the other indices. -/
+lemma γ_mul_γProd (j : Fin 4) (s : Finset (Fin 4)) :
+    endEquivMatrix (gamma (finSumFinEquiv.symm j)) * γProd s =
+      (-1 : ℂ) ^ (s.erase j).card • (γProd s * endEquivMatrix (gamma (finSumFinEquiv.symm j))) := by
+  let G (i : Fin 4) : Matrix (Fin 4) (Fin 4) ℂ := endEquivMatrix (gamma (finSumFinEquiv.symm i))
+  let F (i : Fin 4) : Matrix (Fin 4) (Fin 4) ℂ := if i ∈ s then G i else 1
+  let c (i : Fin 4) : ℂ := if i ∈ s.erase j then -1 else 1
+  -- `G j` commutes with the factor of index `j` and anticommutes with the other gamma matrices
+  have hF (i : Fin 4) : G j * F i = c i • (F i * G j) := by
+    by_cases hi : i ∈ s
+    · by_cases hij : i = j
+      · subst hij
+        simp [F, c, hi]
+      · have hne : (finSumFinEquiv.symm j : Fin 1 ⊕ Fin 3) ≠ finSumFinEquiv.symm i :=
+          fun h => hij (finSumFinEquiv.symm.injective h).symm
+        simp only [F, c, G, hi, hij, Finset.mem_erase, ne_eq, not_false_eq_true, and_self,
+          ↓reduceIte]
+        rw [← map_mul, gamma_mul_gamma_of_ne hne, map_neg, map_mul, neg_smul, one_smul]
+    · simp [F, c, hi]
+  -- moving `G j` through a product of such factors collects the product of the signs
+  have key (l : List (Fin 4)) :
+      G j * (l.map F).prod = (l.map c).prod • ((l.map F).prod * G j) := by
+    induction l with
+    | nil => simp
+    | cons i l ih =>
+      rw [List.map_cons, List.map_cons, List.prod_cons, List.prod_cons, ← mul_assoc, hF,
+        smul_mul_assoc, mul_assoc (F i), ih, mul_smul_comm, smul_smul, mul_assoc]
+  have h1 : γProd s = ((List.finRange 4).map F).prod := by
+    rw [← List.ofFn_eq_map]
+    rfl
+  have h2 : ((List.finRange 4).map c).prod = (-1 : ℂ) ^ (s.erase j).card := by
+    rw [← List.ofFn_eq_map, List.prod_ofFn]
+    simp only [c]
+    rw [Fintype.prod_ite_mem, Finset.prod_const]
+  rw [h1, ← h2]
+  exact key _
 
-/-- The entries of `γ2`. -/
-private lemma γ2_eq_matrix : γ2 = !![0, 0, 0, -I; 0, 0, I, 0; 0, I, 0, 0; -I, 0, 0, 0] := by
-  rw [γ2, endEquivMatrix_apply, gamma_toMatrix]
-  ext i j
-  fin_cases i <;> fin_cases j <;> norm_num [Matrix.mul_apply, Fin.sum_univ_four] <;> ring
+/-- Each product `γProd s` is unitary. -/
+lemma γProd_mem_unitary (s : Finset (Fin 4)) : γProd s ∈ Matrix.unitaryGroup (Fin 4) ℂ := by
+  refine Submonoid.list_prod_mem _ fun x hx => ?_
+  obtain ⟨i, rfl⟩ := List.mem_ofFn.mp hx
+  split_ifs
+  · exact γ_mem_unitary _
+  · exact one_mem _
 
-/-- The entries of `γ3`. -/
-private lemma γ3_eq_matrix : γ3 = !![0, 0, 1, 0; 0, 0, 0, -1; -1, 0, 0, 0; 0, 1, 0, 0] := by
-  rw [γ3, endEquivMatrix_apply, gamma_toMatrix]
-  ext i j
-  fin_cases i <;> fin_cases j <;> norm_num [Matrix.mul_apply, Fin.sum_univ_four]
+/-- The products `γProd s` are orthogonal for the trace form `tr (star A * B)`, each with square
+norm `4`. -/
+lemma trace_star_γProd_mul_γProd (t s : Finset (Fin 4)) :
+    (star (γProd t) * γProd s).trace = if t = s then 4 else 0 := by
+  split_ifs with h
+  · subst h
+    rw [Unitary.star_mul_self_of_mem (γProd_mem_unitary t), Matrix.trace_one, Fintype.card_fin]
+    norm_num
+  -- for `t ≠ s`, conjugation by a suitable gamma matrix `G` changes the sign of the trace
+  obtain ⟨j, hj⟩ : ∃ j, Odd ((t.erase j).card + (s.erase j).card) := by
+    revert t s
+    decide
+  have hu := γ_mem_unitary (finSumFinEquiv.symm j)
+  have ht := γ_mul_γProd j t
+  have hs := γ_mul_γProd j s
+  set G := endEquivMatrix (gamma (finSumFinEquiv.symm j))
+  have key : (star (γProd t) * γProd s).trace = -(star (γProd t) * γProd s).trace := by
+    calc (star (γProd t) * γProd s).trace
+        = (star (G * γProd t) * (G * γProd s)).trace := by
+          rw [star_mul, mul_assoc, ← mul_assoc (star G), Unitary.star_mul_self_of_mem hu, one_mul]
+      _ = (-1 : ℂ) ^ ((t.erase j).card + (s.erase j).card) *
+            (star (γProd t) * γProd s).trace := by
+          rw [ht, hs, star_smul, star_mul, smul_mul_smul_comm, Matrix.trace_smul, mul_assoc,
+            Matrix.trace_mul_comm, mul_assoc, mul_assoc, Unitary.mul_star_self_of_mem hu, mul_one,
+            pow_add, smul_eq_mul, star_pow, star_neg, star_one]
+      _ = -(star (γProd t) * γProd s).trace := by rw [hj.neg_one_pow, neg_one_mul]
+  linear_combination key / 2
 
-/-- The product `γProd s` with its four factors written out. -/
-private lemma γProd_eq (s : Finset (Fin 4)) : γProd s = (if 0 ∈ s then γ0 else 1) *
-    ((if 1 ∈ s then γ1 else 1) * ((if 2 ∈ s then γ2 else 1) * (if 3 ∈ s then γ3 else 1))) := by
-  simp only [γProd, List.ofFn_succ, List.ofFn_zero, List.prod_cons, List.prod_nil, mul_one]
-  rfl
-
-/-- The product `γProd ∅`. -/
-private lemma γProd_empty : γProd ∅ = !![1, 0, 0, 0; 0, 1, 0, 0; 0, 0, 1, 0; 0, 0, 0, 1] := by
-  simp [γProd_eq, Matrix.one_fin_four]
-
-/-- The product `γProd {0}`. -/
-private lemma γProd_0 : γProd {0} = !![1, 0, 0, 0; 0, 1, 0, 0; 0, 0, -1, 0; 0, 0, 0, -1] := by
-  simp [γProd_eq, γ0_eq_matrix]
-
-/-- The product `γProd {1}`. -/
-private lemma γProd_1 : γProd {1} = !![0, 0, 0, 1; 0, 0, 1, 0; 0, -1, 0, 0; -1, 0, 0, 0] := by
-  simp [γProd_eq, γ1_eq_matrix]
-
-/-- The product `γProd {2}`. -/
-private lemma γProd_2 : γProd {2} = !![0, 0, 0, -I; 0, 0, I, 0; 0, I, 0, 0; -I, 0, 0, 0] := by
-  simp [γProd_eq, γ2_eq_matrix]
-
-/-- The product `γProd {3}`. -/
-private lemma γProd_3 : γProd {3} = !![0, 0, 1, 0; 0, 0, 0, -1; -1, 0, 0, 0; 0, 1, 0, 0] := by
-  simp [γProd_eq, γ3_eq_matrix]
-
-/-- The product `γProd {0, 1}`. -/
-private lemma γProd_01 : γProd {0, 1} = !![0, 0, 0, 1; 0, 0, 1, 0; 0, 1, 0, 0; 1, 0, 0, 0] := by
-  simp [γProd_eq, γ0_eq_matrix, γ1_eq_matrix]
-
-/-- The product `γProd {0, 2}`. -/
-private lemma γProd_02 :
-    γProd {0, 2} = !![0, 0, 0, -I; 0, 0, I, 0; 0, -I, 0, 0; I, 0, 0, 0] := by
-  simp [γProd_eq, γ0_eq_matrix, γ2_eq_matrix]
-
-/-- The product `γProd {0, 3}`. -/
-private lemma γProd_03 :
-    γProd {0, 3} = !![0, 0, 1, 0; 0, 0, 0, -1; 1, 0, 0, 0; 0, -1, 0, 0] := by
-  simp [γProd_eq, γ0_eq_matrix, γ3_eq_matrix]
-
-/-- The product `γProd {1, 2}`. -/
-private lemma γProd_12 :
-    γProd {1, 2} = !![-I, 0, 0, 0; 0, I, 0, 0; 0, 0, -I, 0; 0, 0, 0, I] := by
-  simp [γProd_eq, γ1_eq_matrix, γ2_eq_matrix]
-
-/-- The product `γProd {1, 3}`. -/
-private lemma γProd_13 :
-    γProd {1, 3} = !![0, 1, 0, 0; -1, 0, 0, 0; 0, 0, 0, 1; 0, 0, -1, 0] := by
-  simp [γProd_eq, γ1_eq_matrix, γ3_eq_matrix]
-
-/-- The product `γProd {2, 3}`. -/
-private lemma γProd_23 :
-    γProd {2, 3} = !![0, -I, 0, 0; -I, 0, 0, 0; 0, 0, 0, -I; 0, 0, -I, 0] := by
-  simp [γProd_eq, γ2_eq_matrix, γ3_eq_matrix]
-
-/-- The product `γProd {0, 1, 2}`. -/
-private lemma γProd_012 :
-    γProd {0, 1, 2} = !![-I, 0, 0, 0; 0, I, 0, 0; 0, 0, I, 0; 0, 0, 0, -I] := by
-  simp [γProd_eq, γ0_eq_matrix, γ1_eq_matrix, γ2_eq_matrix]
-
-/-- The product `γProd {0, 1, 3}`. -/
-private lemma γProd_013 :
-    γProd {0, 1, 3} = !![0, 1, 0, 0; -1, 0, 0, 0; 0, 0, 0, -1; 0, 0, 1, 0] := by
-  simp [γProd_eq, γ0_eq_matrix, γ1_eq_matrix, γ3_eq_matrix]
-
-/-- The product `γProd {0, 2, 3}`. -/
-private lemma γProd_023 :
-    γProd {0, 2, 3} = !![0, -I, 0, 0; -I, 0, 0, 0; 0, 0, 0, I; 0, 0, I, 0] := by
-  simp [γProd_eq, γ0_eq_matrix, γ2_eq_matrix, γ3_eq_matrix]
-
-/-- The product `γProd {1, 2, 3}`. -/
-private lemma γProd_123 :
-    γProd {1, 2, 3} = !![0, 0, -I, 0; 0, 0, 0, -I; I, 0, 0, 0; 0, I, 0, 0] := by
-  simp [γProd_eq, γ1_eq_matrix, γ2_eq_matrix, γ3_eq_matrix]
-
-/-- The product `γProd {0, 1, 2, 3}`. -/
-private lemma γProd_0123 :
-    γProd {0, 1, 2, 3} = !![0, 0, -I, 0; 0, 0, 0, -I; -I, 0, 0, 0; 0, -I, 0, 0] := by
-  simp [γProd_eq, γ0_eq_matrix, γ1_eq_matrix, γ2_eq_matrix, γ3_eq_matrix]
-
-/-- A sum over the subsets of `Fin 4`, written out. -/
-private lemma sum_finset_fin_four (F : Finset (Fin 4) → ℝ) : ∑ s, F s =
-    F ∅ + F {0} + F {1} + F {2} + F {3} + F {0, 1} + F {0, 2} + F {0, 3} + F {1, 2} + F {1, 3} +
-      F {2, 3} + F {0, 1, 2} + F {0, 1, 3} + F {0, 2, 3} + F {1, 2, 3} + F {0, 1, 2, 3} := by
-  rw [← Finset.powerset_univ,
-    show (Finset.univ : Finset (Fin 4)) = insert 0 (insert 1 (insert 2 (insert 3 ∅))) by decide]
-  simp (disch := decide) only [Finset.sum_powerset_insert, Finset.powerset_empty,
-    Finset.sum_singleton]
-  simp only [Finset.insert_empty]
-  ring
-
-/-- The 16 subsets of `Fin 4`. -/
-private lemma finset_fin_four_cases (s : Finset (Fin 4)) :
-    s = ∅ ∨ s = {0} ∨ s = {1} ∨ s = {2} ∨ s = {3} ∨ s = {0, 1} ∨ s = {0, 2} ∨ s = {0, 3} ∨
-      s = {1, 2} ∨ s = {1, 3} ∨ s = {2, 3} ∨ s = {0, 1, 2} ∨ s = {0, 1, 3} ∨ s = {0, 2, 3} ∨
-      s = {1, 2, 3} ∨ s = {0, 1, 2, 3} := by
-  by_cases h0 : (0 : Fin 4) ∈ s <;> by_cases h1 : (1 : Fin 4) ∈ s <;>
-    by_cases h2 : (2 : Fin 4) ∈ s <;> by_cases h3 : (3 : Fin 4) ∈ s <;>
-    simp [Finset.ext_iff, Fin.forall_fin_succ, h0, h1, h2, h3]
-
-/-- The 16 products `γProd s` are linearly independent over `ℝ`. Each has one nonzero entry in
-each row; the products with the same positions of their nonzero entries form four groups of four,
-and the real and imaginary parts of two entries of each group give 16 linear equations on the
-coefficients. -/
+/-- The 16 products `γProd s` are linearly independent over `ℝ`, since they are orthogonal for the
+trace form `tr (star A * B)`. -/
 lemma linearIndependent_γProd : LinearIndependent ℝ γProd := by
   rw [Fintype.linearIndependent_iff]
-  intro g hg
-  have h (r c : Fin 4) :
-      ∑ s, g s * (γProd s r c).re = 0 ∧ ∑ s, g s * (γProd s r c).im = 0 := by
-    have h := congrFun (congrFun hg r) c
-    simp only [Matrix.sum_apply, Matrix.smul_apply, Matrix.zero_apply] at h
-    exact ⟨by simpa [Complex.re_sum] using congrArg Complex.re h,
-      by simpa [Complex.im_sum] using congrArg Complex.im h⟩
-  obtain ⟨r00, i00⟩ := h 0 0
-  obtain ⟨r22, i22⟩ := h 2 2
-  obtain ⟨r03, i03⟩ := h 0 3
-  obtain ⟨r21, i21⟩ := h 2 1
-  obtain ⟨r02, i02⟩ := h 0 2
-  obtain ⟨r20, i20⟩ := h 2 0
-  obtain ⟨r01, i01⟩ := h 0 1
-  obtain ⟨r23, i23⟩ := h 2 3
-  simp only [Fin.isValue, sum_finset_fin_four, γProd_empty, γProd_0, γProd_1, γProd_2, γProd_3,
-    γProd_01, γProd_02, γProd_03, γProd_12, γProd_13, γProd_23, γProd_012, γProd_013, γProd_023,
-    γProd_123, γProd_0123, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
-    Matrix.cons_val_one, Matrix.cons_val, Matrix.cons_val_fin_one, one_re, one_im, zero_re, zero_im,
-    neg_re, neg_im, I_re, I_im, neg_zero, mul_one, mul_zero, mul_neg, add_zero,
-    zero_add] at r00 i00 r22 i22 r03 i03 r21 i21 r02 i02 r20 i20 r01 i01 r23 i23
-  intro s
-  rcases finset_fin_four_cases s with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
-    rfl | rfl | rfl | rfl | rfl | rfl <;> linarith
+  intro g hg t
+  have h := congrArg (fun M => (star (γProd t) * M).trace) hg
+  simp only [Finset.mul_sum, Matrix.mul_smul, Matrix.trace_sum, Matrix.trace_smul,
+    trace_star_γProd_mul_γProd, smul_ite, smul_zero, Finset.sum_ite_eq, Finset.mem_univ,
+    ↓reduceIte, Matrix.mul_zero, Matrix.trace_zero] at h
+  simpa using h
 
 /-! ### B.3. Injectivity and the isomorphism -/
 
