@@ -115,8 +115,8 @@ open Real Time FriedmannEquation
 
 variable {U : FLRW} {F Fm Fr : CosmicFluid} {Λ G c : ℝ}
 
-/-- For a solution of the Friedmann equations whose density is that of `Fm` (matter) plus that of
-  `Fr` (radiation), take two times `t` and `t₀` of `U.I` with `H(t₀) ≠ 0` at which
+/-- For a solution of the Friedmann equations whose density is that of matter plus that of
+  radiation, take two times `t` and `t₀` of the interval of the model with `H(t₀) ≠ 0` at which
   `ρ_m(t) = ρ_m(t₀) (a(t₀) / a(t))³` and `ρ_r(t) = ρ_r(t₀) (a(t₀) / a(t))⁴`. Then
   `H² = H₀² (Ω_Λ + Ω_m x⁻³ + Ω_r x⁻⁴ + Ω_K x⁻²)` with `x = a(t) / a(t₀)` and the density
   parameters taken at `t₀`. -/

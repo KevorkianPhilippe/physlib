@@ -24,8 +24,8 @@ density parameter `Ω_Λ = Λ c² / (3 H²)` of the cosmological constant and th
 parameter `Ω_K = - k c² / (H² a²)`. Dividing the Friedmann equation by `H²` gives the closure
 relation `Ω + Ω_Λ + Ω_K = 1`.
 
-These quantities are defined for an FLRW model `U`. For a solution of the Friedmann equations,
-the closure relation holds at every time of the interval of `U` at which `H ≠ 0`.
+These quantities are defined for an FLRW model. For a solution of the Friedmann equations, the
+closure relation holds at every time of the interval of the model at which `H ≠ 0`.
 
 The reduced Hubble function of the standard cosmological model is in
 `Physlib.Cosmology.FLRW.ReducedHubble`, and the age of the universe in
@@ -67,23 +67,24 @@ physical meaning at the times at which `H ≠ 0`.
 
 -/
 
-/-- The critical density `ρ_cr = 3 H² / (8 π G)` of `U` at time `t`, where `H` is the Hubble
-  parameter of `U.a`. It is the density of a spatially flat universe without cosmological
-  constant expanding at the rate `H`. -/
+/-- The critical density `ρ_cr = 3 H² / (8 π G)` of an FLRW model at time `t`, where `H` is the
+  Hubble parameter of its scale factor. It is the density of a spatially flat universe without
+  cosmological constant expanding at the rate `H`. -/
 noncomputable def criticalDensity (G : ℝ) (t : Time) : ℝ :=
   3 * hubbleConstant U.a t ^ 2 / (8 * π * G)
 
-/-- The density parameter `Ω = ρ / ρ_cr` of the cosmic fluid `F` in `U`. -/
+/-- The density parameter `Ω = ρ / ρ_cr` of a cosmic fluid in an FLRW model. -/
 noncomputable def densityParameter (F : CosmicFluid) (G : ℝ) (t : Time) : ℝ :=
   F.ρ t / U.criticalDensity G t
 
-/-- The curvature density parameter `Ω_K = - k c² / (H² a²)` of `U`, where `k` is the curvature
-  parameter of the spatial geometry of `U`. When `H`, `a` and `c` are nonzero, it is positive for
-  a saddle geometry, negative for a spherical one and zero for the flat one. -/
+/-- The curvature density parameter `Ω_K = - k c² / (H² a²)` of an FLRW model, where `k` is the
+  curvature parameter of its spatial geometry. When `H`, `a` and `c` are nonzero, it is positive
+  for a saddle geometry, negative for a spherical one and zero for the flat one. -/
 noncomputable def curvatureDensityParameter (c : ℝ) (t : Time) : ℝ :=
   -U.geometry.curvature * c ^ 2 / (hubbleConstant U.a t ^ 2 * U.a t ^ 2)
 
-/-- The density parameter `Ω_Λ = Λ c² / (3 H²)` of the cosmological constant in `U`. -/
+/-- The density parameter `Ω_Λ = Λ c² / (3 H²)` of the cosmological constant in an FLRW
+  model. -/
 noncomputable def lambdaDensityParameter (Λ c : ℝ) (t : Time) : ℝ :=
   Λ * c ^ 2 / (3 * hubbleConstant U.a t ^ 2)
 
@@ -97,8 +98,8 @@ lemma lambdaDensityParameter_eq_densityParameter {Λ G c : ℝ} (hG : G ≠ 0) (
   have hπ := Real.pi_ne_zero
   field_simp
 
-/-- For `G ≠ 0`, folding the cosmological constant into `F` adds `Ω_Λ` to its density
-  parameter. -/
+/-- For `G ≠ 0`, folding the cosmological constant into a cosmic fluid adds `Ω_Λ` to its
+  density parameter. -/
 lemma densityParameter_addCosmologicalConstant (F : CosmicFluid) {Λ G c : ℝ} (hG : G ≠ 0)
     (t : Time) :
     U.densityParameter (F.addCosmologicalConstant Λ G c) G t
@@ -118,7 +119,7 @@ namespace FriedmannSolution
 variable {U} {F : CosmicFluid} {Λ G c : ℝ}
 
 /-- The closure relation `Ω + Ω_Λ + Ω_K = 1` for a solution of the Friedmann equations, at the
-  times of `U.I` at which `H ≠ 0`. -/
+  times of the interval of the model at which `H ≠ 0`. -/
 lemma densityParameter_add_lambda_add_curvature (h : U.FriedmannSolution F Λ G c) {t : Time}
     (ht : t ∈ U.I) (hH : hubbleConstant U.a t ≠ 0) :
     U.densityParameter F G t + U.lambdaDensityParameter Λ c t
@@ -139,7 +140,7 @@ lemma densityParameter_add_lambda_add_curvature (h : U.FriedmannSolution F Λ G 
   rw [key, ← hF1, div_self (pow_ne_zero 2 hH)]
 
 /-- The closure relation `Ω + Ω_K = 1` for a solution of the Friedmann equations without
-  cosmological constant, at the times of `U.I` at which `H ≠ 0`. -/
+  cosmological constant, at the times of the interval of the model at which `H ≠ 0`. -/
 lemma densityParameter_add_curvature (h : U.FriedmannSolution F 0 G c) {t : Time} (ht : t ∈ U.I)
     (hH : hubbleConstant U.a t ≠ 0) :
     U.densityParameter F G t + U.curvatureDensityParameter c t = 1 := by
