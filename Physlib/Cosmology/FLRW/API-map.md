@@ -12,9 +12,9 @@ constant. Around these sit the continuity equation, barotropic equations of stat
 density scaling laws, the cosmological constant as a fluid, exact solutions, the density
 parameters and their closure relation, the reduced Hubble function of the standard cosmological
 model, the age of the universe, the energy conditions of the cosmic fluid with the acceleration
-criterion, eternal expansion together with the Big-Bang bound on the interval of cosmic time,
+criterion, eternal expansion together with the Big-Bang bound on the interval of cosmic time, and
 the cosmological distances, the redshift, the horizons and the lookback time, with the coefficients
-of their low-redshift expansions, and conformal time with the Friedmann equations written in it.
+of their low-redshift expansions.
 
 ## Content (Alpha)
 
@@ -77,13 +77,17 @@ equations with Λ is a solution without Λ for the combined fluid. [19]
 
 ### Density parameters, the standard model and the age
 
-The critical density is ρ_cr = 3 H² / (8πG), and the density parameters are Ω = ρ / ρ_cr,
-Ω_K = −k c² / (H² a²) and Ω_Λ = Λ c² / (3 H²); the first-order Friedmann equation is the closure
-relation Ω + Ω_Λ + Ω_K = 1. [14]
+The critical density of an FLRW model is ρ_cr = 3 H² / (8πG), and the density parameters are
+Ω = ρ / ρ_cr for a cosmic fluid in the model, Ω_K = −k c² / (H² a²), k being the curvature parameter
+of its spatial geometry, and Ω_Λ = Λ c² / (3 H²), the density parameter of the cosmological constant
+as a fluid; folding the cosmological constant into the fluid adds Ω_Λ to its density parameter. [14]
+For a solution of the Friedmann equations, the first-order equation is the closure relation
+Ω + Ω_Λ + Ω_K = 1 at the times of its interval at which H ≠ 0. [6]
 
 The standard cosmological model has reduced Hubble function
-E(x)² = Ω_Λ + Ω_m x⁻³ + Ω_r x⁻⁴ + Ω_K x⁻², with H = H₀ E(a / a₀) for matter and radiation obeying
-their scaling laws, and with radiation–matter and matter–Λ equality scale factors. [15] The age
+E(x)² = Ω_Λ + Ω_m x⁻³ + Ω_r x⁻⁴ + Ω_K x⁻², with H = H₀ E(a / a₀) for a solution of the Friedmann
+equations whose cosmic fluid is made of matter and radiation obeying their scaling laws between two
+times of its interval, and with radiation–matter and matter–Λ equality scale factors. [15] The age
 of the universe is t₀ = H₀⁻¹ ∫₀¹ dx / (x E(x)). [16]
 
 ### Energy conditions and acceleration
@@ -92,8 +96,8 @@ The null, weak, strong and dominant energy conditions of the cosmic fluid are de
 implications between them: the dominant condition implies the weak one, and the weak and strong
 conditions each imply the null one. [20] On the interval of a solution of the Friedmann equations
 the universe accelerates, 0 < ∂ₜ ∂ₜ a, exactly when ρ + 3 p / c² < 0, without and with Λ; and the
-deceleration parameter is q = ½ Σ_i Ω_i (1 + 3 w_i) in terms of the density parameters, with its
-ΛCDM special case. [21]
+deceleration parameter is q = ½ Σ_i Ω_i (1 + 3 w_i) in terms of the density parameters of
+barotropic components, with its ΛCDM special case. [21]
 
 ### Eternal expansion and the Big Bang
 
@@ -106,40 +110,32 @@ has a Big Bang in the finite past. [23] The de Sitter model, by contrast, is def
 
 ### Distances, redshift and horizons
 
-The comoving distance of a source emitting at t and observed at t₀ is χ = c ∫ dτ / a from t to t₀,
-so that ∂ₜ χ = −c / a. The redshift is 1 + z = a(t₀) / a(t), with ∂ₜ z = −(1 + z) H, and
-∂ₜ a = a H; combining the two, ∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z, the change of variables dχ = c dz / H
-for a(t₀) = 1. The proper distance D = a χ obeys the Hubble–Lemaître law ∂ₜ D = H D, and the
-recession velocity ∂ₜ D equals c exactly at the Hubble radius R_H = c / H. [28] The transverse
-comoving distance r(χ) is the profile of the spatial geometry of curvature parameter K, with
-curvature radius 1 / √|K|: it is (1 / √K) sin(√K χ), χ or (1 / √(−K)) sinh(√(−K) χ) for positive,
-zero or negative K. The particle and event horizons are the comoving distances to the initial time
-and to the infinite future, and the particle horizon of the Einstein–de Sitter scale factor, from
-t = 0, is 3 c t₀^(2/3) t^(1/3). [29]
+The distances are defined for an FLRW model, at the times of its interval. The comoving distance
+of a source emitting at t and observed at t₀ is χ = c ∫ dτ / a from t to t₀, so that
+∂ₜ χ = −c / a. The redshift is 1 + z = a(t₀) / a(t), with ∂ₜ z = −(1 + z) H, and ∂ₜ a = a H;
+combining the two, ∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z, the change of variables dχ = c dz / H for
+a(t₀) = 1. The proper distance D = a χ obeys the Hubble–Lemaître law ∂ₜ D = H D, and the recession
+velocity ∂ₜ D equals c exactly at the Hubble radius R_H = c / H. [28] The transverse comoving
+distance r(χ) is the profile of the spatial geometry of the model. With K its curvature parameter
+and curvature radius 1 / √|K|, it is (1 / √K) sin(√K χ), χ or (1 / √(−K)) sinh(√(−K) χ) for
+positive, zero or negative K. The particle and event horizons at t integrate c / a over the times
+of the interval before and after t, and the particle horizon of the Einstein–de Sitter model is
+3 c t₀^(2/3) t^(1/3). [29]
 
-The lookback time is t₀ − t. At the observation time, ∂ₜ z = −H₀ and ∂ₜ ∂ₜ z = H₀² (2 + q₀), the
-coefficients of t₀ − t = H₀⁻¹ [z − ½ (2 + q₀) z² + …]. The luminosity distance d_L = (1 + z) r(χ)
+We write a₀, H₀ and q₀ for the scale factor, the Hubble parameter and the deceleration parameter
+at t₀. The lookback time t₀ − t does not depend on the model. At the observation time,
+∂ₜ z = −H₀ and, for H₀ ≠ 0, ∂ₜ ∂ₜ z = H₀² (2 + q₀). The luminosity distance d_L = (1 + z) r(χ)
 and the angular-diameter distance d_A = r(χ) / (1 + z) satisfy Etherington's relation
-d_L = (1 + z)² d_A. With the time derivatives at t₀, dχ/dz = χ' / z' = c / (a₀ H₀) and
-d²χ/dz² = (χ'' z' − χ' z'') / z'³ = −c (1 + q₀) / (a₀ H₀) at z = 0; in the flat case the
-second-order coefficients of d_L and d_A are then c (1 − q₀) / (a₀ H₀) and −c (3 + q₀) / (a₀ H₀).
-[30]
+d_L = (1 + z)² d_A. With primes for the time derivatives at t₀, the quotients f' / z' and
+(f'' z' − f' z'') / z'³ are, for H₀ ≠ 0, the first and second derivatives in z at z = 0 of a
+function f of the emission time. They are 1 / H₀ and −(2 + q₀) / H₀ for the lookback time, and
+c / (a₀ H₀) and −c (1 + q₀) / (a₀ H₀) for χ. For a flat model, the second-order quotients of
+d_L and d_A are c (1 − q₀) / (a₀ H₀) and −c (3 + q₀) / (a₀ H₀). [30]
 
 The energy of a photon scales as E ∝ 1 / a along its null geodesic, and the comoving distance is
 the integral χ = c ∫ dz / H(z) in the redshift for a(t₀) = 1. [TODO] The lookback time and the
 distances have Taylor expansions in the redshift with the coefficients above, through the inverse
-of t ↦ z(t). [TODO]
-
-### Conformal time
-
-The conformal time η(t) = ∫ dτ / a, counted from a reference time, has ∂ₜ η = 1 / a; for the
-Einstein–de Sitter scale factor, from t = 0, it is 3 t₀^(2/3) t^(1/3). The derivative with respect
-to η of a function of cosmic time is defined through the chain rule, f' = a ∂ₜ f, and is consistent
-with ∂ₜ f = f' ∂ₜ η. The conformal Hubble factor ℋ = a' / a equals a H. The first-order Friedmann
-equation in conformal time, ℋ² = (8πG/3) ρ a² + (Λc²/3) a² − k c², is equivalent to its cosmic-time
-form, and the acceleration equation in conformal time,
-a'' / a = (4πG/3) (ρ − 3 p / c²) a² + (2Λc²/3) a² − k c², follows from the two cosmic-time
-equations. [31] The FLRW metric in conformal time is a(η)² times a static metric. [TODO]
+of t ↦ z(t). The coefficients of d_L and d_A are also computed for a curved model. [TODO]
 
 ## Lean References
 
@@ -153,7 +149,9 @@ equations. [31] The FLRW metric in conformal time is a(η)² times a static metr
 4. Physlib/Cosmology/FLRW/Basic.lean — `CosmicFluid`, `CosmicFluid.empty`,
    `FLRW.FriedmannSolution`
 5. Physlib/Cosmology/FLRW/MatterContent.lean — `FLRW.FriedmannSolution.continuityEquation`
-6. Physlib/Cosmology/FLRW/DensityParameters.lean — `FLRW.FriedmannSolution.densityParameter_add_lambda_add_curvature`
+6. Physlib/Cosmology/FLRW/DensityParameters.lean —
+   `FLRW.FriedmannSolution.densityParameter_add_lambda_add_curvature`,
+   `FLRW.FriedmannSolution.densityParameter_add_curvature`
 7. Physlib/Cosmology/FLRW/Solutions.lean — `FLRW.milne`, `FLRW.friedmannSolution_milne`
 8. Physlib/Cosmology/FLRW/Basic.lean — `FirstOrderFriedmann`, `SecondOrderFriedmann`
 9. Physlib/Cosmology/FLRW/Basic.lean — `hubbleConstant`, `hubbleConstant_ne_zero`
@@ -168,11 +166,13 @@ equations. [31] The FLRW metric in conformal time is a(η)² times a static metr
    `density_scaling_dust`, `density_scaling_radiation`, `density_scaling_vacuum`
 13. Physlib/Cosmology/FLRW/MatterContent.lean — `firstOrderFriedmann_iff_lambdaFluid`,
    `secondOrderFriedmann_iff_lambdaFluid`, `cosmologicalConstantPressure_eq_barotropic`
-14. Physlib/Cosmology/FLRW/DensityParameters.lean — `criticalDensity`, `densityParameter`,
-   `curvatureDensityParameter`, `lambdaDensityParameter`,
-   `densityParameter_add_lambda_add_curvature`, `densityParameter_add_curvature`
+14. Physlib/Cosmology/FLRW/DensityParameters.lean — `FLRW.criticalDensity`,
+   `FLRW.densityParameter`, `FLRW.curvatureDensityParameter`, `FLRW.lambdaDensityParameter`,
+   `FLRW.lambdaDensityParameter_eq_densityParameter`, `FLRW.densityParameter_addCosmologicalConstant`
 15. Physlib/Cosmology/FLRW/ReducedHubble.lean — `reducedHubble`,
-   `sq_hubbleConstant_eq_reducedHubble`, `hubbleConstant_eq_reducedHubble`,
+   `FLRW.FriedmannSolution.sq_hubbleConstant_eq_mul_densityParameters`,
+   `FLRW.FriedmannSolution.sq_hubbleConstant_eq_reducedHubble`,
+   `FLRW.FriedmannSolution.hubbleConstant_eq_reducedHubble`,
    `equalityScaleFactorRadiationMatter`, `equalityScaleFactorMatterLambda`
 16. Physlib/Cosmology/FLRW/Age.lean — `age`, `age_eq`
 17. Physlib/Cosmology/FLRW/DeSitter.lean — `FLRW.deSitter`, `FLRW.friedmannSolution_deSitter`
@@ -204,23 +204,22 @@ equations. [31] The FLRW metric in conformal time is a(η)² times a static metr
    `FLRW.friedmannSolution_radiationDominated`
 27. Physlib/Cosmology/FLRW/SpecificCases/EinsteinDeSitter.lean — `FLRW.einsteinDeSitter`,
    `FLRW.friedmannSolution_einsteinDeSitter`
-28. Physlib/Cosmology/FLRW/Distances.lean — `comovingDistance`, `deriv_comovingDistance`,
-   `redshift`, `one_add_redshift`, `deriv_redshift`, `deriv_eq_mul_hubbleConstant`,
-   `deriv_comovingDistance_eq_mul_deriv_redshift`, `properDistance`, `deriv_properDistance`,
-   `hubbleRadius`, `deriv_properDistance_eq_iff`
-29. Physlib/Cosmology/FLRW/Distances.lean — `spatialGeometryOfCurvature`,
-   `transverseComovingDistance`, `transverseComovingDistance_of_pos`,
-   `transverseComovingDistance_zero`, `transverseComovingDistance_of_neg`, `particleHorizon`,
-   `eventHorizon`, `particleHorizon_einsteinDeSitter`
-30. Physlib/Cosmology/FLRW/Distances.lean — `lookbackTime`, `deriv_redshift_self`,
-   `deriv_deriv_redshift_self`, `luminosityDistance`, `angularDiameterDistance`,
-   `luminosityDistance_eq`, `deriv_deriv_comovingDistance_self`, `comovingDistance_coeff_one`,
-   `comovingDistance_coeff_two`, `luminosityDistance_coeff_two`, `angularDiameterDistance_coeff_two`
-31. Physlib/Cosmology/FLRW/ConformalTime.lean — `conformalTime`, `deriv_conformalTime`,
-   `conformalTime_einsteinDeSitter`, `conformalDeriv`, `deriv_eq_conformalDeriv_mul`,
-   `conformalHubble`, `conformalHubble_eq`, `ConformalFirstOrderFriedmann`,
-   `ConformalSecondOrderFriedmann`, `conformalFirstOrderFriedmann_iff`,
-   `conformalDeriv_conformalDeriv`, `conformalSecondOrderFriedmann_of`
+28. Physlib/Cosmology/FLRW/Distances.lean — `FLRW.comovingDistance`,
+   `FLRW.deriv_comovingDistance`, `FLRW.redshift`, `FLRW.one_add_redshift`, `FLRW.deriv_redshift`,
+   `FLRW.deriv_scaleFactor_eq_mul_hubbleConstant`,
+   `FLRW.deriv_comovingDistance_eq_mul_deriv_redshift`, `FLRW.properDistance`,
+   `FLRW.deriv_properDistance`, `FLRW.hubbleRadius`, `FLRW.deriv_properDistance_eq_iff`
+29. Physlib/Cosmology/FLRW/Distances.lean — `FLRW.transverseComovingDistance`,
+   `FLRW.transverseComovingDistance_of_curvature_pos`,
+   `FLRW.transverseComovingDistance_of_curvature_eq_zero`,
+   `FLRW.transverseComovingDistance_of_curvature_neg`, `FLRW.particleHorizon`,
+   `FLRW.eventHorizon`, `FLRW.particleHorizon_einsteinDeSitter`
+30. Physlib/Cosmology/FLRW/Distances.lean — `FLRW.lookbackTime`, `FLRW.deriv_redshift_self`,
+   `FLRW.deriv_deriv_redshift_self`, `FLRW.luminosityDistance`, `FLRW.angularDiameterDistance`,
+   `FLRW.luminosityDistance_eq`, `FLRW.lookbackTime_coeff_one`, `FLRW.lookbackTime_coeff_two`,
+   `FLRW.differentiableAt_comovingDistance`, `FLRW.deriv_deriv_comovingDistance_self`,
+   `FLRW.comovingDistance_coeff_one`, `FLRW.comovingDistance_coeff_two`,
+   `FLRW.luminosityDistance_coeff_two`, `FLRW.angularDiameterDistance_coeff_two`
 
 ## References
 
