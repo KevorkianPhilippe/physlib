@@ -15,8 +15,8 @@ public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 
 ## i. Overview
 
-The distances of this file are defined for an FLRW model `U`. They have their meaning at the
-times of the interval `U.I` of the model.
+The distances of this file are defined for an FLRW model. They have their meaning at the times
+of the interval of the model.
 
 The comoving distance of a source emitting at the time `t` and observed at `t₀` is
 `χ = c ∫_t^{t₀} dτ / a(τ)`, so that `∂ₜ χ = - c / a`. The redshift is `1 + z = a(t₀) / a(t)`,
@@ -27,13 +27,13 @@ redshift.
 The proper distance `D = a χ` obeys the Hubble-Lemaître law `∂ₜ D = H D`. The recession velocity
 equals `c` exactly at the Hubble radius `R_H = c / H`.
 
-The transverse comoving distance `r(χ)` is the function `S` of the spatial geometry of `U`. Its
-closed forms are written in the curvature parameter `K = U.geometry.curvature`, with curvature
+The transverse comoving distance `r(χ)` is the function `S` of the spatial geometry of the model.
+Its closed forms are written in the curvature parameter `K` of that geometry, with curvature
 radius `1 / √|K|`.
 
-The particle and event horizons at `t` integrate `c / a` over the times of `U.I` before and
-after `t`. The particle horizon of the Einstein-de Sitter model `FLRW.einsteinDeSitter` is
-computed.
+The particle and event horizons at `t` integrate `c / a` over the times of the interval of the
+model before and after `t`. The particle horizon of the Einstein-de Sitter model
+`FLRW.einsteinDeSitter` is computed.
 
 ## ii. Key results
 
@@ -75,7 +75,7 @@ variable (U : FLRW)
 noncomputable def comovingDistance (c : ℝ) (t t₀ : Time) : ℝ :=
   c * ∫ τ in t.val..t₀.val, 1 / U.a ⟨τ⟩
 
-/-- For `t` and `t₀` in `U.I`, `∂ₜ χ = - c / a`. -/
+/-- For `t` and `t₀` in the interval of the model, `∂ₜ χ = - c / a`. -/
 lemma deriv_comovingDistance {c : ℝ} {t₀ t : Time} (ht₀ : t₀ ∈ U.I) (ht : t ∈ U.I) :
     ∂ₜ (fun s => U.comovingDistance c s t₀) t = -c / U.a t := by
   obtain ⟨τ⟩ := t
@@ -106,7 +106,7 @@ lemma one_add_redshift (t₀ t : Time) : 1 + U.redshift t₀ t = U.a t₀ / U.a 
   unfold redshift
   ring
 
-/-- For `t` in `U.I`, `∂ₜ z = -(1 + z) H`. -/
+/-- For `t` in the interval of the model, `∂ₜ z = -(1 + z) H`. -/
 lemma deriv_redshift {t₀ t : Time} (ht : t ∈ U.I) :
     ∂ₜ (U.redshift t₀) t = -(1 + U.redshift t₀ t) * hubbleConstant U.a t := by
   obtain ⟨τ⟩ := t
@@ -118,15 +118,16 @@ lemma deriv_redshift {t₀ t : Time} (ht : t ∈ U.I) :
   field_simp
   ring
 
-/-- For `t` in `U.I`, `∂ₜ a = a H`. -/
+/-- For `t` in the interval of the model, `∂ₜ a = a H`. -/
 lemma deriv_scaleFactor_eq_mul_hubbleConstant {t : Time} (ht : t ∈ U.I) :
     ∂ₜ U.a t = U.a t * hubbleConstant U.a t := by
   have ha := U.a_ne_zero ht
   unfold hubbleConstant
   field_simp
 
-/-- For `t` and `t₀` in `U.I` with `H(t) ≠ 0`, `∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z`. For `a(t₀) = 1`,
-  this is the change of variables `dχ = c dz / H`. -/
+/-- For `t` and `t₀` in the interval of the model with `H(t) ≠ 0`,
+  `∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z`. For `a(t₀) = 1`, this is the change of variables
+  `dχ = c dz / H`. -/
 lemma deriv_comovingDistance_eq_mul_deriv_redshift {c : ℝ} {t₀ t : Time} (ht₀ : t₀ ∈ U.I)
     (ht : t ∈ U.I) (hH : hubbleConstant U.a t ≠ 0) :
     ∂ₜ (fun s => U.comovingDistance c s t₀) t
@@ -145,7 +146,7 @@ lemma deriv_comovingDistance_eq_mul_deriv_redshift {c : ℝ} {t₀ t : Time} (ht
 /-- The proper distance `D = a χ` at fixed comoving distance `χ`. -/
 noncomputable def properDistance (χ : ℝ) (t : Time) : ℝ := U.a t * χ
 
-/-- The Hubble-Lemaître law `∂ₜ D = H D`, for `t` in `U.I`. -/
+/-- The Hubble-Lemaître law `∂ₜ D = H D`, for `t` in the interval of the model. -/
 lemma deriv_properDistance {χ : ℝ} {t : Time} (ht : t ∈ U.I) :
     ∂ₜ (U.properDistance χ) t = hubbleConstant U.a t * U.properDistance χ t := by
   obtain ⟨τ⟩ := t
@@ -158,8 +159,8 @@ lemma deriv_properDistance {χ : ℝ} {t : Time} (ht : t ∈ U.I) :
 /-- The Hubble radius `R_H = c / H`. -/
 noncomputable def hubbleRadius (c : ℝ) (t : Time) : ℝ := c / hubbleConstant U.a t
 
-/-- For `t` in `U.I` with `H(t) ≠ 0`, the recession velocity `∂ₜ D` equals `c` exactly at the
-  Hubble radius. -/
+/-- For `t` in the interval of the model with `H(t) ≠ 0`, the recession velocity `∂ₜ D` equals
+  `c` exactly at the Hubble radius. -/
 lemma deriv_properDistance_eq_iff {χ c : ℝ} {t : Time} (ht : t ∈ U.I)
     (hH : hubbleConstant U.a t ≠ 0) :
     ∂ₜ (U.properDistance χ) t = c ↔ U.properDistance χ t = U.hubbleRadius c t := by
@@ -172,7 +173,7 @@ lemma deriv_properDistance_eq_iff {χ c : ℝ} {t : Time} (ht : t ∈ U.I)
 
 -/
 
-/-- The transverse comoving distance `r(χ) = S(χ)` for the spatial geometry of `U`. -/
+/-- The transverse comoving distance `r(χ) = S(χ)` for the spatial geometry of an FLRW model. -/
 noncomputable def transverseComovingDistance (χ : ℝ) : ℝ := U.geometry.S χ
 
 /-- For a positive curvature parameter `K`, `r(χ) = (1 / √K) sin (√K χ)`. -/
@@ -228,13 +229,15 @@ lemma transverseComovingDistance_of_curvature_neg (hK : U.geometry.curvature < 0
 
 -/
 
-/-- The particle horizon at `t`, the integral of `c / a` over the times of `U.I` before `t`. It
-  is a Lebesgue integral, equal to `0` when the integrand is not integrable. -/
+/-- The particle horizon at `t`, the integral of `c / a` over the times of the interval of the
+  model before `t`. It is a Lebesgue integral, equal to `0` when the integrand is not
+  integrable. -/
 noncomputable def particleHorizon (c : ℝ) (t : Time) : ℝ :=
   c * ∫ τ in {τ : ℝ | (⟨τ⟩ : Time) ∈ U.I ∧ τ < t.val}, 1 / U.a ⟨τ⟩
 
-/-- The event horizon at `t`, the integral of `c / a` over the times of `U.I` after `t`. It is a
-  Lebesgue integral, equal to `0` when the integrand is not integrable. -/
+/-- The event horizon at `t`, the integral of `c / a` over the times of the interval of the
+  model after `t`. It is a Lebesgue integral, equal to `0` when the integrand is not
+  integrable. -/
 noncomputable def eventHorizon (c : ℝ) (t : Time) : ℝ :=
   c * ∫ τ in {τ : ℝ | (⟨τ⟩ : Time) ∈ U.I ∧ t.val < τ}, 1 / U.a ⟨τ⟩
 
