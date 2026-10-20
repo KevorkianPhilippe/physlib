@@ -128,11 +128,9 @@ lemma deriv_deriv_scaleFactor_pos_iff_lambda (h : U.FriedmannSolution F Λ G c) 
 
 -/
 
-/-- If the FLRW model `U` filled with the cosmic fluid `F` solves the Friedmann equations without
-  cosmological constant, and `F` is made of a finite family of barotropic components, the cosmic
-  fluids `F_i` of pressure `p_i = w_i ρ_i c²` whose densities and pressures add up to those of `F`,
-  then `q = ½ Σ_i Ω_i (1 + 3 w_i)` at every time of the interval at which `H ≠ 0`, for `G ≠ 0` and
-  `c ≠ 0`. -/
+/-- For a solution of the Friedmann equations without cosmological constant whose cosmic fluid is
+  the sum of barotropic components `Fi i` of pressure `w i ρ_i c²`, the deceleration parameter is
+  `q = ½ Σ_i Ω_i (1 + 3 w_i)` at the times of `U.I` at which `H ≠ 0`, for `G ≠ 0` and `c ≠ 0`. -/
 lemma decelerationParameter_eq_sum {n : ℕ} {Fi : Fin n → CosmicFluid} {w : Fin n → ℝ}
     (h : U.FriedmannSolution F 0 G c) (hG : G ≠ 0) (hc : c ≠ 0)
     (hρ : ∀ s, F.ρ s = ∑ i, (Fi i).ρ s) (hp : ∀ s, F.p s = ∑ i, (Fi i).p s)
@@ -168,11 +166,9 @@ lemma decelerationParameter_eq_sum {n : ℕ} {Fi : Fin n → CosmicFluid} {w : F
   field_simp
   ring
 
-/-- ΛCDM: if the FLRW model `U` filled with the cosmic fluid `F` solves the Friedmann equations
-  with the cosmological constant `Λ`, and `F` is made of matter, the cosmic fluid `Fm` of zero
-  pressure, and radiation, the cosmic fluid `Fr` of pressure `ρ_r c² / 3`, whose densities and
-  pressures add up to those of `F`, then `q = ½ (Ω_m + 2 Ω_r - 2 Ω_Λ)` at every time of the
-  interval, for `c ≠ 0`. -/
+/-- For a solution of the Friedmann equations whose cosmic fluid is the sum of matter `Fm` (zero
+  pressure) and radiation `Fr` (pressure `ρ_r c² / 3`), the deceleration parameter is
+  `q = ½ (Ω_m + 2 Ω_r - 2 Ω_Λ)` at the times of `U.I`, for `c ≠ 0` (the ΛCDM case). -/
 lemma decelerationParameter_lambdaCDM {Fm Fr : CosmicFluid} (h : U.FriedmannSolution F Λ G c)
     (hc : c ≠ 0) (hρ : ∀ s, F.ρ s = Fm.ρ s + Fr.ρ s) (hp : ∀ s, F.p s = Fm.p s + Fr.p s)
     (hm : Fm.p = barotropicPressure 0 Fm.ρ c) (hr : Fr.p = barotropicPressure (1 / 3) Fr.ρ c)

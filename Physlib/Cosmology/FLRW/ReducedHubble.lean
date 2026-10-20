@@ -12,15 +12,12 @@ public import Physlib.Cosmology.FLRW.DensityParameters
 
 ## i. Overview
 
-For an FLRW model that, filled with a cosmic fluid made of matter (`ρ ∝ a⁻³`) and radiation
-(`ρ ∝ a⁻⁴`), solves the Friedmann equations with a cosmological constant and spatial curvature, the
-Hubble parameter at a time `t` of its interval is `H = H₀ E(a / a₀)`, with `H₀ = H(t₀) > 0` at a
-reference time `t₀` of the interval, `H(t) ≥ 0` and the densities obeying their scaling laws
-between `t₀` and `t` (assumed, not derived), where `E(x)² = Ω_Λ + Ω_m x⁻³ + Ω_r x⁻⁴ + Ω_K x⁻²` is
-the reduced Hubble function of the standard cosmological model.
-The density parameters, defined in `Physlib.Cosmology.FLRW.DensityParameters`, are evaluated at
-the reference time `t₀`: each term is the share of one component at the reference time, diluted
-by its own power of the scale factor.
+The reduced Hubble function of the standard cosmological model is
+`E(x) = √(Ω_Λ + Ω_m x⁻³ + Ω_r x⁻⁴ + Ω_K x⁻²)`, with the density parameters of
+`Physlib.Cosmology.FLRW.DensityParameters` taken at a reference time `t₀`. For an FLRW model
+filled with matter (`ρ ∝ a⁻³`) and radiation (`ρ ∝ a⁻⁴`) that solves the Friedmann equations, the
+Hubble parameter is `H = H₀ E(a / a₀)` with `H₀ = H(t₀) > 0` and `H ≥ 0`. The scaling laws of the
+densities between `t₀` and `t` are hypotheses, not derived here.
 
 The equality scale factors are the values of `x = a / a₀` at which two terms of `E²` are equal:
 radiation and matter at `a_eq = Ω_r / Ω_m`, matter and cosmological constant at
@@ -29,13 +26,11 @@ radiation and matter at `a_eq = Ω_r / Ω_m`, matter and cosmological constant a
 ## ii. Key results
 
 - `reducedHubble`: the reduced Hubble function of the standard model.
-- `FLRW.FriedmannSolution.sq_hubbleConstant_eq_mul_densityParameters`: for a solution of the
-  Friedmann equations, the normalised Friedmann equation `H² = H₀² (Ω_Λ + Ω_m x⁻³ + Ω_r x⁻⁴ +
-  Ω_K x⁻²)` with `x = a / a₀`, relating a time `t` to a reference time `t₀` of its interval, for
-  `H(t₀) ≠ 0`.
+- `FLRW.FriedmannSolution.sq_hubbleConstant_eq_mul_densityParameters`: the normalised Friedmann
+  equation `H² = H₀² (Ω_Λ + Ω_m x⁻³ + Ω_r x⁻⁴ + Ω_K x⁻²)` with `x = a / a₀`.
 - `FLRW.FriedmannSolution.sq_hubbleConstant_eq_reducedHubble`,
-  `FLRW.FriedmannSolution.hubbleConstant_eq_reducedHubble`: `H² = H₀² E(a / a₀)²`, and
-  `H = H₀ E(a / a₀)` for `0 < H₀` and `0 ≤ H`, for matter and radiation obeying their scaling laws.
+  `FLRW.FriedmannSolution.hubbleConstant_eq_reducedHubble`: `H² = H₀² E(a / a₀)²` and
+  `H = H₀ E(a / a₀)`.
 - `equalityScaleFactorRadiationMatter`, `equalityScaleFactorMatterLambda` and the equalities
   they realise.
 
@@ -120,14 +115,11 @@ open Real Time FriedmannEquation
 
 variable {U : FLRW} {F Fm Fr : CosmicFluid} {Λ G c : ℝ}
 
-/-- If the FLRW model `U` filled with the cosmic fluid `F` solves the Friedmann equations, the
-  density of `F` being the sum of those of `Fm` (matter) and `Fr` (radiation), then for two times
-  `t` and `t₀` of `U.I` with `H(t₀) ≠ 0` at which the densities obey the scaling laws
-  `ρ_m(t) = ρ_m(t₀) (a(t₀) / a(t))³` and `ρ_r(t) = ρ_r(t₀) (a(t₀) / a(t))⁴`,
+/-- For a solution of the Friedmann equations whose density is that of `Fm` (matter) plus that of
+  `Fr` (radiation), take two times `t` and `t₀` of `U.I` with `H(t₀) ≠ 0` at which
+  `ρ_m(t) = ρ_m(t₀) (a(t₀) / a(t))³` and `ρ_r(t) = ρ_r(t₀) (a(t₀) / a(t))⁴`. Then
   `H² = H₀² (Ω_Λ + Ω_m x⁻³ + Ω_r x⁻⁴ + Ω_K x⁻²)` with `x = a(t) / a(t₀)` and the density
-  parameters of `U` at `t₀`. Only the first-order equation at `t` is used, the scaling laws are
-  assumed, not derived, and the pressures of `Fm` and `Fr` play no role. The sum on the right-hand
-  side is the argument of the square root in `reducedHubble`. -/
+  parameters taken at `t₀`. -/
 lemma sq_hubbleConstant_eq_mul_densityParameters (h : U.FriedmannSolution F Λ G c)
     (hρ : ∀ s, F.ρ s = Fm.ρ s + Fr.ρ s) {t t₀ : Time} (ht : t ∈ U.I) (ht₀ : t₀ ∈ U.I)
     (hH₀ : hubbleConstant U.a t₀ ≠ 0)
@@ -156,10 +148,8 @@ lemma sq_hubbleConstant_eq_mul_densityParameters (h : U.FriedmannSolution F Λ G
   field_simp
   ring
 
-/-- `H² = H₀² E(a / a₀)²`, under the hypotheses of `sq_hubbleConstant_eq_mul_densityParameters`:
-  the FLRW model solves the Friedmann equations, its cosmic fluid is made of matter and radiation,
-  and at the two times `t` and `t₀` of its interval, with `H(t₀) ≠ 0`, the densities obey their
-  scaling laws (`Physlib.Cosmology.FLRW.MatterContent`), which are assumed, not derived. -/
+/-- `H² = H₀² E(a / a₀)²`, under the hypotheses of
+  `sq_hubbleConstant_eq_mul_densityParameters`. -/
 lemma sq_hubbleConstant_eq_reducedHubble (h : U.FriedmannSolution F Λ G c)
     (hρ : ∀ s, F.ρ s = Fm.ρ s + Fr.ρ s) {t t₀ : Time} (ht : t ∈ U.I) (ht₀ : t₀ ∈ U.I)
     (hH₀ : hubbleConstant U.a t₀ ≠ 0)
@@ -181,9 +171,7 @@ lemma sq_hubbleConstant_eq_reducedHubble (h : U.FriedmannSolution F Λ G c)
   exact key
 
 /-- `H = H₀ E(a / a₀)` for `0 < H₀` and `0 ≤ H`, under the hypotheses of
-  `sq_hubbleConstant_eq_reducedHubble`: the FLRW model solves the Friedmann equations, its cosmic
-  fluid is made of matter and radiation, and at the two times `t` and `t₀` of its interval the
-  densities obey their scaling laws, which are assumed, not derived. -/
+  `sq_hubbleConstant_eq_reducedHubble`. -/
 lemma hubbleConstant_eq_reducedHubble (h : U.FriedmannSolution F Λ G c)
     (hρ : ∀ s, F.ρ s = Fm.ρ s + Fr.ρ s) {t t₀ : Time} (ht : t ∈ U.I) (ht₀ : t₀ ∈ U.I)
     (hH₀ : 0 < hubbleConstant U.a t₀) (hH : 0 ≤ hubbleConstant U.a t)
