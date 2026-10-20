@@ -6,7 +6,7 @@ Authors: Philippe Kevorkian, Jinzheng Li
 module
 
 public import Physlib.Meta.TODO.Basic
-public import Physlib.Cosmology.FLRW.Solutions
+public import Physlib.Cosmology.FLRW.SpecificCases.EinsteinDeSitter
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 /-!
@@ -15,31 +15,36 @@ public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 
 ## i. Overview
 
+The distances of this file are defined for an FLRW model `U`. They have their meaning at the
+times of the interval `U.I` of the model.
+
 The comoving distance of a source emitting at the time `t` and observed at `t₀` is
 `χ = c ∫_t^{t₀} dτ / a(τ)`, so that `∂ₜ χ = - c / a`. The redshift is `1 + z = a(t₀) / a(t)`,
-with `∂ₜ z = -(1 + z) H`; combining the two, `∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z`, which is the
-change of variables `dχ = c dz / H` (for `a(t₀) = 1`) behind the distance integrals written in
-the redshift. The proper distance `D = a χ` obeys the Hubble-Lemaître law `∂ₜ D = H D`, and the
-recession velocity equals `c` exactly at the Hubble radius `R_H = c / H`. The transverse comoving
-distance `r(χ)` is the function `S` of `Cosmology.SpatialGeometry` for the geometry of curvature
-`K`, with curvature radius `1 / √|K|`. The particle and event horizons are the comoving distances
-to the initial time and to the infinite future; the particle horizon of the Einstein-de Sitter
-universe is computed.
+with `∂ₜ z = -(1 + z) H`. Combining the two gives `∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z`. For
+`a(t₀) = 1`, this is the change of variables `dχ = c dz / H` behind the distance integrals in the
+redshift.
 
-What is not stated here: the cosmological redshift law `E ∝ 1 / a` of a photon (it needs the
-metric and the null geodesics, not yet objects of Physlib), and the comoving distance as an
-integral in `z` (it needs `H` as a function of `z`); the differential relation above is what is
-proved.
+The proper distance `D = a χ` obeys the Hubble-Lemaître law `∂ₜ D = H D`. The recession velocity
+equals `c` exactly at the Hubble radius `R_H = c / H`.
+
+The transverse comoving distance `r(χ)` is the function `S` of the spatial geometry of `U`. Its
+closed forms are written in the curvature parameter `K = U.geometry.curvature`, with curvature
+radius `1 / √|K|`.
+
+The particle and event horizons at `t` integrate `c / a` over the times of `U.I` before and
+after `t`. The particle horizon of the Einstein-de Sitter model `FLRW.einsteinDeSitter` is
+computed.
 
 ## ii. Key results
 
-- `comovingDistance`, `deriv_comovingDistance`: `∂ₜ χ = - c / a`.
-- `redshift`, `deriv_redshift`: `∂ₜ z = -(1 + z) H`; `deriv_comovingDistance_eq_mul_deriv_redshift`:
-  `∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z`.
-- `properDistance`, `deriv_properDistance`: the Hubble-Lemaître law; `hubbleRadius`,
-  `deriv_properDistance_eq_iff`.
-- `spatialGeometryOfCurvature`, `transverseComovingDistance` and its three closed forms.
-- `particleHorizon`, `eventHorizon`, `particleHorizon_einsteinDeSitter`.
+- `FLRW.comovingDistance`, `FLRW.deriv_comovingDistance`: `∂ₜ χ = - c / a`.
+- `FLRW.redshift`, `FLRW.deriv_redshift`: `∂ₜ z = -(1 + z) H`.
+- `FLRW.deriv_comovingDistance_eq_mul_deriv_redshift`: `∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z`.
+- `FLRW.properDistance`, `FLRW.deriv_properDistance`: the Hubble-Lemaître law.
+- `FLRW.hubbleRadius`, `FLRW.deriv_properDistance_eq_iff`: the recession velocity at the Hubble
+  radius.
+- `FLRW.transverseComovingDistance` and its three closed forms.
+- `FLRW.particleHorizon`, `FLRW.eventHorizon`, `FLRW.particleHorizon_einsteinDeSitter`.
 
 ## iii. Table of contents
 
@@ -53,9 +58,11 @@ proved.
 
 @[expose] public section
 
-namespace Cosmology.FLRW.FriedmannEquation
+namespace Cosmology.FLRW
 
-open Real Time
+open Real Time FriedmannEquation
+
+variable (U : FLRW)
 
 /-!
 
@@ -65,18 +72,23 @@ open Real Time
 
 /-- The line-of-sight comoving distance `χ = c ∫_t^{t₀} dτ / a(τ)` of a source emitting at `t`
   and observed at `t₀`. -/
-noncomputable def comovingDistance (a : Time → ℝ) (c : ℝ) (t t₀ : Time) : ℝ :=
-  c * ∫ τ in t.val..t₀.val, 1 / a ⟨τ⟩
+noncomputable def comovingDistance (c : ℝ) (t t₀ : Time) : ℝ :=
+  c * ∫ τ in t.val..t₀.val, 1 / U.a ⟨τ⟩
 
-/-- For `a` continuous and positive, `∂ₜ χ = - c / a` (fundamental theorem of calculus). -/
-lemma deriv_comovingDistance {a : Time → ℝ} {c : ℝ} (hcont : Continuous a) (hapos : ∀ s, 0 < a s)
-    (t₀ t : Time) : ∂ₜ (fun s => comovingDistance a c s t₀) t = -c / a t := by
+/-- For `t` and `t₀` in `U.I`, `∂ₜ χ = - c / a`. -/
+lemma deriv_comovingDistance {c : ℝ} {t₀ t : Time} (ht₀ : t₀ ∈ U.I) (ht : t ∈ U.I) :
+    ∂ₜ (fun s => U.comovingDistance c s t₀) t = -c / U.a t := by
   obtain ⟨τ⟩ := t
-  have hf : Continuous (fun τ : ℝ => 1 / a ⟨τ⟩) :=
-    continuous_const.div (hcont.comp toRealCLE.symm.continuous) fun τ => (hapos ⟨τ⟩).ne'
-  have h : HasDerivAt (fun σ : ℝ => ∫ x in σ..t₀.val, 1 / a ⟨x⟩) (-(1 / a ⟨τ⟩)) τ :=
-    intervalIntegral.integral_hasDerivAt_left (hf.intervalIntegrable _ _)
-      (hf.stronglyMeasurableAtFilter _ _) hf.continuousAt
+  have hS : IsOpen {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I} := U.isOpen_I.preimage toRealCLE.symm.continuous
+  have hf : ContinuousOn (fun σ : ℝ => 1 / U.a ⟨σ⟩) {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I} :=
+    continuousOn_const.div (U.differentiableOn_a.continuousOn.comp
+      toRealCLE.symm.continuous.continuousOn fun _ h => h) fun _ h => U.a_ne_zero h
+  have hsub : Set.uIcc τ t₀.val ⊆ {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I} :=
+    Set.OrdConnected.uIcc_subset (s := {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I})
+      ⟨fun _ hx _ hy _ hz => U.mk_mem_I_of_mem_Icc hx hy hz⟩ ht ht₀
+  have h : HasDerivAt (fun σ : ℝ => ∫ x in σ..t₀.val, 1 / U.a ⟨x⟩) (-(1 / U.a ⟨τ⟩)) τ :=
+    intervalIntegral.integral_hasDerivAt_left ((hf.mono hsub).intervalIntegrable)
+      (hf.stronglyMeasurableAtFilter hS τ ht) (hf.continuousAt (hS.mem_nhds ht))
   refine deriv_eq_of_hasDerivAt ((h.const_mul c).congr_deriv ?_)
   ring
 
@@ -86,40 +98,42 @@ lemma deriv_comovingDistance {a : Time → ℝ} {c : ℝ} (hcont : Continuous a)
 
 -/
 
-/-- The redshift of a source emitting at `t` and observed at `t₀`: `1 + z = a(t₀) / a(t)`. -/
-noncomputable def redshift (a : Time → ℝ) (t₀ t : Time) : ℝ := a t₀ / a t - 1
+/-- The redshift `z` of a source emitting at `t` and observed at `t₀`, with
+  `1 + z = a(t₀) / a(t)`. -/
+noncomputable def redshift (t₀ t : Time) : ℝ := U.a t₀ / U.a t - 1
 
-lemma one_add_redshift {a : Time → ℝ} (t₀ t : Time) : 1 + redshift a t₀ t = a t₀ / a t := by
+lemma one_add_redshift (t₀ t : Time) : 1 + U.redshift t₀ t = U.a t₀ / U.a t := by
   unfold redshift
   ring
 
-/-- `∂ₜ z = -(1 + z) H`: the change of variables `dt = - dz / ((1 + z) H)`. -/
-lemma deriv_redshift {a : Time → ℝ} {t₀ t : Time} (hd : DifferentiableAt ℝ a t) (ha : a t ≠ 0) :
-    ∂ₜ (redshift a t₀) t = -(1 + redshift a t₀ t) * hubbleConstant a t := by
+/-- For `t` in `U.I`, `∂ₜ z = -(1 + z) H`. -/
+lemma deriv_redshift {t₀ t : Time} (ht : t ∈ U.I) :
+    ∂ₜ (U.redshift t₀) t = -(1 + U.redshift t₀ t) * hubbleConstant U.a t := by
   obtain ⟨τ⟩ := t
-  have hA := hasDerivAt_mk_of_differentiableAt hd
-  have h := ((hasDerivAt_const τ (a t₀)).div hA ha).sub_const 1
-  refine (deriv_eq_of_hasDerivAt (f := redshift a t₀) h).trans ?_
+  have ha := U.a_ne_zero ht
+  have hA := hasDerivAt_mk_of_differentiableAt (U.differentiableAt_a ht)
+  have h := ((hasDerivAt_const τ (U.a t₀)).div hA ha).sub_const 1
+  refine (deriv_eq_of_hasDerivAt (f := U.redshift t₀) h).trans ?_
   unfold redshift hubbleConstant
   field_simp
   ring
 
-/-- `∂ₜ a = a H`. -/
-lemma deriv_eq_mul_hubbleConstant {a : Time → ℝ} {t : Time} (ha : a t ≠ 0) :
-    ∂ₜ a t = a t * hubbleConstant a t := by
+/-- For `t` in `U.I`, `∂ₜ a = a H`. -/
+lemma deriv_scaleFactor_eq_mul_hubbleConstant {t : Time} (ht : t ∈ U.I) :
+    ∂ₜ U.a t = U.a t * hubbleConstant U.a t := by
+  have ha := U.a_ne_zero ht
   unfold hubbleConstant
   field_simp
 
-/-- `∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z`: with `a(t₀) = 1`, this is the change of variables
-  `dχ = c dz / H` (both derivatives are negative: `χ` and `z` decrease with the emission time). -/
-lemma deriv_comovingDistance_eq_mul_deriv_redshift {a : Time → ℝ} {c : ℝ} (hcont : Continuous a)
-    (hapos : ∀ s, 0 < a s) {t₀ t : Time} (hd : DifferentiableAt ℝ a t)
-    (hH : hubbleConstant a t ≠ 0) :
-    ∂ₜ (fun s => comovingDistance a c s t₀) t
-      = c / (a t₀ * hubbleConstant a t) * ∂ₜ (redshift a t₀) t := by
-  rw [deriv_comovingDistance hcont hapos, deriv_redshift hd (hapos t).ne', one_add_redshift]
-  have ha := (hapos t).ne'
-  have ha₀ := (hapos t₀).ne'
+/-- For `t` and `t₀` in `U.I` with `H(t) ≠ 0`, `∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z`. For `a(t₀) = 1`,
+  this is the change of variables `dχ = c dz / H`. -/
+lemma deriv_comovingDistance_eq_mul_deriv_redshift {c : ℝ} {t₀ t : Time} (ht₀ : t₀ ∈ U.I)
+    (ht : t ∈ U.I) (hH : hubbleConstant U.a t ≠ 0) :
+    ∂ₜ (fun s => U.comovingDistance c s t₀) t
+      = c / (U.a t₀ * hubbleConstant U.a t) * ∂ₜ (U.redshift t₀) t := by
+  rw [U.deriv_comovingDistance ht₀ ht, U.deriv_redshift ht, one_add_redshift]
+  have ha := U.a_ne_zero ht
+  have ha₀ := U.a_ne_zero ht₀
   field_simp
 
 /-!
@@ -129,25 +143,27 @@ lemma deriv_comovingDistance_eq_mul_deriv_redshift {a : Time → ℝ} {c : ℝ} 
 -/
 
 /-- The proper distance `D = a χ` at fixed comoving distance `χ`. -/
-noncomputable def properDistance (a : Time → ℝ) (χ : ℝ) (t : Time) : ℝ := a t * χ
+noncomputable def properDistance (χ : ℝ) (t : Time) : ℝ := U.a t * χ
 
-/-- The Hubble-Lemaître law `∂ₜ D = H D`. -/
-lemma deriv_properDistance {a : Time → ℝ} {χ : ℝ} {t : Time} (hd : DifferentiableAt ℝ a t)
-    (ha : a t ≠ 0) : ∂ₜ (properDistance a χ) t = hubbleConstant a t * properDistance a χ t := by
+/-- The Hubble-Lemaître law `∂ₜ D = H D`, for `t` in `U.I`. -/
+lemma deriv_properDistance {χ : ℝ} {t : Time} (ht : t ∈ U.I) :
+    ∂ₜ (U.properDistance χ) t = hubbleConstant U.a t * U.properDistance χ t := by
   obtain ⟨τ⟩ := t
-  have hA := hasDerivAt_mk_of_differentiableAt hd
-  refine (deriv_eq_of_hasDerivAt (f := properDistance a χ) (hA.mul_const χ)).trans ?_
+  have ha := U.a_ne_zero ht
+  have hA := hasDerivAt_mk_of_differentiableAt (U.differentiableAt_a ht)
+  refine (deriv_eq_of_hasDerivAt (f := U.properDistance χ) (hA.mul_const χ)).trans ?_
   unfold hubbleConstant properDistance
   field_simp
 
 /-- The Hubble radius `R_H = c / H`. -/
-noncomputable def hubbleRadius (a : Time → ℝ) (c : ℝ) (t : Time) : ℝ := c / hubbleConstant a t
+noncomputable def hubbleRadius (c : ℝ) (t : Time) : ℝ := c / hubbleConstant U.a t
 
-/-- The recession velocity `∂ₜ D` equals `c` exactly at the Hubble radius. -/
-lemma deriv_properDistance_eq_iff {a : Time → ℝ} {χ c : ℝ} {t : Time} (hd : DifferentiableAt ℝ a t)
-    (ha : a t ≠ 0) (hH : hubbleConstant a t ≠ 0) :
-    ∂ₜ (properDistance a χ) t = c ↔ properDistance a χ t = hubbleRadius a c t := by
-  rw [deriv_properDistance hd ha, hubbleRadius, eq_div_iff hH]
+/-- For `t` in `U.I` with `H(t) ≠ 0`, the recession velocity `∂ₜ D` equals `c` exactly at the
+  Hubble radius. -/
+lemma deriv_properDistance_eq_iff {χ c : ℝ} {t : Time} (ht : t ∈ U.I)
+    (hH : hubbleConstant U.a t ≠ 0) :
+    ∂ₜ (U.properDistance χ) t = c ↔ U.properDistance χ t = U.hubbleRadius c t := by
+  rw [U.deriv_properDistance ht, hubbleRadius, eq_div_iff hH]
   constructor <;> intro h <;> linarith [h]
 
 /-!
@@ -156,44 +172,55 @@ lemma deriv_properDistance_eq_iff {a : Time → ℝ} {χ c : ℝ} {t : Time} (hd
 
 -/
 
-/-- The spatial geometry of curvature parameter `K`, in the conventions of `SpatialGeometry`
-  (`Spherical k` with `k < 0`, `Saddle k` with `k > 0`; the function `S` is even in `k`), with
-  curvature radius `1 / √|K|`. -/
-noncomputable def spatialGeometryOfCurvature (K : ℝ) : SpatialGeometry :=
-  if hK : 0 < K then
-    .Spherical (-(1 / √K)) (neg_neg_of_pos (one_div_pos.mpr (Real.sqrt_pos.mpr hK)))
-  else if hK' : K < 0 then
-    .Saddle (1 / √(-K)) (one_div_pos.mpr (Real.sqrt_pos.mpr (neg_pos.mpr hK')))
-  else .Flat
+/-- The transverse comoving distance `r(χ) = S(χ)` for the spatial geometry of `U`. -/
+noncomputable def transverseComovingDistance (χ : ℝ) : ℝ := U.geometry.S χ
 
-/-- The transverse comoving distance `r(χ) = S(χ)` for the geometry of curvature `K`. -/
-noncomputable def transverseComovingDistance (K χ : ℝ) : ℝ :=
-  SpatialGeometry.S (spatialGeometryOfCurvature K) χ
+/-- For a positive curvature parameter `K`, `r(χ) = (1 / √K) sin (√K χ)`. -/
+lemma transverseComovingDistance_of_curvature_pos (hK : 0 < U.geometry.curvature) (χ : ℝ) :
+    U.transverseComovingDistance χ
+      = 1 / √U.geometry.curvature * Real.sin (√U.geometry.curvature * χ) := by
+  unfold transverseComovingDistance
+  generalize U.geometry = s at hK ⊢
+  cases s with
+  | Spherical k hk =>
+    have hs : √(SpatialGeometry.Spherical k hk).curvature = -1 / k := by
+      show √(1 / k ^ 2) = -1 / k
+      rw [show (1 : ℝ) / k ^ 2 = (-1 / k) ^ 2 by ring]
+      exact Real.sqrt_sq (div_nonneg_of_nonpos (by norm_num) hk.le)
+    rw [hs]
+    show k * Real.sin (χ / k) = 1 / (-1 / k) * Real.sin (-1 / k * χ)
+    rw [show -1 / k * χ = -(χ / k) by ring, Real.sin_neg, one_div_div]
+    ring
+  | Flat => simp at hK
+  | Saddle k hk => linarith [SpatialGeometry.curvature_saddle_neg k hk]
 
-/-- For `K > 0`, `r(χ) = (1 / √K) sin (√K χ)`. -/
-lemma transverseComovingDistance_of_pos {K : ℝ} (hK : 0 < K) (χ : ℝ) :
-    transverseComovingDistance K χ = 1 / √K * Real.sin (√K * χ) := by
-  unfold transverseComovingDistance spatialGeometryOfCurvature
-  rw [dite_eq_left hK]
-  simp only [SpatialGeometry.S]
-  have hs : √K ≠ 0 := (Real.sqrt_pos.mpr hK).ne'
-  rw [show χ / -(1 / √K) = -(√K * χ) by field_simp, Real.sin_neg]
-  ring
+/-- For a zero curvature parameter, `r(χ) = χ`. -/
+lemma transverseComovingDistance_of_curvature_eq_zero (hK : U.geometry.curvature = 0) (χ : ℝ) :
+    U.transverseComovingDistance χ = χ := by
+  unfold transverseComovingDistance
+  generalize U.geometry = s at hK ⊢
+  cases s with
+  | Spherical k hk => exact absurd hK (SpatialGeometry.curvature_spherical_pos k hk).ne'
+  | Flat => rfl
+  | Saddle k hk => exact absurd hK (SpatialGeometry.curvature_saddle_neg k hk).ne
 
-/-- For `K = 0`, `r(χ) = χ`. -/
-lemma transverseComovingDistance_zero (χ : ℝ) : transverseComovingDistance 0 χ = χ := by
-  unfold transverseComovingDistance spatialGeometryOfCurvature
-  rw [dite_eq_right (lt_irrefl 0), dite_eq_right (lt_irrefl 0)]
-  simp only [SpatialGeometry.S]
-
-/-- For `K < 0`, `r(χ) = (1 / √(-K)) sinh (√(-K) χ)`. -/
-lemma transverseComovingDistance_of_neg {K : ℝ} (hK : K < 0) (χ : ℝ) :
-    transverseComovingDistance K χ = 1 / √(-K) * Real.sinh (√(-K) * χ) := by
-  unfold transverseComovingDistance spatialGeometryOfCurvature
-  rw [dite_eq_right (not_lt.mpr hK.le), dite_eq_left hK]
-  simp only [SpatialGeometry.S]
-  have hs : √(-K) ≠ 0 := (Real.sqrt_pos.mpr (neg_pos.mpr hK)).ne'
-  rw [show χ / (1 / √(-K)) = √(-K) * χ by field_simp]
+/-- For a negative curvature parameter `K`, `r(χ) = (1 / √(-K)) sinh (√(-K) χ)`. -/
+lemma transverseComovingDistance_of_curvature_neg (hK : U.geometry.curvature < 0) (χ : ℝ) :
+    U.transverseComovingDistance χ
+      = 1 / √(-U.geometry.curvature) * Real.sinh (√(-U.geometry.curvature) * χ) := by
+  unfold transverseComovingDistance
+  generalize U.geometry = s at hK ⊢
+  cases s with
+  | Spherical k hk => linarith [SpatialGeometry.curvature_spherical_pos k hk]
+  | Flat => simp at hK
+  | Saddle k hk =>
+    have hs : √(-(SpatialGeometry.Saddle k hk).curvature) = 1 / k := by
+      show √(-(-1 / k ^ 2)) = 1 / k
+      rw [show -(-1 / k ^ 2) = (1 / k) ^ 2 by ring]
+      exact Real.sqrt_sq (one_div_pos.mpr hk).le
+    rw [hs]
+    show k * Real.sinh (χ / k) = 1 / (1 / k) * Real.sinh (1 / k * χ)
+    rw [one_div_one_div, show 1 / k * χ = χ / k by ring]
 
 /-!
 
@@ -201,23 +228,26 @@ lemma transverseComovingDistance_of_neg {K : ℝ} (hK : K < 0) (χ : ℝ) :
 
 -/
 
-/-- The particle horizon at `t`: the comoving distance to the initial time `tᵢ`. -/
-noncomputable def particleHorizon (a : Time → ℝ) (c : ℝ) (tᵢ t : Time) : ℝ :=
-  comovingDistance a c tᵢ t
+/-- The particle horizon at `t`, the integral of `c / a` over the times of `U.I` before `t`. It
+  is a Lebesgue integral, equal to `0` when the integrand is not integrable. -/
+noncomputable def particleHorizon (c : ℝ) (t : Time) : ℝ :=
+  c * ∫ τ in {τ : ℝ | (⟨τ⟩ : Time) ∈ U.I ∧ τ < t.val}, 1 / U.a ⟨τ⟩
 
-/-- The event horizon at `t`: `c ∫_t^∞ dτ / a(τ)` (Lebesgue integral over `(t, ∞)`, equal to
-  `0` when not integrable). -/
-noncomputable def eventHorizon (a : Time → ℝ) (c : ℝ) (t : Time) : ℝ :=
-  c * ∫ τ in Set.Ioi t.val, 1 / a ⟨τ⟩
+/-- The event horizon at `t`, the integral of `c / a` over the times of `U.I` after `t`. It is a
+  Lebesgue integral, equal to `0` when the integrand is not integrable. -/
+noncomputable def eventHorizon (c : ℝ) (t : Time) : ℝ :=
+  c * ∫ τ in {τ : ℝ | (⟨τ⟩ : Time) ∈ U.I ∧ t.val < τ}, 1 / U.a ⟨τ⟩
 
-/-- The particle horizon of the Einstein-de Sitter universe from `t = 0` is finite,
-  `3 c t₀^(2/3) t^(1/3)`. -/
+/-- The particle horizon of the Einstein-de Sitter model at `t > 0` is `3 c t₀^(2/3) t^(1/3)`. -/
 lemma particleHorizon_einsteinDeSitter {t₀ : Time} {c : ℝ} (ht₀ : 0 < t₀.val) {t : Time}
     (ht : 0 < t.val) :
-    particleHorizon (einsteinDeSitterScaleFactor t₀) c ⟨0⟩ t
+    (einsteinDeSitter t₀ ht₀).particleHorizon c t
       = 3 * c * t₀.val ^ (2 / 3 : ℝ) * t.val ^ (1 / 3 : ℝ) := by
-  unfold particleHorizon comovingDistance einsteinDeSitterScaleFactor
-  dsimp only
+  have hset : {τ : ℝ | (⟨τ⟩ : Time) ∈ (einsteinDeSitter t₀ ht₀).I ∧ τ < t.val}
+      = Set.Ioo 0 t.val := rfl
+  rw [particleHorizon, hset, ← MeasureTheory.integral_Ioc_eq_integral_Ioo,
+    ← intervalIntegral.integral_of_le ht.le]
+  show c * ∫ τ in (0 : ℝ)..t.val, 1 / (τ / t₀.val) ^ (2 / 3 : ℝ) = _
   have hcongr : Set.EqOn (fun τ : ℝ => 1 / (τ / t₀.val) ^ (2 / 3 : ℝ))
       (fun τ : ℝ => t₀.val ^ (2 / 3 : ℝ) * τ ^ (-(2 / 3) : ℝ)) (Set.uIcc 0 t.val) := by
     intro τ hτ
@@ -230,4 +260,15 @@ lemma particleHorizon_einsteinDeSitter {t₀ : Time} {c : ℝ} (ht₀ : 0 < t₀
   norm_num
   ring
 
-end Cosmology.FLRW.FriedmannEquation
+end Cosmology.FLRW
+
+TODO "Define the lookback time `t₀ - t` and prove its model-independent expansion
+  `t₀ - t = H₀⁻¹ [z - ½(2 + q₀) z² + …]` in powers of the redshift."
+
+TODO "Define the luminosity distance `d_L = (1 + z) r(χ)` and the angular-diameter
+  distance `d_A = r(χ) / (1 + z)`."
+
+TODO "Prove Etherington's distance-duality relation `d_L = (1 + z)² d_A`."
+
+TODO "Prove the low-redshift expansions of `χ`, `d_L` and `d_A` in powers of `z`
+  in terms of the deceleration parameter `q₀`."

@@ -105,16 +105,17 @@ has a Big Bang in the finite past. [23] The de Sitter model, by contrast, is def
 
 ### Distances, redshift and horizons
 
-The comoving distance of a source emitting at t and observed at t₀ is χ = c ∫ dτ / a from t to t₀,
-so that ∂ₜ χ = −c / a. The redshift is 1 + z = a(t₀) / a(t), with ∂ₜ z = −(1 + z) H, and
-∂ₜ a = a H; combining the two, ∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z, the change of variables dχ = c dz / H
-for a(t₀) = 1. The proper distance D = a χ obeys the Hubble–Lemaître law ∂ₜ D = H D, and the
-recession velocity ∂ₜ D equals c exactly at the Hubble radius R_H = c / H. [28] The transverse
-comoving distance r(χ) is the profile of the spatial geometry of curvature parameter K, with
-curvature radius 1 / √|K|: it is (1 / √K) sin(√K χ), χ or (1 / √(−K)) sinh(√(−K) χ) for positive,
-zero or negative K. The particle and event horizons are the comoving distances to the initial time
-and to the infinite future, and the particle horizon of the Einstein–de Sitter scale factor, from
-t = 0, is 3 c t₀^(2/3) t^(1/3). [29]
+The distances are defined for an FLRW model, at the times of its interval. The comoving distance
+of a source emitting at t and observed at t₀ is χ = c ∫ dτ / a from t to t₀, so that
+∂ₜ χ = −c / a. The redshift is 1 + z = a(t₀) / a(t), with ∂ₜ z = −(1 + z) H, and ∂ₜ a = a H;
+combining the two, ∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z, the change of variables dχ = c dz / H for
+a(t₀) = 1. The proper distance D = a χ obeys the Hubble–Lemaître law ∂ₜ D = H D, and the recession
+velocity ∂ₜ D equals c exactly at the Hubble radius R_H = c / H. [28] The transverse comoving
+distance r(χ) is the profile of the spatial geometry of the model. With K its curvature parameter
+and curvature radius 1 / √|K|, it is (1 / √K) sin(√K χ), χ or (1 / √(−K)) sinh(√(−K) χ) for
+positive, zero or negative K. The particle and event horizons at t integrate c / a over the times
+of the interval before and after t, and the particle horizon of the Einstein–de Sitter model is
+3 c t₀^(2/3) t^(1/3). [29]
 
 The energy of a photon scales as E ∝ 1 / a along its null geodesic, and the comoving distance is
 the integral χ = c ∫ dz / H(z) in the redshift for a(t₀) = 1. [TODO]
@@ -182,14 +183,16 @@ the integral χ = c ∫ dz / H(z) in the redshift for a(t₀) = 1. [TODO]
    `FLRW.friedmannSolution_radiationDominated`
 27. Physlib/Cosmology/FLRW/SpecificCases/EinsteinDeSitter.lean — `FLRW.einsteinDeSitter`,
    `FLRW.friedmannSolution_einsteinDeSitter`
-28. Physlib/Cosmology/FLRW/Distances.lean — `comovingDistance`, `deriv_comovingDistance`,
-   `redshift`, `one_add_redshift`, `deriv_redshift`, `deriv_eq_mul_hubbleConstant`,
-   `deriv_comovingDistance_eq_mul_deriv_redshift`, `properDistance`, `deriv_properDistance`,
-   `hubbleRadius`, `deriv_properDistance_eq_iff`
-29. Physlib/Cosmology/FLRW/Distances.lean — `spatialGeometryOfCurvature`,
-   `transverseComovingDistance`, `transverseComovingDistance_of_pos`,
-   `transverseComovingDistance_zero`, `transverseComovingDistance_of_neg`, `particleHorizon`,
-   `eventHorizon`, `particleHorizon_einsteinDeSitter`
+28. Physlib/Cosmology/FLRW/Distances.lean — `FLRW.comovingDistance`,
+   `FLRW.deriv_comovingDistance`, `FLRW.redshift`, `FLRW.one_add_redshift`, `FLRW.deriv_redshift`,
+   `FLRW.deriv_scaleFactor_eq_mul_hubbleConstant`,
+   `FLRW.deriv_comovingDistance_eq_mul_deriv_redshift`, `FLRW.properDistance`,
+   `FLRW.deriv_properDistance`, `FLRW.hubbleRadius`, `FLRW.deriv_properDistance_eq_iff`
+29. Physlib/Cosmology/FLRW/Distances.lean — `FLRW.transverseComovingDistance`,
+   `FLRW.transverseComovingDistance_of_curvature_pos`,
+   `FLRW.transverseComovingDistance_of_curvature_eq_zero`,
+   `FLRW.transverseComovingDistance_of_curvature_neg`, `FLRW.particleHorizon`,
+   `FLRW.eventHorizon`, `FLRW.particleHorizon_einsteinDeSitter`
 
 ## References
 
