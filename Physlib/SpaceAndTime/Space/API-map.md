@@ -10,7 +10,8 @@ vector space once the origin is fixed, a norm and an inner product, and a smooth
 together with a basis and coordinates, length units, the cross product in three dimensions, the
 relation between spaces of different dimension, and the actions of translations and rotations.
 Space is also the home of differentiation in a spatial direction, for functions and for
-distributions, of gradient, divergence and curl, and of the distributions made from functions
+distributions, of gradient, divergence, curl and the Laplacian, and of the distributions made
+from functions
 that are bounded in the appropriate sense.
 
 ## Content (Alpha)
@@ -81,30 +82,32 @@ The Laplacian of a real function is the divergence of its gradient, that is the 
 derivatives along the coordinate directions, and the Laplacian of a vector field is taken
 component by component. [36]
 
-In three dimensions, for twice continuously differentiable fields, the divergence of a curl and
-the curl of a gradient vanish, and the curl of a curl is the gradient of the divergence minus the
-vector Laplacian. [37] Conversely, on the whole of three-dimensional space, a continuously
-differentiable field with zero divergence is the curl of a differentiable field, given by an
-explicit integral along the segment from the origin, and a differentiable field with zero curl is
-the gradient of a differentiable function, which for a continuously differentiable field is the
-integral of the field along the segment from the origin. [38] A field that also depends on time
-and has zero divergence is the curl of a field depending on time, and one with zero curl is the
-gradient of a function depending on time. [TODO]
+In three dimensions, for twice continuously differentiable fields and functions, the divergence of a
+curl and the curl of a gradient vanish, and the curl of a curl is the gradient of the divergence
+minus the vector Laplacian. [37] Conversely, on the whole of three-dimensional space, a continuously
+differentiable field with zero divergence is the curl of a differentiable field: explicitly, it is
+minus the curl of the integral over t from 0 to 1 of the cross product of t x with the field at t x.
+A differentiable field with zero curl is the gradient of a differentiable function, which for a
+continuously differentiable field is the integral of the field along the segment from the origin.
+[38] A field that also depends on time, with zero divergence at each time, is the curl of a field
+depending on time that is as many times continuously differentiable, jointly in time and space, as
+the original field; likewise a curl-free one is such a gradient. [TODO]
 
-A function that is bounded in the appropriate sense, by a finite sum of powers of the distances to
-some fixed points with exponents bounded below in terms of the dimension, determines a distribution
-on space by integration against Schwartz functions, called below the distribution of the
-function. [19][20] The constant distribution sends a Schwartz function to its integral times a
-fixed vector. [21] A distribution on space of one dimension less gives a distribution on space
-that is constant along a chosen direction, by first integrating Schwartz functions along that
-direction. [22]
+A function that is bounded in the appropriate sense, that is almost everywhere strongly measurable
+and bounded by a finite sum of non-negative multiples of integer powers of the distances to some
+fixed points, with exponents at least 1 - d (at least 0 when d = 0), determines a distribution on
+space by integration against Schwartz functions, called below the distribution of the function.
+[19][20] The constant distribution sends a Schwartz function to its integral times a fixed vector.
+[21] A distribution on space of one dimension less gives a distribution on space that is constant
+along a chosen direction, by first integrating Schwartz functions along that direction. [22]
 
 A distribution on space valued in a normed space has a derivative along each coordinate direction,
 and any two of these derivatives commute. [23] When a differentiable function and its derivative
-along a direction are both bounded in the appropriate sense, the derivative of its distribution
-along that direction is the distribution of its derivative. [39] A distribution that is constant
-along a direction has zero derivative along it, and along any other direction its derivative is
-the constant extension of the derivative of the original distribution. [40]
+along a coordinate direction are both bounded in the appropriate sense, the derivative of its
+distribution along that direction is the distribution of its derivative. [39] The constant
+extension of a distribution has zero derivative along the chosen direction, and along any other
+direction its derivative is the constant extension of the derivative of the original
+distribution. [40]
 
 A real-valued distribution has a gradient, whose components are its coordinate derivatives. [24] A
 distribution valued in Euclidean space of the same dimension has a divergence, the sum of the
