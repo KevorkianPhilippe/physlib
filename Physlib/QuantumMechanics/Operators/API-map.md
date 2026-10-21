@@ -143,7 +143,7 @@ Hall {1}. The uncertainty bounds go back to Robertson {9} and Schrödinger {10}.
    `HasDenseDomain.unitaryConj_dense_domain`, `unitaryConj_sub_smul_surjective`
 8. Physlib/QuantumMechanics/Operators/Multiplication.lean — `mulOperator`, `notation 𝓜`,
    `mem_mulOperator_domain_iff`, `mulOperator_apply_ae`, `mulOperator_hasDenseDomain`,
-   `mulOperator_eq_iff`
+   `mulOperator_eq_iff_ae_eq`
 9. Physlib/QuantumMechanics/Operators/Multiplication.lean — `mulOperator_domain_eq_top`,
    `mulOperator_domain_antitone`, `mulOperator_conj_domain`,
    `mulOperator_domain_ge_of_hasTemperateGrowth`, `mulOperator_domain_le_of_norm_le`

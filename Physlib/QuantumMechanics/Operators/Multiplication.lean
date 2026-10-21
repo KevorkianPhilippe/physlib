@@ -38,11 +38,11 @@ through multiplication in the Fourier domain: see `Operators/Derivative.lean`.
 - `mulOperator_isUnbounded` : Multiplication operators with maximal domain are unbounded
     (i.e. densely defined and closable).
 - `mulOperator_isClosed` : Multiplication operators with maximal domain are closed.
+- `mulOperator_eq_iff_ae_eq` : `𝓜 μ f = 𝓜 μ g ↔ f =ᵐ[μ] g` for `μ`-a.e. strongly measurable `f`
+    and σ-finite `μ`.
 - `mulOperator_const_smul_eq` : `𝓜 μ (c • f) = c • 𝓜 μ f` for non-zero `c`.
 - `mulOperator_add_ge` / `mulOperator_sub_ge` : `𝓜 μ (f ± g)` is an extension of `𝓜 μ f ± 𝓜 μ g`.
 - `mulOperator_smul_ge` : `𝓜 μ (f • g)` is an extension of `𝓜 μ f * 𝓜 μ g`.
-- `mulOperator_eq_iff` : `𝓜 μ f = 𝓜 μ g ↔ f =ᵐ[μ] g` for σ-finite `μ` and `μ`-a.e. strongly
-    measurable `f`.
 - `mulOperator_add_eq_iff_domain_le` / `mulOperator_sub_eq_iff_domain_le` :
     `𝓜 μ (f ± g) = 𝓜 μ f ± 𝓜 μ g` exactly when `(𝓜 μ (f ± g)).domain ≤ (𝓜 μ g).domain`.
 - `mulOperator_smul_eq_iff_domain_le` : `𝓜 μ (f • g) = 𝓜 μ f * 𝓜 μ g` exactly when
@@ -152,6 +152,18 @@ lemma mulOperator_domain_antitone {μ : Measure (Space d)}
   refine hψ.mono (by fun_prop) ?_
   filter_upwards [h]
   simp_all [mul_le_mul_of_nonneg_right]
+
+/-- A state which is `μ`-a.e. equal to the indicator of a set on which `f` is `μ`-a.e. bounded
+  lies in the domain of `𝓜 μ f`. -/
+lemma mem_mulOperator_domain_of_ae_eq_indicator {μ : Measure (Space d)} {f : Space d → ℂ}
+    (hf : AEStronglyMeasurable f μ) {s : Set (Space d)} {c : ℝ}
+    (hfc : ∀ᵐ x ∂μ, x ∈ s → ‖f x‖ ≤ c) {ψ : SpaceDHilbertSpace d μ}
+    (hψ : ψ =ᵐ[μ] s.indicator 1) : ψ ∈ (𝓜 μ f).domain := by
+  refine ((memHS_coe ψ).const_smul (c : ℂ)).mono (by fun_prop) ?_
+  filter_upwards [hfc, hψ] with x h₁ h₂
+  by_cases hx : x ∈ s
+  · simpa [h₂, hx] using (h₁ hx).trans (le_abs_self c)
+  · simp [h₂, hx]
 
 /-- The multiplication operators corresponding to functions
   of `μ`-a.e. equal norm have the same domain. -/
@@ -416,44 +428,30 @@ lemma mulOperator_eq_of_congr_ae {μ : Measure (Space d)} {f g : Space d → ℂ
   · filter_upwards [h, mulOperator_apply_ae ⟨ψ, hψ⟩, mulOperator_apply_ae ⟨ψ, hψ'⟩]
     simp_all
 
-/-- For a σ-finite measure `μ` and a `μ`-a.e. strongly measurable `f`, the multiplication operators
-  of `f` and `g` are equal exactly when `f =ᵐ[μ] g`. No measurability of `g` is assumed.
-
-  `volume`, and any measure which is finite on compact sets, is σ-finite by instance. For a measure
-  with only `[μ.HasTemperateGrowth]` this instance is not found: add `[IsFiniteMeasureOnCompacts μ]`
-  or `[SigmaFinite μ]`. -/
-lemma mulOperator_eq_iff {μ : Measure (Space d)} [SigmaFinite μ] {f g : Space d → ℂ}
-    (hf : AEStronglyMeasurable f μ) :
-    𝓜 μ f = 𝓜 μ g ↔ f =ᵐ[μ] g := by
+/-- For a `μ`-a.e. strongly measurable `f` and σ-finite `μ`, the multiplication
+  operator determines the function up to `μ`-a.e. equality.
+  No measurability of `g` is needed. -/
+lemma mulOperator_eq_iff_ae_eq {μ : Measure (Space d)} [SigmaFinite μ] {f g : Space d → ℂ}
+    (hf : AEStronglyMeasurable f μ) : 𝓜 μ f = 𝓜 μ g ↔ f =ᵐ[μ] g := by
   refine ⟨fun h ↦ ?_, mulOperator_eq_of_congr_ae⟩
-  obtain ⟨hdom, hval⟩ := LinearPMap.ext_iff.mp h
-  obtain ⟨u, hu, hfu⟩ := hf.aemeasurable
-  -- Test both operators on the indicator of `t = s ∩ {‖u‖ ≤ n}`, with `μ s < ⊤`.
-  have key (s : Set (Space d)) (hs : MeasurableSet s) (hμs : μ s < ⊤) (n : ℕ) :
-      ∀ᵐ x ∂μ, x ∈ s → ‖u x‖ ≤ n → f x = g x := by
-    let t := s ∩ u ⁻¹' Metric.closedBall 0 n
-    have hmem (x : Space d) : x ∈ t ↔ x ∈ s ∧ ‖u x‖ ≤ n := by simp [t]
-    have hone : MemHS (t.indicator fun _ ↦ (1 : ℂ)) μ :=
-      memLp_indicator_const 2 (hs.inter (hu measurableSet_closedBall)).nullMeasurableSet 1
-        (Or.inr ((measure_mono Set.inter_subset_left).trans_lt hμs).ne)
-    have hψ := coeFn_mk hone
-    have hψf : mk hone ∈ (𝓜 μ f).domain := by
-      refine (hone.const_smul (n : ℂ)).mono (by fun_prop) ?_
-      filter_upwards [hfu, hψ] with x h₁ h₂
-      by_cases hx : x ∈ t
-      · simp [h₁, h₂, hx, ((hmem x).mp hx).2]
-      · simp [h₂, hx]
-    have hψg : mk hone ∈ (𝓜 μ g).domain := hdom ▸ hψf
-    have hfg : f • ⇑(mk hone) =ᵐ[μ] g • ⇑(mk hone) := by
-      refine (mulOperator_apply_ae ⟨_, hψf⟩).symm.trans ?_
-      rw [@hval _ hψf hψg]
-      exact mulOperator_apply_ae ⟨_, hψg⟩
-    filter_upwards [hfg, hψ] with x h₁ h₂ hxs hxn
-    simpa [h₂, (hmem x).mpr ⟨hxs, hxn⟩] using h₁
-  refine ae_of_forall_measure_lt_top_ae_restrict _ fun s hs hμs ↦ ?_
-  rw [ae_restrict_iff' hs]
-  filter_upwards [ae_all_iff.mpr (key s hs hμs)] with x hx hxs
-  exact hx ⌈‖u x‖⌉₊ hxs (Nat.le_ceil _)
+  have hdom : (𝓜 μ f).domain = (𝓜 μ g).domain := congrArg LinearPMap.domain h
+  obtain ⟨s, hs, hs_univ⟩ :=
+    exists_spanning_measurableSet_le hf.stronglyMeasurable_mk.measurable.nnnorm μ
+  have heq : ∀ n, ∀ᵐ x ∂μ, x ∈ s n → f x = g x := by
+    intro n
+    have hfn : ∀ᵐ x ∂μ, x ∈ s n → ‖f x‖ ≤ n := by
+      filter_upwards [hf.ae_eq_mk] with x hx hxs
+      simpa [hx, ← NNReal.coe_le_coe] using (hs n).2.2 x hxs
+    have h1 := memLp_indicator_const 2 (hs n).1.nullMeasurableSet (1 : ℂ) (Or.inr (hs n).2.1.ne)
+    have hψ := mem_mulOperator_domain_of_ae_eq_indicator hf hfn (coeFn_mk h1)
+    have : 𝓜 μ f ⟨_, hψ⟩ = 𝓜 μ g ⟨_, hdom ▸ hψ⟩ :=
+      (LinearPMap.ext_iff.mp h).2 (hf := hψ) (hg := hdom ▸ hψ)
+    filter_upwards [ext_iff.mp this, mulOperator_apply_ae ⟨_, hψ⟩,
+      mulOperator_apply_ae ⟨_, hdom ▸ hψ⟩, coeFn_mk h1] with x h₁ h₂ h₃ h₄ hx
+    simpa [h₄, hx] using h₂.symm.trans (h₁.trans h₃)
+  filter_upwards [ae_all_iff.mpr heq] with x hx
+  obtain ⟨n, hn⟩ := Set.mem_iUnion.mp (hs_univ.ge (Set.mem_univ x))
+  exact hx n hn
 
 /-!
 ### E.1. Smul & neg
