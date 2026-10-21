@@ -58,9 +58,6 @@ function and the constant slice are such distributions. [19][20][21][22] A distr
 valued in a normed space can be differentiated, giving also its gradient, its divergence and its
 curl. [23][24][25][26] A distribution from space into a manifold is differentiable. [TODO]
 
-The Laplacian of a function on space, real or vector valued, commutes with composition by a
-linear isometry of space. [27]
-
 ## Lean References
 
 1. Physlib/SpaceAndTime/Space/Basic.lean — `Space`
@@ -92,8 +89,6 @@ linear isometry of space. [27]
 24. Physlib/SpaceAndTime/Space/Derivatives/Grad.lean — `distGrad`
 25. Physlib/SpaceAndTime/Space/Derivatives/Div.lean — `distDiv`
 26. Physlib/SpaceAndTime/Space/Derivatives/Curl.lean — `distCurl`
-27. Physlib/SpaceAndTime/Space/Derivatives/Laplacian.lean - `laplacian_comp_linearIsometryEquiv`,
-   `laplacianVec_comp_linearIsometryEquiv`
 
 ## References
 
