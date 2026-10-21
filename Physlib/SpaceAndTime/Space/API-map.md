@@ -164,41 +164,41 @@ the norm gives a non-zero multiple of the Dirac delta at the origin. [46]
    `distDiv_apply_eq_sum_distDeriv`, `distDiv_ofFunction`
 26. Physlib/SpaceAndTime/Space/Derivatives/Curl.lean — `distCurl`, `notation ∇ᵈ ⨯`,
    `distCurl_distGrad_eq_zero`
-27. Physlib/SpaceAndTime/Space/Derivatives/Basic.lean - `deriv_const`, `deriv_add`, `deriv_sub`,
+27. Physlib/SpaceAndTime/Space/Derivatives/Basic.lean — `deriv_const`, `deriv_add`, `deriv_sub`,
    `deriv_const_smul`, `deriv_smul`, `deriv_commute`
-28. Physlib/SpaceAndTime/Space/Derivatives/Basic.lean - `fderiv_eq_sum_deriv`, `deriv_euclid`
-29. Physlib/SpaceAndTime/Space/Derivatives/MultiIndex.lean - `MultiIndex`, `MultiIndex.order`
-30. Physlib/SpaceAndTime/Space/Derivatives/DerivativeIndex.lean - `DerivativeIndex`,
+28. Physlib/SpaceAndTime/Space/Derivatives/Basic.lean — `fderiv_eq_sum_deriv`, `deriv_euclid`
+29. Physlib/SpaceAndTime/Space/Derivatives/MultiIndex.lean — `MultiIndex`, `MultiIndex.order`
+30. Physlib/SpaceAndTime/Space/Derivatives/DerivativeIndex.lean — `DerivativeIndex`,
    `Fintype (DerivativeIndex d k)`
-31. Physlib/SpaceAndTime/Space/Derivatives/Iterated.lean - `iteratedDeriv`, `notation ∂^[·]`,
+31. Physlib/SpaceAndTime/Space/Derivatives/Iterated.lean — `iteratedDeriv`, `notation ∂^[·]`,
    `iteratedDeriv_add`, `iteratedDeriv_const_smul`, `iteratedDeriv_contDiff`,
    `deriv_iteratedDeriv_commute`, `tsupport_iteratedDeriv_subset`
-32. Physlib/SpaceAndTime/Space/Derivatives/Grad.lean - `grad`, `notation ∇`, `grad_apply`,
+32. Physlib/SpaceAndTime/Space/Derivatives/Grad.lean — `grad`, `notation ∇`, `grad_apply`,
    `grad_add`, `grad_smul`, `grad_eq_gradient`
-33. Physlib/SpaceAndTime/Space/Derivatives/Div.lean - `div`, `notation ∇ ⬝`, `div_add`,
+33. Physlib/SpaceAndTime/Space/Derivatives/Div.lean — `div`, `notation ∇ ⬝`, `div_add`,
    `div_smul`
-34. Physlib/SpaceAndTime/Space/Derivatives/Curl.lean - `curl`, `notation ∇ ⨯`,
+34. Physlib/SpaceAndTime/Space/Derivatives/Curl.lean — `curl`, `notation ∇ ⨯`,
    `curl_eq_sum_leviCivitaSymbol`, `curl_add`, `curl_smul`
-35. Physlib/SpaceAndTime/Space/Derivatives/MatrixDiv.lean - `matrixDiv`, `matrixDiv_apply`,
+35. Physlib/SpaceAndTime/Space/Derivatives/MatrixDiv.lean — `matrixDiv`, `matrixDiv_apply`,
    `matrixDiv_add`, `matrixDiv_smul`
-36. Physlib/SpaceAndTime/Space/Derivatives/Laplacian.lean - `laplacian`, `notation Δ`,
+36. Physlib/SpaceAndTime/Space/Derivatives/Laplacian.lean — `laplacian`, `notation Δ`,
    `laplacian_eq_sum_snd_deriv`, `laplacianVec`, `notation Δᵥ`
-37. Physlib/SpaceAndTime/Space/Derivatives/Curl.lean - `div_of_curl_eq_zero`,
+37. Physlib/SpaceAndTime/Space/Derivatives/Curl.lean — `div_of_curl_eq_zero`,
    `curl_of_grad_eq_zero`, `curl_of_curl`
-38. Physlib/SpaceAndTime/Space/Derivatives/Curl.lean - `exists_curl_of_div_zero`,
+38. Physlib/SpaceAndTime/Space/Derivatives/Curl.lean — `exists_curl_of_div_zero`,
    `eq_neg_curl_of_div_zero`, `exists_grad_of_curl_zero`, `eq_grad_integral_of_curl_zero`
-39. Physlib/SpaceAndTime/Space/DistOfFunction.lean - `distDeriv_distOfFunction`
-40. Physlib/SpaceAndTime/Space/ConstantSliceDist.lean - `distDeriv_constantSliceDist_same`,
+39. Physlib/SpaceAndTime/Space/DistOfFunction.lean — `distDeriv_distOfFunction`
+40. Physlib/SpaceAndTime/Space/ConstantSliceDist.lean — `distDeriv_constantSliceDist_same`,
    `distDeriv_constantSliceDist_succAbove`
-41. Physlib/SpaceAndTime/Space/Derivatives/Laplacian.lean - `distLaplacian`, `notation Δᵈ`,
+41. Physlib/SpaceAndTime/Space/Derivatives/Laplacian.lean — `distLaplacian`, `notation Δᵈ`,
    `distLaplacian_const`
-42. Physlib/SpaceAndTime/Space/DistConst.lean - `distDeriv_distConst`, `distGrad_distConst`,
+42. Physlib/SpaceAndTime/Space/DistConst.lean — `distDeriv_distConst`, `distGrad_distConst`,
    `distDiv_distConst`, `distCurl_distConst`
-43. Physlib/SpaceAndTime/Space/Norm/Basic.lean - `distLaplacian_distOfFunction_norm_zpow`
-44. Physlib/SpaceAndTime/Space/Norm/Basic.lean - `distDiv_inv_pow_eq_dim`
-45. Physlib/SpaceAndTime/Space/Norm/Basic.lean - `distLaplacian_fundamentalSolution_norm_zpow`,
+43. Physlib/SpaceAndTime/Space/Norm/Basic.lean — `distLaplacian_distOfFunction_norm_zpow`
+44. Physlib/SpaceAndTime/Space/Norm/Basic.lean — `distDiv_inv_pow_eq_dim`
+45. Physlib/SpaceAndTime/Space/Norm/Basic.lean — `distLaplacian_fundamentalSolution_norm_zpow`,
    `distLaplacian_fundamentalSolution_log_norm`
-46. Physlib/SpaceAndTime/Space/Norm/IteratedLaplacian.lean -
+46. Physlib/SpaceAndTime/Space/Norm/IteratedLaplacian.lean —
    `iterated_distLaplacian_norm_zpow_odd_eq_smul_diracDelta`,
    `oddNormIteratedLaplacianCoeff_ne_zero`
 
