@@ -280,17 +280,13 @@ def tIncl₃'ₗᵢ : E ⊗[𝕜] (F ⊗[𝕜] G) →ₗᵢ[𝕜] E ⊗ₕ[𝕜]
 /-- On a simple tensor `x ⊗ₜ y ⊗ₜ z`, the embedding `tIncl₃ₗᵢ` is the nested coercion. -/
 @[simp]
 lemma tIncl₃ₗᵢ_tmul (x : E) (y : F) (z : G) :
-    tIncl₃ₗᵢ (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z) =
-      ((((x ⊗ₜ[𝕜] y : E ⊗[𝕜] F) : E ⊗ₕ[𝕜] F) ⊗ₜ[𝕜] z : (E ⊗ₕ[𝕜] F) ⊗[𝕜] G) :
-        E ⊗ₕ[𝕜] F ⊗ₕ[𝕜] G) :=
+    tIncl₃ₗᵢ (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z) = (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z : (E ⊗ₕ[𝕜] F) ⊗[𝕜] G) :=
   rfl
 
 /-- On a simple tensor `x ⊗ₜ (y ⊗ₜ z)`, the embedding `tIncl₃'ₗᵢ` is the nested coercion. -/
 @[simp]
 lemma tIncl₃'ₗᵢ_tmul (x : E) (y : F) (z : G) :
-    tIncl₃'ₗᵢ (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z)) =
-      ((x ⊗ₜ[𝕜] ((y ⊗ₜ[𝕜] z : F ⊗[𝕜] G) : F ⊗ₕ[𝕜] G) : E ⊗[𝕜] (F ⊗ₕ[𝕜] G)) :
-        E ⊗ₕ[𝕜] (F ⊗ₕ[𝕜] G)) :=
+    tIncl₃'ₗᵢ (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z)) = (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z) : E ⊗[𝕜] (F ⊗ₕ[𝕜] G)) :=
   rfl
 
 /-- `CompleteTensorProduct.assoc` acting on an element of the algebraic threefold tensor product
@@ -310,21 +306,16 @@ lemma assoc_symm_tIncl₃'ₗᵢ (x : E ⊗[𝕜] (F ⊗[𝕜] G)) :
 /-- `CompleteTensorProduct.assoc` on simple tensors (c.f. `TensorProduct.assoc_tmul`). -/
 @[simp]
 lemma assoc_tmul (x : E) (y : F) (z : G) :
-    assoc 𝕜 E F G ((((x ⊗ₜ[𝕜] y : E ⊗[𝕜] F) : E ⊗ₕ[𝕜] F) ⊗ₜ[𝕜] z : (E ⊗ₕ[𝕜] F) ⊗[𝕜] G) :
-        E ⊗ₕ[𝕜] F ⊗ₕ[𝕜] G) =
-      ((x ⊗ₜ[𝕜] ((y ⊗ₜ[𝕜] z : F ⊗[𝕜] G) : F ⊗ₕ[𝕜] G) : E ⊗[𝕜] (F ⊗ₕ[𝕜] G)) :
-        E ⊗ₕ[𝕜] (F ⊗ₕ[𝕜] G)) :=
+    assoc 𝕜 E F G (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z : (E ⊗ₕ[𝕜] F) ⊗[𝕜] G) =
+      (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z) : E ⊗[𝕜] (F ⊗ₕ[𝕜] G)) :=
   assoc_tIncl₃ₗᵢ (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z)
 
 /-- The inverse of `CompleteTensorProduct.assoc` on simple tensors
   (c.f. `TensorProduct.assoc_symm_tmul`). -/
 @[simp]
 lemma assoc_symm_tmul (x : E) (y : F) (z : G) :
-    (assoc 𝕜 E F G).symm
-        ((x ⊗ₜ[𝕜] ((y ⊗ₜ[𝕜] z : F ⊗[𝕜] G) : F ⊗ₕ[𝕜] G) : E ⊗[𝕜] (F ⊗ₕ[𝕜] G)) :
-          E ⊗ₕ[𝕜] (F ⊗ₕ[𝕜] G)) =
-      ((((x ⊗ₜ[𝕜] y : E ⊗[𝕜] F) : E ⊗ₕ[𝕜] F) ⊗ₜ[𝕜] z : (E ⊗ₕ[𝕜] F) ⊗[𝕜] G) :
-        E ⊗ₕ[𝕜] F ⊗ₕ[𝕜] G) :=
+    (assoc 𝕜 E F G).symm (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z) : E ⊗[𝕜] (F ⊗ₕ[𝕜] G)) =
+      (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z : (E ⊗ₕ[𝕜] F) ⊗[𝕜] G) :=
   assoc_symm_tIncl₃'ₗᵢ (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z))
 
 end ThreefoldInclusions
