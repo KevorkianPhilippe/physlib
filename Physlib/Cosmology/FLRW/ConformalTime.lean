@@ -68,7 +68,7 @@ variable (U : FLRW)
 -/
 
 /-- The conformal time `η = ∫_{t₁}^{t} dτ / a(τ)` of an FLRW model, counted from the time
-  `t₁`. -/
+  `t₁`. A light ray emitted at `t₁` has travelled the comoving distance `c η` at `t`. -/
 noncomputable def conformalTime (t₁ t : Time) : ℝ :=
   ∫ τ in t₁.val..t.val, 1 / U.a ⟨τ⟩
 
@@ -112,13 +112,24 @@ lemma deriv_eq_conformalDeriv_mul {f : Time → ℝ} {t₁ t : Time} (ht₁ : t�
   rw [U.deriv_conformalTime ht₁ ht, conformalDeriv, mul_right_comm,
     mul_one_div_cancel (U.a_ne_zero ht), one_mul]
 
+/-- At a time of the interval of the model, the second conformal derivative of its scale factor
+  is `a'' = a ((∂ₜ a)² + a ∂ₜ ∂ₜ a)`, by the product rule. -/
+lemma conformalDeriv_conformalDeriv {t : Time} (ht : t ∈ U.I) :
+    U.conformalDeriv (U.conformalDeriv U.a) t
+      = U.a t * (∂ₜ U.a t ^ 2 + U.a t * ∂ₜ (∂ₜ U.a) t) := by
+  obtain ⟨τ⟩ := t
+  have hA := hasDerivAt_mk_of_differentiableAt (U.differentiableAt_a ht)
+  have hA' := hasDerivAt_mk_of_differentiableAt (U.differentiableAt_deriv_a ht)
+  rw [conformalDeriv, deriv_eq_of_hasDerivAt (f := U.conformalDeriv U.a) (hA.mul hA')]
+  ring
+
 /-!
 
 ## C. The conformal Hubble factor
 
 -/
 
-/-- The conformal Hubble factor `ℋ = a' / a`. -/
+/-- The conformal Hubble factor `ℋ = a' / a`, the expansion rate per unit of conformal time. -/
 noncomputable def conformalHubble (t : Time) : ℝ := U.conformalDeriv U.a t / U.a t
 
 /-- The conformal Hubble factor is `ℋ = a H`. -/
@@ -163,17 +174,6 @@ lemma conformalFirstOrderFriedmann_iff {F : CosmicFluid} {Λ G c : ℝ} {t : Tim
   · intro h
     refine mul_left_cancel₀ hA ?_
     linear_combination h + hk
-
-/-- At a time of the interval of the model, the second conformal derivative of its scale factor
-  is `a'' = a ((∂ₜ a)² + a ∂ₜ ∂ₜ a)`, by the product rule. -/
-lemma conformalDeriv_conformalDeriv {t : Time} (ht : t ∈ U.I) :
-    U.conformalDeriv (U.conformalDeriv U.a) t
-      = U.a t * (∂ₜ U.a t ^ 2 + U.a t * ∂ₜ (∂ₜ U.a) t) := by
-  obtain ⟨τ⟩ := t
-  have hA := hasDerivAt_mk_of_differentiableAt (U.differentiableAt_a ht)
-  have hA' := hasDerivAt_mk_of_differentiableAt (U.differentiableAt_deriv_a ht)
-  rw [conformalDeriv, deriv_eq_of_hasDerivAt (f := U.conformalDeriv U.a) (hA.mul hA')]
-  ring
 
 /-- At a time of the interval of the model where the first-order Friedmann equation holds, the
   second-order Friedmann equation is equivalent to the acceleration equation in conformal
