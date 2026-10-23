@@ -115,16 +115,15 @@ lemma distLaplacian_const {d : ℕ} (c : ℝ) :
 
 -/
 
-/-- The Laplacian commutes with composition by a linear isometry `R` of space: if the derivative
-  `fderiv ℝ f` is differentiable at `R x`, then the Laplacian of `fun y => f (R y)` at `x` is the
-  Laplacian of `f` at `R x`. -/
+/-- The Laplacian of `f ∘ R` at `x` is the Laplacian of `f` at `R x`, for a linear isometry `R`
+  of space. -/
 lemma laplacian_comp_linearIsometryEquiv {d : ℕ} (f : Space d → ℝ) (R : Space d ≃ₗᵢ[ℝ] Space d)
     (x : Space d) (hf : DifferentiableAt ℝ (fderiv ℝ f) (R x)) :
     Δ (fun y => f (R y)) x = Δ f (R x) := by
   have hR (g : Space d → ℝ) (y : Space d) : fderiv ℝ (fun y => g (R y)) y =
       (fderiv ℝ g (R y)).comp (R.toContinuousLinearEquiv : Space d →L[ℝ] Space d) :=
     R.toContinuousLinearEquiv.comp_right_fderiv
-  -- The second derivative of `f` at `R x` in the directions `w` and `v`: the only use of `hf`.
+  -- Second derivatives of `f` at `R x`; this is where `hf` is used.
   have h2 (v w : Space d) : fderiv ℝ (fun z => fderiv ℝ f z v) (R x) w =
       fderiv ℝ (fderiv ℝ f) (R x) w v := by
     rw [fderiv_clm_apply hf (differentiableAt_const v)]
@@ -140,8 +139,7 @@ lemma laplacian_comp_linearIsometryEquiv {d : ℕ} (f : Space d → ℝ) (R : Sp
   have hr (i : Fin d) : ∂[i] (∂[i] f) (R x) = fderiv ℝ (fderiv ℝ f) (R x) (basis i) (basis i) := by
     rw [deriv_eq, show ∂[i] f = fun z => fderiv ℝ f z (basis i) from funext (deriv_eq _ _)]
     exact h2 _ _
-  -- The trace of the second derivative is the same in the orthonormal bases `basis.map R` and
-  -- `basis`, since both compute the Laplacian of Mathlib at `R x`.
+  -- The Laplacian of Mathlib at `R x`, computed in two orthonormal bases.
   have ht := (congrFun (InnerProductSpace.laplacian_eq_iteratedFDeriv_orthonormalBasis f
     (basis.map R)) (R x)).symm.trans
     (congrFun (InnerProductSpace.laplacian_eq_iteratedFDeriv_orthonormalBasis f basis) (R x))
@@ -155,9 +153,8 @@ lemma laplacian_comp_linearIsometryEquiv {d : ℕ} (f : Space d → ℝ) (R : Sp
         rw [laplacian_eq_sum_snd_deriv]
         exact (Finset.sum_congr rfl fun i _ => hr i).symm
 
-/-- The vector Laplacian commutes with composition by a linear isometry `R` of space, component
-  by component: if the derivative of each component of `f` is differentiable at `R x`, then
-  `Δᵥ (fun y => f (R y)) x = Δᵥ f (R x)`. -/
+/-- The vector Laplacian of `f ∘ R` at `x` is the vector Laplacian of `f` at `R x`, for a linear
+  isometry `R` of space. -/
 lemma laplacianVec_comp_linearIsometryEquiv {d : ℕ} (f : Space d → EuclideanSpace ℝ (Fin d))
     (R : Space d ≃ₗᵢ[ℝ] Space d) (x : Space d)
     (hf : ∀ i, DifferentiableAt ℝ (fderiv ℝ (fun y => f y i)) (R x)) :
