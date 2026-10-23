@@ -78,6 +78,7 @@ public import Physlib.Electromagnetism.Basic
 public import Physlib.Electromagnetism.Charge.ChargeUnit
 public import Physlib.Electromagnetism.Current.CircularCoil
 public import Physlib.Electromagnetism.Current.InfiniteWire
+public import Physlib.Electromagnetism.Distributional.Basic
 public import Physlib.Electromagnetism.Dynamics.Basic
 public import Physlib.Electromagnetism.Dynamics.CurrentDensity
 public import Physlib.Electromagnetism.Dynamics.Hamiltonian
@@ -152,6 +153,7 @@ public import Physlib.Mathematics.ForMathlib.OneParameterSubgroups.Basic
 public import Physlib.Mathematics.ForMathlib.OneParameterSubgroups.Unitary
 public import Physlib.Mathematics.ForMathlib.OrthogonalMatrix
 public import Physlib.Mathematics.ForMathlib.SchurTriangulation
+public import Physlib.Mathematics.ForMathlib.SesquilinearForm
 public import Physlib.Mathematics.ForMathlib.Trigonometry.SinSq
 public import Physlib.Mathematics.ForMathlib.Trigonometry.Tanh
 public import Physlib.Mathematics.Groups.SO3.Basic
@@ -187,14 +189,14 @@ public import Physlib.Meta.Informal.Basic
 public import Physlib.Meta.Informal.Post
 public import Physlib.Meta.Informal.SemiFormal
 public import Physlib.Meta.Linters.DefsWithUnderscore
-public import Physlib.Meta.Linters.Sorry
+public import Physlib.Meta.Linters.Pseudo
 public import Physlib.Meta.Notes.Basic
 public import Physlib.Meta.Notes.HTMLNote
 public import Physlib.Meta.Notes.NoteFile
 public import Physlib.Meta.Notes.ToHTML
+public import Physlib.Meta.Pseudo
 public import Physlib.Meta.Remark.Basic
 public import Physlib.Meta.Remark.Properties
-public import Physlib.Meta.Sorry
 public import Physlib.Meta.TODO.Basic
 public import Physlib.Meta.TODO.Global
 public import Physlib.Meta.TransverseTactics
@@ -288,6 +290,7 @@ public import Physlib.ProbabilisticTheory.OrderUnit.Cone
 public import Physlib.ProbabilisticTheory.State.Basic
 public import Physlib.ProbabilisticTheory.State.Convex
 public import Physlib.ProbabilisticTheory.State.Discrimination
+public import Physlib.ProbabilisticTheory.State.Local
 public import Physlib.ProbabilisticTheory.State.Metric
 public import Physlib.ProbabilisticTheory.State.Pairing
 public import Physlib.ProbabilisticTheory.State.Separation
@@ -466,6 +469,7 @@ public import Physlib.Relativity.PauliMatrices.SelfAdjoint
 public import Physlib.Relativity.PauliMatrices.ToTensor
 public import Physlib.Relativity.SL2C.AxisRotations
 public import Physlib.Relativity.SL2C.Basic
+public import Physlib.Relativity.SL2C.CayleyKlein
 public import Physlib.Relativity.SL2C.SelfAdjoint
 public import Physlib.Relativity.Special.ProperTime
 public import Physlib.Relativity.Special.TwinParadox.Basic
@@ -498,6 +502,7 @@ public import Physlib.Relativity.Tensors.Contraction.CrossToEnd
 public import Physlib.Relativity.Tensors.Contraction.CrossToSlot
 public import Physlib.Relativity.Tensors.Contraction.Products
 public import Physlib.Relativity.Tensors.Contraction.Pure
+public import Physlib.Relativity.Tensors.Contraction.RankTwo
 public import Physlib.Relativity.Tensors.Contraction.SuccSuccAbove
 public import Physlib.Relativity.Tensors.Contraction.UnitTensorContraction
 public import Physlib.Relativity.Tensors.Dual
@@ -580,6 +585,7 @@ public import Physlib.SpaceAndTime.SpaceTime.TimeSlice
 public import Physlib.SpaceAndTime.Time.Basic
 public import Physlib.SpaceAndTime.Time.Derivatives
 public import Physlib.SpaceAndTime.Time.InnerProductSpace
+public import Physlib.SpaceAndTime.Time.ManifoldCurves
 public import Physlib.SpaceAndTime.Time.MatrixDerivatives
 public import Physlib.SpaceAndTime.Time.TimeMan
 public import Physlib.SpaceAndTime.Time.TimeUnit
