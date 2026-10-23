@@ -12,9 +12,8 @@ public import Physlib.ClassicalMechanics.WaveEquation.Basic
 
 Time-harmonic waves.
 
-The wave equation is invariant under any linear isometry of space acting on the position, and a
-rotation sends the direction of a single plane wave to `basis 2` (the vector
-`EuclideanSpace.single 2 1` under `basis.repr`).
+The wave equation is invariant under linear isometries of space, and a single plane wave can be
+rotated so that it travels along `basis 2`.
 
 Note TODO `EGU3E` may require considerable effort to be made rigorous and may heavily depend on
 the status of Fourier theory in Mathlib.
@@ -48,19 +47,16 @@ noncomputable def harmonicWave (a g : ℝ → Space d → ℝ) (ω : WaveVector 
 
 -/
 
-/-- The wave equation is invariant under a linear isometry `R` of space acting on the position:
-  at a fixed time `t`, if the derivative of each component of `f t` is differentiable at `R x`,
-  then `fun t y => f t (R y)` satisfies the wave equation at `(t, x)` if and only if `f`
-  satisfies it at `(t, R x)`. -/
+/-- At `(t, x)`, `f` composed with a linear isometry `R` satisfies the wave equation if and only
+  if `f` satisfies it at `(t, R x)`. -/
 lemma waveEquation_comp_linearIsometryEquiv_iff {d : ℕ}
     (f : Time → Space d → EuclideanSpace ℝ (Fin d)) (R : Space d ≃ₗᵢ[ℝ] Space d) (t : Time)
     (x : Space d) (c : ℝ) (hf : ∀ i, DifferentiableAt ℝ (fderiv ℝ (fun y => f t y i)) (R x)) :
     WaveEquation (fun t y => f t (R y)) t x c ↔ WaveEquation f t (R x) c := by
   rw [WaveEquation, WaveEquation, laplacianVec_comp_linearIsometryEquiv (f t) R x hf]
 
-/-- If `f t` is twice continuously differentiable in space for every time `t`, then
-  `fun t y => f t (R y)` satisfies the wave equation everywhere if and only if `f` does, for any
-  linear isometry `R` of space. -/
+/-- For `f` twice continuously differentiable in space, `f` composed with a linear isometry `R`
+  satisfies the wave equation everywhere if and only if `f` does. -/
 lemma forall_waveEquation_comp_linearIsometryEquiv_iff {d : ℕ}
     (f : Time → Space d → EuclideanSpace ℝ (Fin d)) (R : Space d ≃ₗᵢ[ℝ] Space d) (c : ℝ)
     (hf : ∀ t, ContDiff ℝ 2 (f t)) :
@@ -73,25 +69,20 @@ lemma forall_waveEquation_comp_linearIsometryEquiv_iff {d : ℕ}
   simpa using (waveEquation_comp_linearIsometryEquiv_iff f R t (R.symm z) c (hd t · _)).mp
     (h t (R.symm z))
 
-/-- If the linear isometry `R` sends the direction `s` to the direction `e`, the plane wave of
-  direction `s` is the plane wave of direction `e`, with the same function `f₀` and speed `c`,
-  precomposed with `R`. Only the position is transformed: the values of the wave are not. -/
+/-- If `R` sends the direction `s` to `e`, the plane wave in direction `s` is the plane wave in
+  direction `e` composed with `R`. -/
 lemma planeWave_eq_comp_linearIsometryEquiv {d : ℕ} (f₀ : ℝ → EuclideanSpace ℝ (Fin d)) (c : ℝ)
     {s e : Direction d} (R : Space d ≃ₗᵢ[ℝ] Space d) (h : R s.unit = e.unit) :
     planeWave f₀ c s = fun t x => planeWave f₀ c e t (R x) := by
   funext t x
   rw [planeWave_eq, planeWave_eq, ← h, LinearIsometryEquiv.inner_map_map]
 
-/-- Any direction `s` of three-dimensional space is sent to `basis 2` (the vector
-  `EuclideanSpace.single 2 1` under `basis.repr`) by a rotation, that is a linear isometry of
-  determinant one. With `planeWave_eq_comp_linearIsometryEquiv`, a single plane wave is a plane
-  wave travelling along `basis 2` precomposed with a rotation. -/
+/-- Every direction in three-dimensional space is sent to `basis 2` by a rotation. -/
 lemma exists_rotation_apply_unit_eq_basis_two (s : Direction) :
     ∃ R : Space ≃ₗᵢ[ℝ] Space, LinearMap.det R.toLinearMap = 1 ∧ R s.unit = basis 2 := by
   by_cases hs : s.unit = basis 2
   · exact ⟨LinearIsometryEquiv.refl ℝ Space, by simp, by simp [hs]⟩
-  -- The reflection exchanging `s.unit` and `basis 2`, followed by the reflection in the plane
-  -- orthogonal to `basis 0`, which fixes `basis 2`.
+  -- Two reflections: one exchanging `s.unit` and `basis 2`, one fixing `basis 2`.
   have hv : s.unit - basis 2 ≠ 0 := sub_ne_zero.mpr hs
   have h0 : basis (d := 3) 0 ≠ 0 := (basis (d := 3)).orthonormal.ne_zero 0
   refine ⟨(ℝ ∙ (s.unit - basis 2))ᗮ.reflection.trans (ℝ ∙ basis (d := 3) 0)ᗮ.reflection, ?_, ?_⟩
