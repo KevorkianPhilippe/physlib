@@ -6,6 +6,7 @@ Authors: Philippe Kevorkian, Jinzheng Li
 module
 
 public import Physlib.Meta.TODO.Basic
+public import Physlib.SpaceAndTime.ReferenceFrame
 public import Physlib.Cosmology.FLRW.SpecificCases.EinsteinDeSitter
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
@@ -31,7 +32,7 @@ The low-redshift expansions are given through their coefficients. Primes denote 
 at `t₀`. For `H₀ ≠ 0`, the redshift is invertible as a function of the emission time near `t₀`,
 and a function `f` of the emission time, differentiable near `t₀` with `f'` differentiable at
 `t₀`, has the derivatives `f' / z'` and `(f'' z' - f' z'') / z'³` in `z` at `z = 0`. These
-quotients are computed here. For `χ` they give `χ = (c / (a₀ H₀)) [z - ½ (1 + q₀) z² + …]`.
+quotients are computed here for the lookback time.
 
 The proper distance `D = a χ` obeys the Hubble-Lemaître law `∂ₜ D = H D`. The recession velocity
 equals `c` exactly at the Hubble radius `R_H = c / H`.
@@ -44,13 +45,10 @@ The particle and event horizons at `t` integrate `c / a` over the times of the i
 model before and after `t`. The particle horizon of the Einstein-de Sitter model
 `FLRW.einsteinDeSitter` is computed.
 
-The lookback time `t₀ - t` does not depend on the model, and
-`t₀ - t = H₀⁻¹ [z - ½ (2 + q₀) z² + …]`.
-
-The luminosity distance `d_L = (1 + z) r(χ)` and the angular-diameter distance
-`d_A = r(χ) / (1 + z)` satisfy Etherington's relation `d_L = (1 + z)² d_A`. For `d_L` and `d_A`,
-only the second-order quotients are computed, for a flat model: `c (1 - q₀) / (a₀ H₀)` and
-`- c (3 + q₀) / (a₀ H₀)`.
+The lookback time of a source is the time elapsed between the emission of its light at `t` and
+its observation at `t₀`: the duration `t₀ -ᵥ t` given by the affine structure of `Time`. It does
+not depend on the model, and in every reference frame it is the difference `t₀ - t` of the time
+coordinates of the two instants. Its coefficients give `t₀ - t = H₀⁻¹ [z - ½ (2 + q₀) z² + …]`.
 
 ## ii. Key results
 
@@ -59,19 +57,14 @@ only the second-order quotients are computed, for a flat model: `c (1 - q₀) / 
 - `FLRW.deriv_redshift_self`, `FLRW.deriv_deriv_redshift_self`: `∂ₜ z` and `∂ₜ ∂ₜ z` at the
   observation time.
 - `FLRW.deriv_comovingDistance_eq_mul_deriv_redshift`: `∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z`.
-- `FLRW.comovingDistance_coeff_one`, `FLRW.comovingDistance_coeff_two`: the low-redshift
-  coefficients of `χ`.
 - `FLRW.properDistance`, `FLRW.deriv_properDistance`: the Hubble-Lemaître law.
 - `FLRW.hubbleRadius`, `FLRW.deriv_properDistance_eq_iff`: the recession velocity at the Hubble
   radius.
 - `FLRW.transverseComovingDistance` and its three closed forms.
 - `FLRW.particleHorizon`, `FLRW.eventHorizon`, `FLRW.particleHorizon_einsteinDeSitter`.
-- `FLRW.lookbackTime`, `FLRW.lookbackTime_coeff_one`, `FLRW.lookbackTime_coeff_two`: the lookback
-  time `t₀ - t` and its low-redshift coefficients.
-- `FLRW.angularDiameterDistance`, `FLRW.luminosityDistance`, `FLRW.luminosityDistance_eq`:
-  Etherington's relation.
-- `FLRW.angularDiameterDistance_coeff_two`, `FLRW.luminosityDistance_coeff_two`: the second-order
-  quotients of `d_A` and `d_L` for a flat model.
+- `FLRW.lookbackTime`, `FLRW.lookbackTime_eq_timeEquiv_symm_sub`: the lookback time, the same in
+  every reference frame.
+- `FLRW.lookbackTime_coeff_one`, `FLRW.lookbackTime_coeff_two`: its low-redshift coefficients.
 
 ## iii. Table of contents
 
@@ -81,7 +74,6 @@ only the second-order quotients are computed, for a flat model: `c (1 - q₀) / 
 - D. The transverse comoving distance
 - E. The horizons
 - F. The lookback time
-- G. The angular-diameter and luminosity distances
 
 -/
 
@@ -119,39 +111,6 @@ lemma deriv_comovingDistance {c : ℝ} {t₀ t : Time} (ht₀ : t₀ ∈ U.I) (h
     intervalIntegral.integral_hasDerivAt_left ((hf.mono hsub).intervalIntegrable)
       (hf.stronglyMeasurableAtFilter hS τ ht) (hf.continuousAt (hS.mem_nhds ht))
   refine deriv_eq_of_hasDerivAt ((h.const_mul c).congr_deriv ?_)
-  ring
-
-/-- For `t` and `t₀` in the interval of the model, `χ` is differentiable in the emission time
-  at `t`. -/
-lemma differentiableAt_comovingDistance {c : ℝ} {t₀ t : Time} (ht₀ : t₀ ∈ U.I) (ht : t ∈ U.I) :
-    DifferentiableAt ℝ (fun s => U.comovingDistance c s t₀) t := by
-  obtain ⟨τ⟩ := t
-  have hS : IsOpen {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I} := U.isOpen_I.preimage toRealCLE.symm.continuous
-  have hf : ContinuousOn (fun σ : ℝ => 1 / U.a ⟨σ⟩) {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I} :=
-    continuousOn_const.div (U.differentiableOn_a.continuousOn.comp
-      toRealCLE.symm.continuous.continuousOn fun _ h => h) fun _ h => U.a_ne_zero h
-  have hsub : Set.uIcc τ t₀.val ⊆ {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I} :=
-    Set.OrdConnected.uIcc_subset (s := {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I})
-      ⟨fun _ hx _ hy _ hz => U.mk_mem_I_of_mem_Icc hx hy hz⟩ ht ht₀
-  have h : HasDerivAt (fun σ : ℝ => ∫ x in σ..t₀.val, 1 / U.a ⟨x⟩) (-(1 / U.a ⟨τ⟩)) τ :=
-    intervalIntegral.integral_hasDerivAt_left ((hf.mono hsub).intervalIntegrable)
-      (hf.stronglyMeasurableAtFilter hS τ ht) (hf.continuousAt (hS.mem_nhds ht))
-  have hc := (h.const_mul c).differentiableAt.comp (⟨τ⟩ : Time) toRealCLE.differentiableAt
-  exact hc
-
-/-- For `t₀` in the interval of the model, `χ'' = c H₀ / a₀`. -/
-lemma deriv_deriv_comovingDistance_self {c : ℝ} {t₀ : Time} (ht₀ : t₀ ∈ U.I) :
-    ∂ₜ (∂ₜ (fun s => U.comovingDistance c s t₀)) t₀ = c * hubbleConstant U.a t₀ / U.a t₀ := by
-  obtain ⟨τ₀⟩ := t₀
-  have hS : IsOpen {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I} := U.isOpen_I.preimage toRealCLE.symm.continuous
-  have ha := U.a_ne_zero ht₀
-  have hA := hasDerivAt_mk_of_differentiableAt (U.differentiableAt_a ht₀)
-  refine (deriv_eq_of_hasDerivAt (f := ∂ₜ (fun s => U.comovingDistance c s ⟨τ₀⟩))
-    (((hasDerivAt_const τ₀ (-c)).fun_div hA ha).congr_of_eventuallyEq
-      (Filter.eventually_of_mem (hS.mem_nhds ht₀) fun σ hσ =>
-        U.deriv_comovingDistance (t := ⟨σ⟩) ht₀ hσ))).trans ?_
-  unfold hubbleConstant
-  field_simp
   ring
 
 /-!
@@ -227,30 +186,6 @@ lemma deriv_comovingDistance_eq_mul_deriv_redshift {c : ℝ} {t₀ t : Time} (ht
   have ha := U.a_ne_zero ht
   have ha₀ := U.a_ne_zero ht₀
   field_simp
-
-/-- For `t₀` in the interval of the model, `χ' / z' = c / (a₀ H₀)`. For `H₀ ≠ 0`, it is the
-  first-order coefficient of `χ` in `z`. -/
-lemma comovingDistance_coeff_one {c : ℝ} {t₀ : Time} (ht₀ : t₀ ∈ U.I) :
-    ∂ₜ (fun s => U.comovingDistance c s t₀) t₀ / ∂ₜ (U.redshift t₀) t₀
-      = c / (U.a t₀ * hubbleConstant U.a t₀) := by
-  rw [U.deriv_comovingDistance ht₀ ht₀, U.deriv_redshift_self ht₀]
-  ring
-
-/-- For `t₀` in the interval of the model, `(χ'' z' - χ' z'') / z'³ = - c (1 + q₀) / (a₀ H₀)`.
-  For `H₀ ≠ 0`, it is the second derivative of `χ` in `z` at `z = 0`. -/
-lemma comovingDistance_coeff_two {c : ℝ} {t₀ : Time} (ht₀ : t₀ ∈ U.I) :
-    (∂ₜ (∂ₜ (fun s => U.comovingDistance c s t₀)) t₀ * ∂ₜ (U.redshift t₀) t₀
-      - ∂ₜ (fun s => U.comovingDistance c s t₀) t₀ * ∂ₜ (∂ₜ (U.redshift t₀)) t₀)
-      / ∂ₜ (U.redshift t₀) t₀ ^ 3
-      = -(c * (1 + decelerationParameter U.a t₀) / (U.a t₀ * hubbleConstant U.a t₀)) := by
-  rw [U.deriv_redshift_self ht₀]
-  rcases eq_or_ne (hubbleConstant U.a t₀) 0 with hH | hH
-  · simp [hH]
-  · rw [U.deriv_deriv_comovingDistance_self ht₀, U.deriv_comovingDistance ht₀ ht₀,
-      U.deriv_deriv_redshift_self ht₀ hH]
-    have ha := U.a_ne_zero ht₀
-    field_simp
-    ring
 
 /-!
 
@@ -383,9 +318,17 @@ lemma particleHorizon_einsteinDeSitter {t₀ : Time} {c : ℝ} (ht₀ : 0 < t₀
 ## F. The lookback time
 
 -/
-/-- The lookback time `t₀ - t` of a source emitting at `t` and observed at `t₀`: the time its
-  light has travelled to reach the observer. It does not depend on the model. -/
-def lookbackTime (t₀ t : Time) : ℝ := t₀.val - t.val
+/-- The lookback time of a source whose light, emitted at `t`, is observed at `t₀`: the time
+  elapsed between the emission and the observation, the duration `t₀ -ᵥ t`. It does not depend
+  on the model. -/
+def lookbackTime (t₀ t : Time) : ℝ := t₀ -ᵥ t
+
+/-- The lookback time does not depend on the reference frame: in any frame, it is the difference
+  of the time coordinates of the observation and of the emission. -/
+lemma lookbackTime_eq_timeEquiv_symm_sub {d : ℕ} (frame : ClassicalMechanics.ReferenceFrame d)
+    (t₀ t : Time) :
+    lookbackTime t₀ t = frame.timeEquiv.symm t₀ - frame.timeEquiv.symm t := by
+  simp [lookbackTime, ClassicalMechanics.ReferenceFrame.timeEquiv]
 
 /-- For `t₀` in the interval of the model, `L' / z' = 1 / H₀` for the lookback time `L`. For
   `H₀ ≠ 0`, it is the first-order coefficient of `L` in `z`. -/
@@ -410,121 +353,16 @@ lemma lookbackTime_coeff_two {t₀ : Time} (ht₀ : t₀ ∈ U.I) :
     field_simp
     ring
 
-/-!
-
-## G. The angular-diameter and luminosity distances
-
--/
-/-- The angular-diameter distance `d_A = r(χ) / (1 + z)` of a source emitting at `t` and observed
-  at `t₀`. For `a(t₀) = 1`, an object of size `ℓ` at the source is observed under the angle
-  `ℓ / d_A`. -/
-noncomputable def angularDiameterDistance (c : ℝ) (t₀ t : Time) : ℝ :=
-  U.transverseComovingDistance (U.comovingDistance c t t₀) / (1 + U.redshift t₀ t)
-
-/-- For a flat model and `t₀` in its interval,
-  `(d_A'' z' - d_A' z'') / z'³ = - c (3 + q₀) / (a₀ H₀)`. For `H₀ ≠ 0`, it is the second
-  derivative of `d_A` in `z` at `z = 0`. -/
-lemma angularDiameterDistance_coeff_two {c : ℝ} {t₀ : Time} (ht₀ : t₀ ∈ U.I)
-    (hK : U.geometry.curvature = 0) :
-    (∂ₜ (∂ₜ (U.angularDiameterDistance c t₀)) t₀ * ∂ₜ (U.redshift t₀) t₀
-      - ∂ₜ (U.angularDiameterDistance c t₀) t₀ * ∂ₜ (∂ₜ (U.redshift t₀)) t₀)
-      / ∂ₜ (U.redshift t₀) t₀ ^ 3
-      = -(c * (3 + decelerationParameter U.a t₀) / (U.a t₀ * hubbleConstant U.a t₀)) := by
-  obtain ⟨τ₀⟩ := t₀
-  have hS : IsOpen {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I} := U.isOpen_I.preimage toRealCLE.symm.continuous
-  have ha := U.a_ne_zero ht₀
-  have hA (σ : ℝ) (hσ : (⟨σ⟩ : Time) ∈ U.I) :=
-    hasDerivAt_mk_of_differentiableAt (U.differentiableAt_a hσ)
-  have hX (σ : ℝ) (hσ : (⟨σ⟩ : Time) ∈ U.I) :=
-    hasDerivAt_mk_of_differentiableAt (U.differentiableAt_comovingDistance (c := c) ht₀ hσ)
-  have hA' := hasDerivAt_mk_of_differentiableAt (U.differentiableAt_deriv_a ht₀)
-  -- for a flat model `d_A = χ a / a(t₀)`, whose time derivative near `t₀` is
-  have h1 (σ : ℝ) (hσ : (⟨σ⟩ : Time) ∈ U.I) : ∂ₜ (U.angularDiameterDistance c ⟨τ₀⟩) ⟨σ⟩
-      = (-c / U.a ⟨σ⟩ * U.a ⟨σ⟩ + U.comovingDistance c ⟨σ⟩ ⟨τ₀⟩ * ∂ₜ U.a ⟨σ⟩) / U.a ⟨τ₀⟩ := by
-    have hL : U.angularDiameterDistance c ⟨τ₀⟩
-        = fun s => U.comovingDistance c s ⟨τ₀⟩ * U.a s / U.a ⟨τ₀⟩ := funext fun s => by
-      rw [angularDiameterDistance, one_add_redshift,
-        U.transverseComovingDistance_of_curvature_eq_zero hK, div_div_eq_mul_div]
-    rw [hL, ← U.deriv_comovingDistance ht₀ hσ]
-    exact deriv_eq_of_hasDerivAt (((hX σ hσ).fun_mul (hA σ hσ)).div_const (U.a ⟨τ₀⟩))
-  -- and the derivative of this expression at `t₀`
-  have h2 := ((((hasDerivAt_const τ₀ (-c)).fun_div (hA τ₀ ht₀) ha).fun_mul (hA τ₀ ht₀)).fun_add
-    ((hX τ₀ ht₀).fun_mul hA')).div_const (U.a ⟨τ₀⟩)
-  rw [deriv_eq_of_hasDerivAt (f := ∂ₜ (U.angularDiameterDistance c ⟨τ₀⟩))
-    (h2.congr_of_eventuallyEq (Filter.eventually_of_mem (hS.mem_nhds ht₀) h1)), h1 τ₀ ht₀,
-    U.deriv_comovingDistance ht₀ ht₀, U.deriv_redshift_self ht₀,
-    show U.comovingDistance c ⟨τ₀⟩ ⟨τ₀⟩ = 0 by simp [comovingDistance]]
-  rcases eq_or_ne (hubbleConstant U.a ⟨τ₀⟩) 0 with hH | hH
-  · simp [hH]
-  · have hd : ∂ₜ U.a ⟨τ₀⟩ ≠ 0 := (div_ne_zero_iff.mp hH).1
-    rw [U.deriv_deriv_redshift_self ht₀ hH]
-    unfold hubbleConstant decelerationParameter
-    field_simp
-    ring
-
-/-- The luminosity distance `d_L = (1 + z) r(χ)` of a source emitting at `t` and observed at
-  `t₀`. For `a(t₀) = 1`, a source of luminosity `L` is observed with the flux `L / (4π d_L²)`. -/
-noncomputable def luminosityDistance (c : ℝ) (t₀ t : Time) : ℝ :=
-  (1 + U.redshift t₀ t) * U.transverseComovingDistance (U.comovingDistance c t t₀)
-
-/-- Etherington's distance-duality relation `d_L = (1 + z)² d_A`. -/
-lemma luminosityDistance_eq (c : ℝ) (t₀ t : Time) :
-    U.luminosityDistance c t₀ t
-      = (1 + U.redshift t₀ t) ^ 2 * U.angularDiameterDistance c t₀ t := by
-  unfold luminosityDistance angularDiameterDistance
-  rcases eq_or_ne (1 + U.redshift t₀ t) 0 with h | h
-  · rw [h]
-    ring
-  · field_simp
-
-/-- For a flat model and `t₀` in its interval,
-  `(d_L'' z' - d_L' z'') / z'³ = c (1 - q₀) / (a₀ H₀)`. For `H₀ ≠ 0`, it is the second derivative
-  of `d_L` in `z` at `z = 0`. -/
-lemma luminosityDistance_coeff_two {c : ℝ} {t₀ : Time} (ht₀ : t₀ ∈ U.I)
-    (hK : U.geometry.curvature = 0) :
-    (∂ₜ (∂ₜ (U.luminosityDistance c t₀)) t₀ * ∂ₜ (U.redshift t₀) t₀
-      - ∂ₜ (U.luminosityDistance c t₀) t₀ * ∂ₜ (∂ₜ (U.redshift t₀)) t₀)
-      / ∂ₜ (U.redshift t₀) t₀ ^ 3
-      = c * (1 - decelerationParameter U.a t₀) / (U.a t₀ * hubbleConstant U.a t₀) := by
-  obtain ⟨τ₀⟩ := t₀
-  have hS : IsOpen {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I} := U.isOpen_I.preimage toRealCLE.symm.continuous
-  have ha := U.a_ne_zero ht₀
-  have hA (σ : ℝ) (hσ : (⟨σ⟩ : Time) ∈ U.I) :=
-    hasDerivAt_mk_of_differentiableAt (U.differentiableAt_a hσ)
-  have hX (σ : ℝ) (hσ : (⟨σ⟩ : Time) ∈ U.I) :=
-    hasDerivAt_mk_of_differentiableAt (U.differentiableAt_comovingDistance (c := c) ht₀ hσ)
-  have hA' := hasDerivAt_mk_of_differentiableAt (U.differentiableAt_deriv_a ht₀)
-  -- for a flat model `d_L = a(t₀) χ / a`, whose time derivative near `t₀` is
-  have h1 (σ : ℝ) (hσ : (⟨σ⟩ : Time) ∈ U.I) : ∂ₜ (U.luminosityDistance c ⟨τ₀⟩) ⟨σ⟩
-      = (0 * U.a ⟨σ⟩ - U.a ⟨τ₀⟩ * ∂ₜ U.a ⟨σ⟩) / U.a ⟨σ⟩ ^ 2 * U.comovingDistance c ⟨σ⟩ ⟨τ₀⟩
-        + U.a ⟨τ₀⟩ / U.a ⟨σ⟩ * (-c / U.a ⟨σ⟩) := by
-    have hL : U.luminosityDistance c ⟨τ₀⟩
-        = fun s => U.a ⟨τ₀⟩ / U.a s * U.comovingDistance c s ⟨τ₀⟩ := funext fun s => by
-      rw [luminosityDistance, one_add_redshift,
-        U.transverseComovingDistance_of_curvature_eq_zero hK]
-    rw [hL, ← U.deriv_comovingDistance ht₀ hσ]
-    exact deriv_eq_of_hasDerivAt (((hasDerivAt_const σ (U.a ⟨τ₀⟩)).fun_div (hA σ hσ)
-      (U.a_ne_zero hσ)).fun_mul (hX σ hσ))
-  -- and the derivative of this expression at `t₀`
-  have h2 := (((((hasDerivAt_const τ₀ (0 : ℝ)).fun_mul (hA τ₀ ht₀)).fun_sub
-    ((hasDerivAt_const τ₀ (U.a ⟨τ₀⟩)).fun_mul hA')).fun_div ((hA τ₀ ht₀).fun_pow 2)
-      (pow_ne_zero 2 ha)).fun_mul (hX τ₀ ht₀)).fun_add
-    (((hasDerivAt_const τ₀ (U.a ⟨τ₀⟩)).fun_div (hA τ₀ ht₀) ha).fun_mul
-      ((hasDerivAt_const τ₀ (-c)).fun_div (hA τ₀ ht₀) ha))
-  rw [deriv_eq_of_hasDerivAt (f := ∂ₜ (U.luminosityDistance c ⟨τ₀⟩))
-    (h2.congr_of_eventuallyEq (Filter.eventually_of_mem (hS.mem_nhds ht₀) h1)), h1 τ₀ ht₀,
-    U.deriv_comovingDistance ht₀ ht₀, U.deriv_redshift_self ht₀,
-    show U.comovingDistance c ⟨τ₀⟩ ⟨τ₀⟩ = 0 by simp [comovingDistance]]
-  rcases eq_or_ne (hubbleConstant U.a ⟨τ₀⟩) 0 with hH | hH
-  · simp [hH]
-  · have hd : ∂ₜ U.a ⟨τ₀⟩ ≠ 0 := (div_ne_zero_iff.mp hH).1
-    rw [U.deriv_deriv_redshift_self ht₀ hH]
-    unfold hubbleConstant decelerationParameter
-    field_simp
-    ring
-
 end Cosmology.FLRW
 
-TODO "Prove the low-redshift expansions of the lookback time, `χ`, `d_L` and `d_A` as Taylor
-  expansions in powers of `z`, with remainder, through the inverse of `t ↦ z(t)` near `t₀`, and
-  the low-redshift coefficients of `d_L` and `d_A` for a curved model."
+TODO "Prove the low-redshift expansion of the lookback time
+  `t₀ - t = H₀⁻¹ [z - ½(2 + q₀) z² + …]` as a Taylor expansion in powers of `z`, with remainder,
+  through the inverse of `t ↦ z(t)` near `t₀`."
+
+TODO "Define the luminosity distance `d_L = (1 + z) r(χ)` and the angular-diameter
+  distance `d_A = r(χ) / (1 + z)`."
+
+TODO "Prove Etherington's distance-duality relation `d_L = (1 + z)² d_A`."
+
+TODO "Prove the low-redshift expansions of `χ`, `d_L` and `d_A` in powers of `z`
+  in terms of the deceleration parameter `q₀`."
