@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Gregory J. Loges. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Adam Bornemann, Gregory J. Loges, Philippe Kevorkian
+Authors: Adam Bornemann, Philippe Kevorkian, Gregory J. Loges
 -/
 module
 
