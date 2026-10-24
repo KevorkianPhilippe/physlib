@@ -14,7 +14,7 @@ parameters and their closure relation, the reduced Hubble function of the standa
 model, the age of the universe, the energy conditions of the cosmic fluid with the acceleration
 criterion, eternal expansion together with the Big-Bang bound on the interval of cosmic time, the
 cosmological distances, the redshift, the horizons and the lookback time, with the coefficients of
-their low-redshift expansions, and conformal time with the Friedmann equations written in it.
+its low-redshift expansion, and conformal time with the Friedmann equations written in it.
 
 ## Content (Alpha)
 
@@ -122,20 +122,17 @@ positive, zero or negative K. The particle and event horizons at t integrate c /
 of the interval before and after t, and the particle horizon of the Einstein–de Sitter model is
 3 c t₀^(2/3) t^(1/3). [29]
 
-We write a₀, H₀ and q₀ for the scale factor, the Hubble parameter and the deceleration parameter
-at t₀. The lookback time t₀ − t does not depend on the model. At the observation time,
-∂ₜ z = −H₀ and, for H₀ ≠ 0, ∂ₜ ∂ₜ z = H₀² (2 + q₀). The luminosity distance d_L = (1 + z) r(χ)
-and the angular-diameter distance d_A = r(χ) / (1 + z) satisfy Etherington's relation
-d_L = (1 + z)² d_A. With primes for the time derivatives at t₀, the quotients f' / z' and
-(f'' z' − f' z'') / z'³ are, for H₀ ≠ 0, the first and second derivatives in z at z = 0 of a
-function f of the emission time. They are 1 / H₀ and −(2 + q₀) / H₀ for the lookback time, and
-c / (a₀ H₀) and −c (1 + q₀) / (a₀ H₀) for χ. For a flat model, the second-order quotients of
-d_L and d_A are c (1 − q₀) / (a₀ H₀) and −c (3 + q₀) / (a₀ H₀). [30]
+The lookback time is the time elapsed between the emission of light at t and its observation at
+t₀. It does not depend on the model, and it is the same in every reference frame. We write H₀
+and q₀ for the Hubble parameter and the deceleration parameter at t₀. At the observation time,
+∂ₜ z = −H₀ and, for H₀ ≠ 0, ∂ₜ ∂ₜ z = H₀² (2 + q₀). With primes for the time derivatives at t₀,
+the quotients f' / z' and (f'' z' − f' z'') / z'³ are, for H₀ ≠ 0, the first and second
+derivatives in z at z = 0 of a function f of the emission time. They are 1 / H₀ and
+−(2 + q₀) / H₀ for the lookback time. [30]
 
 The energy of a photon scales as E ∝ 1 / a along its null geodesic, and the comoving distance is
-the integral χ = c ∫ dz / H(z) in the redshift for a(t₀) = 1. [TODO] The lookback time and the
-distances have Taylor expansions in the redshift with the coefficients above, through the inverse
-of t ↦ z(t). The coefficients of d_L and d_A are also computed for a curved model. [TODO]
+the integral χ = c ∫ dz / H(z) in the redshift for a(t₀) = 1. [TODO] The lookback time has a
+Taylor expansion in the redshift with these coefficients, through the inverse of t ↦ z(t). [TODO]
 
 ### Conformal time
 
@@ -229,12 +226,9 @@ The FLRW metric in conformal time is a(η)² times a static metric. [TODO]
    `FLRW.transverseComovingDistance_of_curvature_eq_zero`,
    `FLRW.transverseComovingDistance_of_curvature_neg`, `FLRW.particleHorizon`,
    `FLRW.eventHorizon`, `FLRW.particleHorizon_einsteinDeSitter`
-30. Physlib/Cosmology/FLRW/Distances.lean — `FLRW.lookbackTime`, `FLRW.deriv_redshift_self`,
-   `FLRW.deriv_deriv_redshift_self`, `FLRW.luminosityDistance`, `FLRW.angularDiameterDistance`,
-   `FLRW.luminosityDistance_eq`, `FLRW.lookbackTime_coeff_one`, `FLRW.lookbackTime_coeff_two`,
-   `FLRW.differentiableAt_comovingDistance`, `FLRW.deriv_deriv_comovingDistance_self`,
-   `FLRW.comovingDistance_coeff_one`, `FLRW.comovingDistance_coeff_two`,
-   `FLRW.luminosityDistance_coeff_two`, `FLRW.angularDiameterDistance_coeff_two`
+30. Physlib/Cosmology/FLRW/Distances.lean — `FLRW.lookbackTime`,
+   `FLRW.lookbackTime_eq_timeEquiv_symm_sub`, `FLRW.deriv_redshift_self`,
+   `FLRW.deriv_deriv_redshift_self`, `FLRW.lookbackTime_coeff_one`, `FLRW.lookbackTime_coeff_two`
 31. Physlib/Cosmology/FLRW/ConformalTime.lean — `FLRW.conformalTime`, `FLRW.deriv_conformalTime`,
    `FLRW.conformalTime_einsteinDeSitter`, `FLRW.conformalDeriv`, `FLRW.deriv_eq_conformalDeriv_mul`,
    `FLRW.conformalHubble`, `FLRW.conformalHubble_eq`, `FLRW.ConformalFirstOrderFriedmann`,
